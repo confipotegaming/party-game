@@ -1,0 +1,87 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="play stack" id="app"></main>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const s = io(); const app = document.getElementById('app');
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let joined = null, st = null, off = 0, key = '';
+const saved = () => { try { return JSON.parse(localStorage.getItem('pg') || 'null'); } catch { return null; } };
+
+function join(code, name, pid) {
+  s.emit('join', { code, name, pid }, r => {
+    if (r.error) { localStorage.removeItem('pg'); joined = null; return form(r.error); }
+    joined = { code: code.toUpperCase(), pid: r.pid, name: r.name };
+    localStorage.setItem('pg', JSON.stringify(joined));
+  });
+}
+s.on('connect', () => { const j = joined || saved(); if (j) join(j.code, j.name, j.pid); else form(); });
+s.on('closed', () => { localStorage.removeItem('pg'); joined = null; form('La partie est terminée.'); });
+
+function form(err = '') {
+  key = '';
+  app.innerHTML = `<h1 class="big" style="font-size:2.6rem">Rejoindre</h1>
+    <div class="card stack">
+      <input id="c" placeholder="Code (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
+      <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
+      <button id="j">Rejoindre</button>
+      <p id="e" style="color:#c0123f">${esc(err)}</p></div>`;
+  document.getElementById('j').onclick = () =>
+    join(document.getElementById('c').value, document.getElementById('n').value);
+}
+
+s.on('state', x => {
+  st = x; off = x.now - Date.now();
+  if (!x.me) return;
+  const p = x.phase, done = p.answered.includes(x.me.id);
+  const k = p.n + ':' + done;
+  if (k !== key) { key = k; render(p, done); }
+});
+
+setInterval(() => {
+  const t = document.getElementById('t');
+  if (t && st && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
+}, 250);
+
+const me = () => st.players.find(x => x.id === st.me.id) || { name: '', score: 0 };
+const wait = msg => `<div class="card stack"><p class="prompt">${msg}</p></div>`;
+const timer = p => p.endsAt ? '<span class="timer" id="t"></span>' : '';
+
+function render(p, done) {
+  const m = me();
+  const top = `<div class="row"><b class="muted">${esc(m.name)} · ${m.score} pts</b>${timer(p)}</div>`;
+  if (p.kind === 'lobby') {
+    app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}`;
+  } else if (p.kind === 'text' || p.kind === 'number') {
+    if (done) { app.innerHTML = `${top}${wait('Réponse envoyée ✓<br>Attendez les autres.')}`; return; }
+    const field = p.kind === 'text'
+      ? '<textarea id="a" rows="3" maxlength="120" placeholder="Votre réponse"></textarea>'
+      : `<input id="a" inputmode="decimal" placeholder="Votre estimation ${esc(p.unit || '')}" autocomplete="off">`;
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p>${field}<button id="ok">Envoyer</button></div>`;
+    document.getElementById('ok').onclick = () => s.emit('answer', document.getElementById('a').value);
+  } else if (p.kind === 'guess') {
+    if (done) { app.innerHTML = `${top}${wait('Bonne réponse ✓<br>Attendez les autres.')}`; return; }
+    const cl = c => `<div class="clue ${/^[^\p{L}]+$/u.test(c) ? 'emoji' : ''}">${esc(c)}</div>`;
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p>${p.data.clues.map(cl).join('')}
+      <input id="a" placeholder="Votre réponse" autocomplete="off" autocapitalize="off">
+      <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
+    const el = document.getElementById('a');
+    const send = () => s.emit('answer', el.value, r => {
+      if (r === 'invalid') { document.getElementById('msg').textContent = 'Ce n\'est pas ça, réessayez !'; el.value = ''; el.focus(); }
+    });
+    document.getElementById('ok').onclick = send;
+    el.onkeydown = e => { if (e.key === 'Enter') send(); };
+  } else if (p.kind === 'vote') {
+    if (done) { app.innerHTML = `${top}${wait('Vote enregistré ✓')}`; return; }
+    const opts = p.options.filter(o => !st.me.mine.includes(o.id));
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p>
+      ${opts.map(o => `<button class="choice" data-o="${o.id}">${esc(o.text)}</button>`).join('')}</div>`;
+    app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => s.emit('answer', b.dataset.o));
+  } else if (p.kind === 'reveal') {
+    app.innerHTML = `${top}${wait('Regardez l\'écran !')}`;
+  } else if (p.kind === 'scores') {
+    const r = [...st.players].sort((a, b) => b.score - a.score);
+    app.innerHTML = `${top}${wait(`Vous finissez ${r.findIndex(x => x.id === st.me.id) + 1}ᵉ sur ${r.length}.`)}`;
+  }
+}
+</script></body></html>

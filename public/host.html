@@ -1,0 +1,55 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="host stack" id="app"></main>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const s = io(); let st = null, off = 0, sel = null;
+const app = document.getElementById('app');
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+s.emit('host:create');
+s.on('state', x => { st = x; off = x.now - Date.now(); render(); });
+s.on('closed', () => location.reload());
+setInterval(() => {
+  const t = document.getElementById('t');
+  if (t && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
+}, 250);
+const head = p => `<div class="row"><h2>${p.round ? `Manche ${p.round}/${p.rounds}` : ''}</h2>${p.endsAt ? '<span class="timer" id="t"></span>' : ''}</div>`;
+const progress = p => `<p class="muted">${p.answered.length} / ${p.expected.length} ont répondu</p>`;
+function render() {
+  const p = st.phase, pl = st.players;
+  if (p.kind === 'lobby') {
+    const ok = pl.length >= st.min && sel;
+    app.innerHTML = `
+      <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
+      <div class="code">${st.code}</div>
+      <div class="chips">${pl.map(x => `<span class="chip">${esc(x.name)}</span>`).join('') || '<span class="muted">En attente des joueurs…</span>'}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><b>${g.name}</b><br>${g.desc}</button>`).join('')}</div>
+      <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
+      <span class="muted"> ${pl.length < st.min ? `Il faut au moins ${st.min} joueurs.` : !sel ? 'Choisissez un jeu.' : ''}</span></div>`;
+    app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { sel = b.dataset.g; render(); });
+    document.getElementById('go').onclick = () => s.emit('host:start', sel);
+  } else if (p.kind === 'text' || p.kind === 'number') {
+    app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>${progress(p)}`;
+  } else if (p.kind === 'guess') {
+    const name = id => (st.players.find(x => x.id === id) || {}).name || '';
+    const ids = [...p.data.found, ...p.answered];
+    app.innerHTML = `${head(p)}<p class="muted">${esc(p.prompt)}</p>
+      <div class="stack">${p.data.clues.map(c => `<div class="clue ${/^[^\p{L}]+$/u.test(c) ? 'emoji' : ''}">${esc(c)}</div>`).join('')}</div>
+      <div class="chips">${ids.map(id => `<span class="chip">${esc(name(id))} a trouvé !</span>`).join('')}</div>`;
+  } else if (p.kind === 'vote') {
+    app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>
+      <div class="stack">${p.options.map(o => `<div class="card opt">${esc(o.text)}</div>`).join('')}</div>${progress(p)}`;
+  } else if (p.kind === 'reveal') {
+    app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>
+      <div class="card">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br>${esc(l.sub)}</div><span class="pts">+${l.pts}</span></div>`).join('') || 'Aucun point cette manche.'}</div>
+      <div><button id="next">Suivant</button></div>`;
+    document.getElementById('next').onclick = () => s.emit('host:skip');
+  } else if (p.kind === 'scores') {
+    const r = [...pl].sort((a, b) => b.score - a.score);
+    app.innerHTML = `<h1 class="big" style="font-size:4rem">Classement final</h1>
+      <div class="card">${r.map((x, i) => `<div class="line"><b>${i + 1}. ${esc(x.name)}</b><span class="pts">${x.score}</span></div>`).join('')}</div>
+      <div><button id="back">Retour au menu</button></div>`;
+    document.getElementById('back').onclick = () => s.emit('host:lobby');
+  }
+}
+</script></body></html>
