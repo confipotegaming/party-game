@@ -8,7 +8,7 @@
 <script>
 const s = io(); const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let joined = null, st = null, off = 0, key = '', chosenAvatar = localStorage.getItem('pg-avatar') || '';
+let joined = null, st = null, off = 0, key = '', chosenAvatar = (() => { try { return JSON.parse(localStorage.getItem('pg-avatar') || 'null') || window.defaultPony(); } catch { return window.defaultPony(); } })();
 function avatarMarkup(id,size=62,mood='happy'){ return window.renderAvatar ? window.renderAvatar(id,size,mood) : ''; }
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 const saved = () => { try { return JSON.parse(localStorage.getItem('pg') || 'null'); } catch { return null; } };
@@ -41,26 +41,32 @@ function form(err = '') {
   };
 }
 function avatarStep(code,name){
-  const list=(window.avatarData&&window.avatarData()) || window.AVATARS || [];
-  if(!list.length){ document.getElementById('e').textContent='Les avatars arrivent…'; return; }
-  let index=Math.max(0,list.findIndex(a=>a.id===chosenAvatar)); if(index<0) index=0;
+  let pony = window.normalizePony(chosenAvatar) || window.defaultPony();
+  const cat = window.PONY_CATALOG;
+  const categories = [
+    ['bodyShape','Corps','bodyShapes'],['mane','Cheveux / crinière','manes'],['tail','Queue','tails'],['eyes','Yeux','eyes'],['pupils','Pupilles','pupils'],['ears','Oreilles','ears'],['horn','Corne','horns'],['wings','Ailes','wings'],['mark','Tatouage / marque','marks'],['clothes','Vêtements','clothes'],['hat','Chapeaux','hats'],['glasses','Lunettes','glasses'],['jewelry','Bijoux','jewelry'],['accessory','Accessoires','accessories'],['pattern','Motifs','patterns'],['effect','Effets spéciaux','effects']
+  ];
+  let active=0;
+  const colorMap={bodyColor:'Couleur du corps',maneColor:'Couleur des cheveux',eyeColor:'Couleur des yeux',markColor:'Couleur de la marque',accessoryColor:'Couleur des accessoires'};
+  const presets=[['🌸 Kawaii',{bodyColor:'#f6a6c9',mane:0,maneColor:'#fff8f0',eyes:0,mark:1,clothes:1,hat:1,effect:5}],['🌈 Arc-en-ciel',{bodyColor:'#8fd3ff',mane:9,maneColor:'#ff6b9e',wings:8,pattern:8,effect:7}],['🎸 Rock',{bodyColor:'#34304a',mane:6,maneColor:'#24213a',clothes:4,glasses:4,mark:9,accessory:2}],['🖤 Gothique',{bodyColor:'#34304a',mane:7,maneColor:'#24213a',clothes:5,wings:5,hat:5,mark:18,glasses:1}],['✨ Magique',{bodyColor:'#d9c7ff',mane:10,maneColor:'#b889ff',horn:5,wings:7,mark:11,pattern:10,effect:3}],['🐾 Furry',{bodyShape:5,ears:2,tail:5,pattern:7,bodyColor:'#d9c7ff',mane:11,mark:13}]];
+  const colorChoices=['#f6a6c9','#8fd3ff','#b99cff','#ffe47a','#9ee6a8','#ffb36b','#f47f86','#fff8f0','#34304a','#d9c7ff','#73ffcb','#ff6b9e'];
   const draw=()=>{
-    const a=list[index]; chosenAvatar=a.id;
-    app.innerHTML=`<h1 class="big join-title">Choisis ton avatar</h1>
-      <div class="card avatar-stage-card">
-        <div class="step-pill"><b>2</b><span>Fais défiler les personnages</span></div>
-        <div class="avatar-carousel">
-          <button class="avatar-arrow" id="prev" aria-label="Avatar précédent">‹</button>
-          <div class="avatar-showcase"><div class="avatar-halo">${avatarMarkup(a.id,190,'happy')}</div><h2>${esc(a.name)}</h2><p>${esc(a.animal||'Compagnon')}</p></div>
-          <button class="avatar-arrow" id="next" aria-label="Avatar suivant">›</button>
-        </div>
-        <div class="avatar-dots">${list.map((_,i)=>`<i class="${i===index?'on':''}"></i>`).join('')}</div>
-        <div class="avatar-actions"><button class="alt" id="back-avatar">← Retour</button><button id="confirm-avatar">C'est moi ! ✨</button></div>
-      </div>`;
-    document.getElementById('prev').onclick=()=>{index=(index-1+list.length)%list.length;window.partyAudio.click();draw();};
-    document.getElementById('next').onclick=()=>{index=(index+1)%list.length;window.partyAudio.click();draw();};
-    document.getElementById('back-avatar').onclick=()=>form();
-    document.getElementById('confirm-avatar').onclick=()=>{chosenAvatar=a.id;localStorage.setItem('pg-avatar',chosenAvatar);window.partyAudio.enable();join(code,name,null,chosenAvatar);};
+    const [keyName,label,listKey]=categories[active], list=cat[listKey]||[];
+    const idx=Math.max(0,Math.min(list.length-1,Number(pony[keyName])||0)); pony[keyName]=idx;
+    const colorKey=keyName==='bodyShape'?'bodyColor':keyName==='mane'?'maneColor':keyName==='eyes'?'eyeColor':keyName==='mark'?'markColor':keyName==='accessory'?'accessoryColor':null;
+    app.innerHTML='<h1 class="big join-title">✨ Crée ton poney</h1><div class="card pony-customizer"><div class="step-pill"><b>2</b><span>Personnalise ton avatar</span></div><div class="pony-preview-panel"><div class="pony-preview">'+avatarMarkup(pony,250,'happy')+'</div><div class="pony-name"><b>'+esc(pony.name||'Mon poney')+'</b><span>Ton avatar se met à jour en direct ✨</span></div></div><div class="pony-categories">'+categories.map((x,i)=>'<button type="button" class="pony-cat '+(i===active?'active':'')+'" data-cat="'+i+'">'+esc(x[1])+'</button>').join('')+'</div><div class="pony-selector"><button type="button" class="avatar-arrow" id="pony-prev">‹</button><div class="pony-choice"><span class="pony-choice-label">'+esc(label)+'</span><strong>'+esc(list[idx]||'Aucun')+'</strong><small>'+(idx+1)+' / '+list.length+'</small></div><button type="button" class="avatar-arrow" id="pony-next">›</button></div>'+
+      (colorKey?'<div class="pony-colors"><b>'+esc(colorMap[colorKey])+'</b><div class="color-palette">'+colorChoices.map(x=>'<button type="button" class="pony-color '+(pony[colorKey]===x?'active':'')+'" data-color="'+x+'" style="background:'+x+'"></button>').join('')+'<label class="custom-color"><input id="custom-color" type="color" value="'+(pony[colorKey]||'#ffffff')+'"> 🎨 personnalisée</label></div></div>':'')+
+      '<div class="pony-presets"><span>Styles rapides</span>'+presets.map((x,i)=>'<button type="button" class="alt preset" data-preset="'+i+'">'+esc(x[0])+'</button>').join('')+'</div><div class="pony-actions"><button type="button" class="alt" id="pony-back">← Retour</button><button type="button" class="alt" id="pony-random">🎲 Avatar aléatoire</button><button type="button" class="alt" id="pony-reset">↻ Réinitialiser</button><button type="button" id="pony-confirm">✓ Choisir cet avatar</button></div></div>';
+    document.querySelectorAll('.pony-cat').forEach(b=>b.onclick=()=>{active=+b.dataset.cat;draw();});
+    document.getElementById('pony-prev').onclick=()=>{pony[keyName]=(idx-1+list.length)%list.length;draw();};
+    document.getElementById('pony-next').onclick=()=>{pony[keyName]=(idx+1)%list.length;draw();};
+    document.querySelectorAll('.pony-color').forEach(b=>b.onclick=()=>{pony[colorKey]=b.dataset.color;draw();});
+    const cc=document.getElementById('custom-color'); if(cc) cc.oninput=()=>{pony[colorKey]=cc.value;draw();};
+    document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>{Object.assign(pony,presets[+b.dataset.preset][1]);draw();});
+    document.getElementById('pony-reset').onclick=()=>{pony=window.defaultPony();draw();};
+    document.getElementById('pony-random').onclick=()=>{categories.forEach(([k,,lk])=>{const a=cat[lk]||[];pony[k]=Math.floor(Math.random()*Math.max(1,a.length));});['bodyColor','maneColor','eyeColor','markColor','accessoryColor'].forEach(k=>pony[k]=colorChoices[Math.floor(Math.random()*colorChoices.length)]);draw();};
+    document.getElementById('pony-back').onclick=()=>form();
+    document.getElementById('pony-confirm').onclick=()=>{chosenAvatar=JSON.parse(JSON.stringify(pony));localStorage.setItem('pg-avatar',JSON.stringify(chosenAvatar));window.partyAudio.enable();join(code,name,null,chosenAvatar);};
   };
   draw();
 }
