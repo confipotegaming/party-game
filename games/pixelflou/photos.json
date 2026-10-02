@@ -323,5 +323,109 @@
   "license": "CC BY-SA 2.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
   "source": "https://commons.wikimedia.org/wiki/File:Montreal_Comiccon_2016_-_Rayman_%2828225331866%29.jpg"
+ },
+ "bomberman": {
+  "file": "2edd02415de1.jpg",
+  "title": "Cosplayer_of_Bomberman_20060520.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "7sigma",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplayer_of_Bomberman_20060520.jpg"
+ },
+ "knuckles": {
+  "file": "74d6938a645e.jpg",
+  "title": "Sonic_Cast.jpg",
+  "crop": [
+   0.47,
+   0.45,
+   1.0
+  ],
+  "author": "Oliver Ayala",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Sonic_Cast.jpg"
+ },
+ "tails": {
+  "file": "4d1697dad900.jpg",
+  "title": "New_York_Comic_Con_2014_-_Tails_(15314294238).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Richie S from Brooklyn, NY, United States",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:New_York_Comic_Con_2014_-_Tails_%2815314294238%29.jpg"
+ },
+ "samus": {
+  "file": "385025c24dae.jpg",
+  "title": "Cosplay_of_Samus_Aran_at_Otakon_2022.png",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "stupid systemus",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Samus_Aran_at_Otakon_2022.png"
+ },
+ "lapincretin": {
+  "file": "6686710a0c44.jpg",
+  "title": "Rabbid_cosplay_(edit).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Sunrise Ottah from USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Rabbid_cosplay_%28edit%29.jpg"
+ },
+ "ectoplasma": {
+  "file": "bb385e15e41a.jpg",
+  "title": "Gengar_keychain.jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Wwemeowmeow",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Gengar_keychain.jpg"
+ },
+ "ronflex": {
+  "file": "ca25543e858f.jpg",
+  "title": "MAGFest_IMG_8541_(32102985541).jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "peyj_turner",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:MAGFest_IMG_8541_%2832102985541%29.jpg"
+ },
+ "boo": {
+  "file": "1fa0022f269f.jpg",
+  "title": "Mural_de_un_Boo.jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Germanico5468504",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mural_de_un_Boo.jpg"
  }
 }
