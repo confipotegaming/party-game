@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.17';
+const APP_VERSION = '0.1.19';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -12,13 +12,15 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'wario',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario',
 ]) games[id] = require('./games/' + id);
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.static('public'));
+// Un jeu peut exposer sa propre API (ex. back-office de ses questions) sous /api/games/<id>.
+for (const g of Object.values(games)) if (g.router) app.use('/api/games/' + g.id, g.router);
 
 const rooms = {};
 
@@ -94,6 +96,7 @@ function apiFor(room) {
     ids: () => Object.values(room.players).filter(p => p.connected).map(p => p.id),
     name: (id) => (room.players[id] || {}).name || '?',
     addScore: (id, n) => { if (room.players[id]) room.players[id].score += n; },
+    end: () => endPhase(room), // termine la phase en cours avant la fin du chrono
     finish: () => setPhase(room, { kind: 'scores' }),
   };
 }
@@ -239,6 +242,17 @@ io.on('connection', (socket) => {
     reply('ok');
     broadcast(room);
     if (ph.expected.every(id => id in ph.answers)) endPhase(room);
+  });
+
+  // Action d'un joueur propre au jeu en cours (ex. une proposition au Grand Sondage, plusieurs par phase).
+  // Le jeu valide tout côté serveur et renvoie le résultat dans l'ack ; l'état est ensuite rediffusé à tous.
+  socket.on('player:action', (value, ack) => {
+    const reply = (r) => typeof ack === 'function' && ack(r);
+    const { room, pid } = ctx();
+    if (!room || !pid || !room.game || !room.game.playerAction) return reply({ status: 'ignored' });
+    try { reply(room.game.playerAction(room, pid, value, apiFor(room)) || { status: 'ignored' }); }
+    catch (err) { console.error('[game:playerAction]', room.game.id, err); return reply({ status: 'error' }); }
+    broadcast(room);
   });
 
   // Progression en direct d'un joueur (jeux qui la gèrent), relayée seulement à l'écran de l'hôte
