@@ -1,0 +1,168 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Grand Sondage – Questions</title><link rel="stylesheet" href="style.css">
+<style>
+  .adm{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+  .adm h1{font-size:clamp(2rem,5vw,3rem);text-shadow:4px 4px 0 var(--ink)}
+  .adm h2{color:var(--ink);font-size:1.5rem}
+  .adm select{font:inherit;font-weight:800;color:var(--ink);padding:12px;border:4px solid var(--ink);border-radius:14px;background:#fff;width:100%}
+  .adm .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}
+  .adm .q{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px 0;border-bottom:3px dashed var(--ink)}
+  .adm .q:last-child{border:0}.adm .q.off{opacity:.55}
+  .adm .q small{display:block;opacity:.7}
+  .adm .q .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:end}
+  .adm .q .acts button,.adm .ans button{padding:8px 12px;font-size:.9rem;box-shadow:3px 3px 0 var(--ink)}
+  .adm .grid3{display:grid;grid-template-columns:2fr 1fr 1fr 90px;gap:10px;align-items:end}
+  .adm label{display:grid;gap:4px;font-weight:900}
+  .adm .ans{display:grid;grid-template-columns:34px 1.3fr 90px 2fr auto;gap:8px;align-items:center}
+  .adm .ans b{font-family:'Bagel Fat One';text-align:center}
+  .adm .ans input{padding:10px}
+  .adm .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .adm .ok{color:#127a5d;min-height:1.4em}
+  .adm textarea{min-height:120px;font-family:ui-monospace,monospace;font-size:.85rem}
+  .adm .chk{display:flex;gap:8px;align-items:center}.adm .chk input{width:auto}
+  @media(max-width:760px){.adm .filters,.adm .grid3{grid-template-columns:1fr 1fr}.adm .ans{grid-template-columns:28px 1fr 70px auto}.adm .ans .var{grid-column:2/-1}}
+</style></head>
+<body><main class="adm" id="app">
+  <header class="row"><div><div class="eyebrow muted">Back-office</div><h1>📊 Le Grand Sondage</h1></div><a href="host.html"><button class="alt" type="button">← Retour au jeu</button></a></header>
+  <section class="card stack" id="auth" hidden><h2>Accès</h2><p>Le serveur demande un jeton d’administration (variable <code>ADMIN_TOKEN</code>).</p>
+    <div class="bar"><input id="token" type="password" placeholder="Jeton" style="flex:1"><button id="save-token">Valider</button></div><p class="msg" id="auth-msg"></p></section>
+  <section class="card stack" id="editor" hidden></section>
+  <section class="card stack">
+    <div class="row"><h2>Questions <small id="count"></small></h2><button id="new">➕ Nouvelle question</button></div>
+    <div class="filters">
+      <input id="f-search" placeholder="🔍 Rechercher une question ou une réponse">
+      <select id="f-cat"><option value="">Toutes catégories</option></select>
+      <select id="f-diff"><option value="">Toutes difficultés</option></select>
+      <select id="f-active"><option value="">Actives et inactives</option><option value="true">Actives</option><option value="false">Inactives</option></select>
+    </div>
+    <div id="list"></div>
+  </section>
+  <section class="card stack">
+    <h2>Importer / exporter</h2>
+    <p>JSON : tableau de <code>{ question, category, difficulty, language, active, answers: [{ answer, accepted_variants, votes, position }] }</code>.
+      CSV (« ; » ou « , ») : <code>question;category;difficulty;language;active;answer;votes;accepted_variants</code>, une ligne par réponse, variantes séparées par « | ».</p>
+    <div class="bar"><input type="file" id="imp-file" accept=".json,.csv,application/json,text/csv" style="flex:1"><input id="imp-url" placeholder="… ou URL d’une API (JSON/CSV)" style="flex:2"></div>
+    <textarea id="imp-text" placeholder="… ou collez le contenu ici"></textarea>
+    <div class="bar"><label class="chk"><input type="checkbox" id="imp-replace"> Mettre à jour les questions existantes</label><button id="imp-go">📥 Importer</button><button class="alt" id="exp-go">📤 Exporter en JSON</button></div>
+    <p class="ok" id="imp-msg"></p>
+  </section>
+</main>
+<script>
+const API = '/api/games/sondage';
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let meta = { categories: [], difficulties: [] }, editing = null;
+const token = () => { try { return localStorage.getItem('sondage-admin-token') || ''; } catch { return ''; } };
+
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, { ...opts, headers: { 'content-type': 'application/json', 'x-admin-token': token(), ...(opts.headers || {}) },
+    body: opts.body && typeof opts.body !== 'string' ? JSON.stringify(opts.body) : opts.body });
+  if (res.status === 403) { $('auth').hidden = false; const e = await res.json().catch(() => ({})); $('auth-msg').textContent = e.error || 'Accès refusé.'; throw new Error(e.error || 'Accès refusé'); }
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Erreur ' + res.status);
+  return data;
+}
+const diffLabel = id => (meta.difficulties.find(d => d.id === id) || {}).label || id;
+
+async function loadMeta() {
+  meta = await api('/meta');
+  $('auth').hidden = true;
+  $('f-cat').innerHTML = '<option value="">Toutes catégories</option>' + meta.categories.map(c => `<option>${esc(c)}</option>`).join('');
+  $('f-diff').innerHTML = '<option value="">Toutes difficultés</option>' + meta.difficulties.map(d => `<option value="${d.id}">${esc(d.label)}</option>`).join('');
+}
+async function loadList() {
+  const q = new URLSearchParams({ search: $('f-search').value, category: $('f-cat').value, difficulty: $('f-diff').value, active: $('f-active').value });
+  const list = await api('/questions?' + q);
+  $('count').textContent = `(${list.length})`;
+  $('list').innerHTML = list.map(x => `<div class="q ${x.active ? '' : 'off'}"><div><b>${esc(x.question)}</b>
+    <small>${esc(x.category)} · ${esc(diffLabel(x.difficulty))} · ${x.answers.length} réponses · ${x.answers.reduce((t, a) => t + a.votes, 0)} votes${x.active ? '' : ' · inactive'}</small>
+    <small>${x.answers.map(a => esc(a.answer) + ' (' + a.votes + ')').join(' · ')}</small></div>
+    <div class="acts"><button data-edit="${x.id}">✏️ Modifier</button><button class="alt" data-toggle="${x.id}" data-on="${x.active}">${x.active ? '⏸ Désactiver' : '▶️ Activer'}</button><button class="alt" data-del="${x.id}">🗑</button></div></div>`).join('') || '<p>Aucune question.</p>';
+}
+
+function edit(q) {
+  editing = q ? JSON.parse(JSON.stringify(q)) : { question: '', category: meta.categories[0] || '', difficulty: 'moyen', language: 'fr', active: true,
+    answers: [1, 2, 3, 4, 5].map(i => ({ answer: '', votes: 0, accepted_variants: [] })) };
+  drawEditor(); $('editor').scrollIntoView({ behavior: 'smooth' });
+}
+function readEditor() {
+  editing.question = $('e-q').value; editing.category = $('e-cat').value; editing.difficulty = $('e-diff').value;
+  editing.language = $('e-lang').value; editing.active = $('e-active').checked;
+  editing.answers = [...document.querySelectorAll('#e-answers .ans')].map((row, i) => ({
+    answer: row.querySelector('.a').value, votes: Number(row.querySelector('.v').value) || 0, position: i + 1,
+    accepted_variants: row.querySelector('.var').value.split(/[|,]/).map(s => s.trim()).filter(Boolean),
+  }));
+}
+function drawEditor() {
+  const e = editing, total = e.answers.reduce((t, a) => t + (Number(a.votes) || 0), 0);
+  $('editor').hidden = false;
+  $('editor').innerHTML = `<h2>${e.id ? 'Modifier la question' : 'Nouvelle question'}</h2>
+    <label>Question<input id="e-q" value="${esc(e.question)}" placeholder="Citez quelque chose que…" maxlength="200"></label>
+    <div class="grid3"><label>Catégorie<input id="e-cat" list="cats" value="${esc(e.category)}" maxlength="40"></label>
+      <label>Difficulté<select id="e-diff">${meta.difficulties.map(d => `<option value="${d.id}" ${d.id === e.difficulty ? 'selected' : ''}>${esc(d.label)} (${d.maxAnswers} réponses, ${d.seconds} s)</option>`).join('')}</select></label>
+      <label>Langue<input id="e-lang" value="${esc(e.language)}" maxlength="5"></label>
+      <label class="chk"><input type="checkbox" id="e-active" ${e.active ? 'checked' : ''}> Active</label></div>
+    <datalist id="cats">${meta.categories.map(c => `<option value="${esc(c)}">`).join('')}</datalist>
+    <div><b>Réponses</b> <small>(dans l’ordre du tableau · ${total} votes au total · variantes séparées par « | » ou « , »)</small></div>
+    <div id="e-answers" class="stack">${e.answers.map((a, i) => `<div class="ans"><b>${i + 1}</b><input class="a" value="${esc(a.answer)}" placeholder="Réponse" maxlength="60">
+      <input class="v" type="number" min="0" max="1000" value="${a.votes}" title="Votes = points"><input class="var" value="${esc((a.accepted_variants || []).join(' | '))}" placeholder="Variantes acceptées">
+      <span class="bar"><button type="button" data-up="${i}">▲</button><button type="button" data-down="${i}">▼</button><button type="button" class="alt" data-rm="${i}">✕</button></span></div>`).join('')}</div>
+    <div class="bar"><button type="button" class="alt" id="e-add">➕ Ajouter une réponse</button><button type="button" class="alt" id="e-sort">↕ Trier par votes</button></div>
+    <div class="bar"><input id="e-test" placeholder="Tester une proposition de joueur…" style="flex:1"><button type="button" class="alt" id="e-test-go">🧪 Tester</button></div><p class="ok" id="e-test-msg"></p>
+    <div class="bar"><button id="e-save">💾 Enregistrer</button><button class="alt" id="e-cancel">Annuler</button></div><p class="msg" id="e-msg"></p>`;
+  const move = (i, j) => { readEditor(); if (j < 0 || j >= editing.answers.length) return; [editing.answers[i], editing.answers[j]] = [editing.answers[j], editing.answers[i]]; drawEditor(); };
+  document.querySelectorAll('[data-up]').forEach(b => b.onclick = () => move(+b.dataset.up, +b.dataset.up - 1));
+  document.querySelectorAll('[data-down]').forEach(b => b.onclick = () => move(+b.dataset.down, +b.dataset.down + 1));
+  document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { readEditor(); editing.answers.splice(+b.dataset.rm, 1); drawEditor(); });
+  $('e-add').onclick = () => { readEditor(); editing.answers.push({ answer: '', votes: 0, accepted_variants: [] }); drawEditor(); };
+  $('e-sort').onclick = () => { readEditor(); editing.answers.sort((a, b) => b.votes - a.votes); drawEditor(); };
+  $('e-cancel').onclick = () => { editing = null; $('editor').hidden = true; };
+  $('e-test-go').onclick = async () => {
+    readEditor();
+    try { const r = await api('/test-match', { method: 'POST', body: { question: { ...editing, answers: editing.answers.filter(a => a.answer) }, guess: $('e-test').value } });
+      $('e-test-msg').textContent = r.found ? `✅ Reconnu : ${r.answer}` : r.ambiguous ? `⚠️ Ambigu entre : ${r.answers.join(', ')}` : '❌ Non reconnu (compterait comme une faute)'; }
+    catch (err) { $('e-test-msg').textContent = err.message; }
+  };
+  $('e-save').onclick = async () => {
+    readEditor();
+    const body = { ...editing, answers: editing.answers.filter(a => a.answer.trim()) };
+    try {
+      await api(editing.id ? '/questions/' + editing.id : '/questions', { method: editing.id ? 'PUT' : 'POST', body });
+      editing = null; $('editor').hidden = true; await loadMeta(); await loadList();
+    } catch (err) { $('e-msg').textContent = err.message; }
+  };
+}
+
+$('list').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  try {
+    if (b.dataset.edit) edit(await api('/questions/' + b.dataset.edit));
+    if (b.dataset.toggle) { await api(`/questions/${b.dataset.toggle}/active`, { method: 'PATCH', body: { active: b.dataset.on !== 'true' } }); await loadList(); }
+    if (b.dataset.del && confirm('Supprimer définitivement cette question et ses réponses ?')) { await api('/questions/' + b.dataset.del, { method: 'DELETE' }); await loadList(); }
+  } catch (err) { alert(err.message); }
+};
+$('new').onclick = () => edit(null);
+let t; $('f-search').oninput = () => { clearTimeout(t); t = setTimeout(loadList, 200); };
+['f-cat', 'f-diff', 'f-active'].forEach(id => $(id).onchange = loadList);
+$('save-token').onclick = async () => { try { localStorage.setItem('sondage-admin-token', $('token').value); } catch {} init(); };
+$('imp-go').onclick = async () => {
+  const file = $('imp-file').files[0], url = $('imp-url').value.trim();
+  const content = file ? await file.text() : $('imp-text').value;
+  const format = file ? (file.name.toLowerCase().endsWith('.csv') ? 'csv' : 'json') : '';
+  try {
+    const r = await api('/import', { method: 'POST', body: url && !file ? { url, mode: $('imp-replace').checked ? 'replace' : 'skip' } : { content, format, mode: $('imp-replace').checked ? 'replace' : 'skip' } });
+    $('imp-msg').textContent = `${r.created} créée(s), ${r.updated} mise(s) à jour, ${r.skipped} ignorée(s)` + (r.errors.length ? ` · ${r.errors.length} erreur(s) : ` + r.errors.map(e => `#${e.index + 1} ${e.error}`).join(' ; ') : '');
+    await loadMeta(); await loadList();
+  } catch (err) { $('imp-msg').textContent = '❌ ' + err.message; }
+};
+$('exp-go').onclick = async () => {
+  try {
+    const data = await api('/export');
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })), download: 'sondage-questions.json' });
+    a.click(); URL.revokeObjectURL(a.href);
+  } catch (err) { $('imp-msg').textContent = '❌ ' + err.message; }
+};
+async function init() { try { await loadMeta(); await loadList(); } catch (err) { console.warn(err); } }
+init();
+</script></body></html>

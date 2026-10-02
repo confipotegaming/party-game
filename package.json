@@ -1,10 +1,12 @@
 {
   "name": "party-game",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Jeux de soirée en français façon Jackbox",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "sondage:import": "node scripts/sondage-import.js"
   },
   "dependencies": {
     "express": "^4.19.2",

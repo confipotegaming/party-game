@@ -1,26 +1,34 @@
 # Version 0.1.17
 
-## Nouveau mini-jeu : 🏛️ Cérébrale Académie
-- Un examen de réflexe et de logique : 5 épreuves chronométrées de 22 secondes, une par matière, enchaînées
-  automatiquement. Tous les joueurs passent les mêmes épreuves en même temps sur leur téléphone.
-- Chaque épreuve est présentée (icône, matière, règle, 3… 2… 1…) avec le bilan de la précédente.
-- 15 épreuves, 3 par matière (tirées au hasard, sans reprendre celles de la partie précédente) :
-  - 👁️ Perception : 🎈 Ballons (éclater ou compter les ballons d'une couleur), 🐹 Taupes (taper celles qui portent
-    l'accessoire demandé), 🪙 Pièces (pièce identique ou vue en miroir, malgré la rotation).
-  - 🧩 Analyse : 🚂 Rails (suivre les voies et leurs traverses), 🧱 Bouche-trou (la pièce qui comble le mur),
-    🧊 Cubes (compter les cubes d'une construction en 3D, cachés compris).
-  - 🔢 Maths : ➕ Calcul, ⚖️ Balance (poids affichés ou relations entre objets), 🔢 Compte (objets qui se chevauchent).
-  - 🧠 Mémoire : ☎️ Allô, oui ? (qui a appelé, dans quel ordre, pour commander quoi), 🃏 Mémo (où était l'objet,
-    lequel a disparu), 🔢 Ordre (reproduire une séquence, parfois à l'envers).
-  - 🔎 Identification : 🧸 Objets (l'identique parmi les sosies), 👤 Silhouettes (ombre ↔ objet),
-    🔍 Différences (la case qui change entre deux tableaux).
-- Difficulté adaptative dans chaque épreuve (niveau 1 à 10) : plus d'éléments, sosies, rotations, moins de temps.
-- Score : 100 pts + bonus de rapidité + bonus de niveau, pondéré selon l'épreuve. Une erreur fait perdre du temps.
-- Fin d'examen : diplôme avec masse cérébrale (en grammes), titre (🎒 Nouvel·le élève → 🏛️ Génie de l'Académie),
-  bulletin avec une note par épreuve (E à S), statistiques et records personnels.
-- Écran hôte : épreuve en cours, programme de l'examen, chrono, classement en direct avec les notes, puis remise des
-  diplômes avec 🔁 Rejouer, 🏠 Retour aux mini-jeux et 🏆 Classement final.
+## Nouveau mini-jeu : 📊 Le Grand Sondage
+- Principe des jeux de sondage familiaux : une question (« Citez quelque chose que… »), un tableau de réponses cachées
+  classées par popularité ; trouvez les réponses les plus citées.
+- Tout le monde propose en même temps depuis son téléphone. Bonne réponse : la case se retourne sur tous les écrans,
+  avec le nombre de votes, le nom du joueur, « +38 » animé et un son. Mauvaise réponse : grande croix ❌ sur l'écran de l'hôte et une faute ;
+  3 fautes et on est éliminé·e de la manche. « Déjà trouvée » et « soyez plus précis·e » ne coûtent pas de faute.
+- Fin de manche : tableau complet, temps écoulé ou tout le monde éliminé. Les réponses manquées sont dévoilées sur
+  l'écran de résultats habituel (« Suivant »), puis classement final de la soirée.
+- Points = votes de la réponse × multiplicateur de la manche (×1, ×1, ×2, ×3 par défaut). Ils s'ajoutent au score global.
+- L'hôte choisit un thème (ou « Tous les thèmes ») ; la difficulté monte au fil des manches et fixe le nombre de réponses
+  (5 / 6 / 8) et le temps (60 / 75 / 90 s). Tout est réglable dans `games/sondage/config.js`.
+- Reconnaissance des réponses côté serveur : accents, majuscules, espaces, articles et possessifs, pluriels, ordre des
+  mots, fautes de frappe légères (1 dès 6 lettres, 2 dès 12), synonymes globaux et variantes propres à chaque réponse.
+  Une proposition partielle (« brosse ») ou proche de deux réponses n'est pas acceptée.
 - Jouable dès 1 joueur.
 
+## Questions et back-office
+- Questions séparées du code, dans `data/sondage.json` (tables `questions` et `answers`), 18 questions de démonstration
+  dans 16 catégories.
+- Back-office : `/sondage-admin.html` (ajout, modification, suppression, activation, réponses, votes, variantes,
+  filtres par catégorie / difficulté / état, recherche, test d'une proposition, import JSON / CSV / URL, export JSON).
+  Accessible depuis l'ordinateur hôte, ou partout avec la variable d'environnement `ADMIN_TOKEN`.
+- Import en ligne de commande : `npm run sondage:import -- fichier.json|fichier.csv|URL [--replace]`
+  (exemple CSV : `data/sondage-exemple.csv`).
+
 ## Moteur
+- Nouvel évènement générique `player:action` : un jeu peut recevoir plusieurs actions d'un joueur pendant une phase,
+  les valider côté serveur et renvoyer le résultat au joueur.
+- `api.end()` termine la phase en cours avant la fin du chrono.
+- Un jeu peut exposer sa propre API HTTP (`router`), montée sur `/api/games/<id>`.
+- Tests : `npm test` (reconnaissance, base de questions, déroulé du jeu et non-régression de tous les mini-jeux).
 - Version serveur et package : 0.1.17.

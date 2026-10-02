@@ -22,7 +22,8 @@
     motinterdit:{bpm:126,notes:[277.18,349.23,440,554.37],wave:'square'},
     dessin:{bpm:92,notes:[261.63,329.63,392,493.88],wave:'sine'},
     cerveau:{bpm:138,notes:[523.25,659.25,783.99,659.25,587.33,698.46,880,698.46],wave:'triangle'},
-    academie:{bpm:120,notes:[392,493.88,587.33,783.99,698.46,587.33,659.25,523.25],wave:'triangle'}
+    academie:{bpm:120,notes:[392,493.88,587.33,783.99,698.46,587.33,659.25,523.25],wave:'triangle'},
+    sondage:{bpm:120,notes:[392,493.88,587.33,783.99,587.33,493.88],wave:'triangle'}
   };
   const themes={lobby:{bpm:100,notes:[261.63,329.63,392,523.25],wave:'triangle'},victory:{bpm:132,notes:[392,523.25,659.25,783.99,1046.5],wave:'triangle'},calm:{bpm:86,notes:[261.63,293.66,329.63,392],wave:'sine'},tense:{bpm:126,notes:[220,261.63,311.13,261.63],wave:'sawtooth'}};
   const ensure=()=>{if(ctx)return;ctx=new(window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=.2;master.connect(ctx.destination);musicGain=ctx.createGain();musicGain.gain.value=.15;musicGain.connect(master);sfxGain=ctx.createGain();sfxGain.gain.value=.38;sfxGain.connect(master)};
