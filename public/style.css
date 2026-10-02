@@ -86,3 +86,28 @@ input[type=radio]{width:auto;margin-right:8px}
 @keyframes avatarSleepy{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(3px) scale(.98)}}
 @keyframes avatarHappy{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .avatar-stage-card .avatar-showcase p{margin:0;font-weight:800;}
+/* v0.1.8 — écran hôte en direct */
+.host-game-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start;width:min(1180px,100%);margin:0 auto}
+.host-main{min-width:0}
+.game-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}
+.game-head h1{margin:.15rem 0 .4rem}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;opacity:.7;font-weight:800}
+.host-chips{display:flex;gap:7px;flex-wrap:wrap}
+.host-timer{display:inline-grid;place-items:center;min-width:64px;padding:9px 13px;border-radius:14px;background:#201b52;color:#fff;font-weight:900;font-size:1.3rem}
+.answer-progress{margin-top:14px}
+.progress-top{display:flex;justify-content:space-between;gap:12px}
+.progress-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:9px}
+.progress-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#8f72ff,#ff7fd3);transition:width .25s ease}
+.live-scores{position:sticky;top:16px}
+.live-score-row{display:grid;grid-template-columns:22px 40px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.live-score-row:last-child{border-bottom:0}
+.live-score-row>strong{font-variant-numeric:tabular-nums}
+.live-score-avatar,.answer-avatar{display:grid;place-items:center}
+.live-answers{margin-top:14px}
+.live-answer-row{display:grid;grid-template-columns:44px 1fr 24px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.live-answer-row:last-child{border-bottom:0}
+.answer-text{margin-top:3px;font-size:1.05rem;word-break:break-word}
+.answer-check{color:#69e7a0;font-weight:900}
+.host-error{max-width:760px;margin:10vh auto;text-align:center}
+.draw-layout .board{width:100%;height:auto;max-height:70vh;object-fit:contain;background:#fff;border-radius:18px;touch-action:none}
+@media(max-width:900px){.host-game-grid{grid-template-columns:1fr}.live-scores{position:static}.game-head{flex-direction:column}}

@@ -6,11 +6,11 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
-const s = io(); let st = null, off = 0, sel = null, drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null;
+const s = io(); let st = null, off = 0, sel = null, drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null, renderError = null;
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
-s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); render(); window.partyAudio.update(x); });
+s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); renderError = null; try { render(); } catch (err) { renderError = err; renderFallback(err); console.error('[host render]', err); } window.partyAudio.update(x); });
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 s.on('closed', () => location.reload());
 function startDrawResync(n) {
@@ -42,13 +42,51 @@ setInterval(() => {
   if (t && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
 }, 250);
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
+const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
+const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
+const phaseLabel = p => ({ text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const head = p => {
+  const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
+  const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
+  const answered = Array.isArray(p?.answered) ? p.answered.length : 0;
+  const expected = Array.isArray(p?.expected) ? p.expected.length : 0;
+  const progress = expected ? `<span class="chip">${answered}/${expected} réponses</span>` : '';
+  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${category}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
+};
+const scoreBoard = () => {
+  const rows = [...(st?.players || [])].sort((a,b)=>b.score-a.score);
+  return `<aside class="live-scores card"><div class="section-title"><span>🏆 Scores en direct</span><small>${rows.length} joueur${rows.length>1?'s':''}</small></div>${rows.map((x,i)=>`<div class="live-score-row"><span>${i+1}</span><span class="live-score-avatar">${avatarMarkup(x.avatar,38,'happy')}</span><b>${esc(x.name)}</b><strong>${x.score}</strong></div>`).join('')}</aside>`;
+};
+const liveAnswers = p => {
+  const rows = Array.isArray(p?.answers) ? p.answers : [];
+  if (!rows.length) return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>En attente…</small></div><p class="muted">Les réponses apparaîtront ici dès qu’elles arrivent.</p></section>`;
+  const fmt = v => { if (Array.isArray(v)) return v.join(' → '); if (v && typeof v === 'object') return JSON.stringify(v); return String(v ?? ''); };
+  return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>${rows.length} reçue${rows.length>1?'s':''}</small></div>${rows.map((r,i)=>`<div class="live-answer-row"><span class="answer-avatar">${avatarMarkup(((st.players || []).find(x=>x.id===r.id)||{}).avatar,42,'happy')}</span><div><b>${esc(r.name)}</b><div class="answer-text">${esc(fmt(r.value))}</div></div><span class="answer-check">✓</span></div>`).join('')}</section>`;
+};
+const progress = p => {
+  const answered = Array.isArray(p?.answered) ? p.answered : [];
+  const expected = Array.isArray(p?.expected) ? p.expected : [];
+  const done = expected.length ? answered.length / expected.length : 0;
+  const names = answered.map(nameOf).map(esc).join(' · ');
+  return `<section class="answer-progress card"><div class="progress-top"><b>${answered.length} réponse${answered.length>1?'s':''}</b><span>${expected.length ? `sur ${expected.length}` : 'en cours'}</span></div><div class="progress-bar"><i style="width:${Math.round(done*100)}%"></i></div>${names ? `<p class="muted">${names}</p>` : '<p class="muted">Les joueurs répondent…</p>'}</section>`;
+};
+function renderFallback(err) {
+  if (!st) return;
+  const p = st.phase || {};
+  app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Écran hôte</span><h1>${esc(p.title || 'La manche est en cours')}</h1><p>La partie a bien changé de phase, mais cet écran n’a pas encore de vue dédiée. Le jeu continue.</p><p class="muted">Phase reçue : ${esc(p.kind || 'inconnue')}</p><button id="retry-render">Réafficher</button></section>`;
+  const b=document.getElementById('retry-render'); if(b) b.onclick=()=>{ renderError=null; try{render();}catch(e){renderFallback(e);} };
+}
 const antics=['Le champion parade !','Deux joueurs se chamaillent pour la 2e place !','Quelqu’un tente une pose de victoire…','Ça rigole au fond !','Un duel de regards est lancé !','Tout le monde félicite le leader !','Le dernier prépare sa revanche !'];
 let anticIndex=Math.floor(Math.random()*antics.length);
 const rankBoard = (items, final=false) => { const names=['winner','p2','p3','p4','p5']; const scene=final?antics[anticIndex%antics.length]:'La partie commence déjà à chambrer…'; return `<div class="rank-scene"><div class="scene-prop">${esc(scene)}</div><div class="scene-floor"></div>${items.slice(0,5).map((x,i)=>`<div class="scene-player ${names[i]}"><div>${avatarMarkup(x.avatar,82,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}${final?' · '+x.score+' pts':''}</span></div>`).join('')}</div><div class="rank-list">${items.map((x,i)=>`<div class="rank-row"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div></div>`).join('')}</div>`; };
 setInterval(()=>{ if(st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores')) { anticIndex++; render(); } }, 6500);
 function render() {
-  const p = st.phase, pl = st.players;
-  if (p.kind === 'lobby') {
+  const p = st.phase || { kind:'lobby' }, pl = st.players || [];
+  if (p.kind === 'error') {
+    stopDrawResync();
+    app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Erreur</span><h1>${esc(p.title || 'Erreur')}</h1><p>${esc(p.prompt || 'Un problème est survenu.')}</p><p class="muted">${esc(p.error || '')}</p><button id="back">Retour au menu</button></section>`;
+    document.getElementById('back').onclick=()=>s.emit('host:lobby');
+  } else if (p.kind === 'lobby') {
     const ok = pl.length >= st.min && sel;
     app.innerHTML = `
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
@@ -60,26 +98,25 @@ function render() {
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
     document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel); };
   } else if (p.kind === 'text' || p.kind === 'number') {
-    app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>${progress(p)}`;
+    app.innerHTML = `<div class="host-game-grid"><div><div class="host-main">${head(p)}<div class="prompt">${esc(p.prompt)}</div>${progress(p)}${liveAnswers(p)}</div></div>${scoreBoard()}</div>`;
   } else if (p.kind === 'guess') {
     const name = id => (st.players.find(x => x.id === id) || {}).name || '';
     const ids = [...p.data.found, ...p.answered];
-    app.innerHTML = `${head(p)}<p class="muted">${esc(p.prompt)}</p>
+    app.innerHTML = `<div class="host-game-grid"><div><div class="host-main">${head(p)}<p class="muted">${esc(p.prompt)}</p>
       <div class="stack">${p.data.clues.map(c => `<div class="clue ${/^[^\p{L}]+$/u.test(c) ? 'emoji' : ''}">${esc(c)}</div>`).join('')}</div>
-      <div class="chips">${ids.map(id => `<span class="chip">${esc(name(id))} a trouvé !</span>`).join('')}</div>`;
+      <div class="chips">${ids.map(id => `<span class="chip">${esc(name(id))} a trouvé !</span>`).join('')}</div>${liveAnswers(p)}</div></div>${scoreBoard()}</div>`;
   } else if (p.kind === 'rank') {
-    app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>
-      <div class="items">${p.data.items.map(i => `<div class="card opt">${esc(i.text)}</div>`).join('')}</div>${progress(p)}`;
+    app.innerHTML = `<div class="host-game-grid"><div class="host-main">${head(p)}<div class="prompt">${esc(p.prompt)}</div><div class="items">${p.data.items.map(i => `<div class="card opt">${esc(i.text)}</div>`).join('')}</div>${progress(p)}${liveAnswers(p)}</div>${scoreBoard()}</div>`;
   } else if (p.kind === 'truths') {
-    app.innerHTML = `${head(p)}<div class="prompt">Sur votre téléphone : écrivez 2 vérités et 1 mensonge sur vous !</div>${progress(p)}`;
+    app.innerHTML = `<div class="host-game-grid"><div class="host-main">${head(p)}<div class="prompt">Sur votre téléphone : écrivez 2 vérités et 1 mensonge sur vous !</div>${progress(p)}${liveAnswers(p)}</div>${scoreBoard()}</div>`;
   } else if (p.kind === 'describe') {
-    app.innerHTML = `${head(p)}<div class="prompt">${esc(nameOf(p.data.describer))} prépare un indice…</div>`;
+    app.innerHTML = `<div class="host-game-grid"><div class="host-main">${head(p)}<div class="prompt">${esc(nameOf(p.data.describer))} prépare un indice…</div>${liveAnswers(p)}</div>${scoreBoard()}</div>`;
   } else if (p.kind === 'draw') {
     if (app.dataset.dn != p.n) {
       stopDrawResync();
       app.dataset.dn = p.n;
       drawSyncN = p.n;
-      app.innerHTML = `${head(p)}<p class="muted" id="who"></p><canvas id="cv" class="board" width="800" height="600"></canvas><div class="chips" id="fc"></div>`;
+      app.innerHTML = `<div class="host-game-grid draw-layout"><div class="host-main">${head(p)}<p class="muted" id="who"></p><canvas id="cv" class="board" width="800" height="600"></canvas><div class="chips" id="fc"></div>${liveAnswers(p)}</div>${scoreBoard()}</div>`;
       // Snapshot immédiat + resynchronisation périodique : le host récupère aussi
       // le dessin si un paquet temps réel a été perdu.
       s.emit('host:sync-draw');
@@ -89,8 +126,7 @@ function render() {
     document.getElementById('fc').innerHTML = p.answered.map(id => `<span class="chip">${esc(nameOf(id))} a trouvé !</span>`).join('');
   } else if (p.kind === 'vote') {
     stopDrawResync();
-    app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>
-      <div class="stack">${p.options.map(o => `<div class="card opt">${esc(o.text)}</div>`).join('')}</div>${progress(p)}`;
+    app.innerHTML = `<div class="host-game-grid"><div class="host-main">${head(p)}<div class="prompt">${esc(p.prompt)}</div><div class="stack">${p.options.map(o => `<div class="card opt">${esc(o.text)}</div>`).join('')}</div>${progress(p)}${liveAnswers(p)}</div>${scoreBoard()}</div>`;
   } else if (p.kind === 'reveal') {
     stopDrawResync();
     app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>

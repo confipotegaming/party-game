@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.7';
+const APP_VERSION = '0.1.8';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -51,7 +51,7 @@ const newCode = () => {
 function setPhase(room, ph) {
   clearTimeout(room.timer);
   room.phase = {
-    n: ++room.pn, answers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [], drawSeq: 0 } : {}), ...ph,
+    n: ++room.pn, answers: {}, rawAnswers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [], drawSeq: 0 } : {}), ...ph,
     endsAt: ph.duration ? Date.now() + ph.duration * 1000 : null,
   };
   if (ph.duration) room.timer = setTimeout(() => endPhase(room), ph.duration * 1000);
@@ -63,7 +63,12 @@ function endPhase(room) {
   if (!room.game || !ph || ph.done) return;
   ph.done = true;
   clearTimeout(room.timer);
-  room.game.onEnd(room, ph, apiFor(room));
+  try {
+    room.game.onEnd(room, ph, apiFor(room));
+  } catch (err) {
+    console.error('[game:onEnd]', room.game && room.game.id, err);
+    setPhase(room, { kind: 'error', step: 'error', title: 'Une erreur est survenue', prompt: 'La partie peut être reprise depuis le menu.', error: String(err && err.message || err) });
+  }
 }
 
 function apiFor(room) {
@@ -85,7 +90,7 @@ function toLobby(room) {
 }
 
 // ----- Diffusion de l'état -----
-function view(room) {
+function view(room, forHost = false) {
   const p = room.phase;
   return {
     code: room.code,
@@ -103,14 +108,26 @@ function view(room) {
       ...(p.kind === 'draw' ? { drawingCount: (p.drawing || []).length } : {}),
       round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
-      answered: Object.keys(p.answers), expected: p.expected,
+      answered: Object.keys(p.answers), expected: p.expected, error: p.error,
+      ...(forHost ? { answers: Object.entries(p.answers).map(([id, value]) => ({ id, name: (room.players[id] || {}).name || '?', value: publicAnswer(p, (p.rawAnswers || {})[id], value) })) } : {}),
     },
   };
 }
 
+function publicAnswer(ph, raw, value) {
+  if (!ph) return null;
+  value = raw === undefined ? value : raw;
+  if (ph.kind === 'vote') { const o = (ph.options || []).find(x => x.id === value); return o ? o.text : value; }
+  if (ph.kind === 'rank' && Array.isArray(value)) return value;
+  if (typeof value === 'string') return value.slice(0, 240);
+  if (typeof value === 'number' || typeof value === 'boolean') return value;
+  if (value && typeof value === 'object') return value;
+  return String(value ?? '');
+}
+
 function broadcast(room) {
-  const v = view(room);
-  if (room.host) io.to(room.host).emit('state', v);
+  const v = view(room, false);
+  if (room.host) io.to(room.host).emit('state', view(room, true));
   for (const pl of Object.values(room.players)) {
     if (!pl.sid) continue;
     const mine = ((room.phase && room.phase.options) || []).filter(o => o.by === pl.id).map(o => o.id);
@@ -142,7 +159,12 @@ io.on('connection', (socket) => {
     Object.values(room.players).forEach(p => (p.score = 0));
     room.game = games[gameId];
     room.gameCategory = room.game.category || 'Général';
-    room.game.start(room, apiFor(room));
+    try {
+      room.game.start(room, apiFor(room));
+    } catch (err) {
+      console.error('[game:start]', gameId, err);
+      setPhase(room, { kind: 'error', step: 'error', title: 'Impossible de lancer ce jeu', prompt: 'Une erreur technique a été détectée.', error: String(err && err.message || err) });
+    }
   });
 
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
@@ -186,6 +208,7 @@ io.on('connection', (socket) => {
     if (!ph || ph.done || !room.game || !ph.expected.includes(pid) || pid in ph.answers) return reply('ignored');
     const v = room.game.validate(ph, pid, value);
     if (v === undefined) return reply('invalid');
+    ph.rawAnswers[pid] = value;
     ph.answers[pid] = v;
     reply('ok');
     broadcast(room);
