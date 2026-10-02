@@ -84,3 +84,4 @@ module.exports = function makeTextQuiz(cfg) {
 module.exports.norm = norm;
 module.exports.matches = matches;
 module.exports.shuffle = shuffle;
+module.exports.lev = lev;
