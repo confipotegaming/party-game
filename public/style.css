@@ -111,3 +111,6 @@ input[type=radio]{width:auto;margin-right:8px}
 .host-error{max-width:760px;margin:10vh auto;text-align:center}
 .draw-layout .board{width:100%;height:auto;max-height:70vh;object-fit:contain;background:#fff;border-radius:18px;touch-action:none}
 @media(max-width:900px){.host-game-grid{grid-template-columns:1fr}.live-scores{position:static}.game-head{flex-direction:column}}
+
+/* v0.1.10 — contrôles de manche */
+.game-stop-bar{display:flex;justify-content:flex-end;margin-top:16px}.game-stop-bar .danger{background:#ff6b6b;color:#fff;border-color:var(--ink);box-shadow:4px 4px 0 var(--ink)}.game-stop-bar .danger:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
