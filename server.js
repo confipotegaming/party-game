@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.18';
+const APP_VERSION = '0.1.19';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario',
 ]) games[id] = require('./games/' + id);
 
 const app = express();
