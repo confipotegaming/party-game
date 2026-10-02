@@ -264,20 +264,8 @@ function view(room, forHost = false) {
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
       answered: Object.keys(p.answers), expected: p.expected, error: p.error,
       ...(forHost && p.live ? { live: p.live } : {}),
-      ...(forHost ? { answers: Object.entries(p.answers).map(([id, value]) => ({ id, name: (room.players[id] || {}).name || '?', value: publicAnswer(p, (p.rawAnswers || {})[id], value) })) } : {}),
     },
   };
-}
-
-function publicAnswer(ph, raw, value) {
-  if (!ph) return null;
-  value = raw === undefined ? value : raw;
-  if (ph.kind === 'vote') { const o = (ph.options || []).find(x => x.id === value); return o ? o.text : value; }
-  if (ph.kind === 'rank' && Array.isArray(value)) return value;
-  if (typeof value === 'string') return value.slice(0, 240);
-  if (typeof value === 'number' || typeof value === 'boolean') return value;
-  if (value && typeof value === 'object') return value;
-  return String(value ?? '');
 }
 
 function broadcast(room) {

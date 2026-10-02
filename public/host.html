@@ -80,11 +80,11 @@ const scoreBoard = () => {
   const rows = [...(st?.players || [])].sort((a,b)=>b.score-a.score);
   return `<aside class="live-scores card"><div class="section-title"><span>🏆 Scores en direct</span><small>${rows.length} joueur${rows.length>1?'s':''}</small></div>${rows.map((x,i)=>`<div class="live-score-row"><span>${i+1}</span><span class="live-score-avatar">${avatarMarkup(x.avatar,38,'happy')}</span><b>${esc(x.name)}</b><strong data-score-for="${x.id}" data-score="${x.score}">${x.score}</strong></div>`).join('')}</aside>`;
 };
+// Seulement qui a répondu, jamais le contenu : les réponses affichées sur l'écran partagé spoileraient les autres joueurs.
 const liveAnswers = p => {
-  const rows = Array.isArray(p?.answers) ? p.answers : [];
-  if (!rows.length) return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>En attente…</small></div><p class="muted">Les réponses apparaîtront ici dès qu’elles arrivent.</p></section>`;
-  const fmt = v => { if (Array.isArray(v)) return v.join(' → '); if (v && typeof v === 'object') return JSON.stringify(v); return String(v ?? ''); };
-  return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>${rows.length} reçue${rows.length>1?'s':''}</small></div>${rows.map((r,i)=>`<div class="live-answer-row"><span class="answer-avatar">${avatarMarkup(((st.players || []).find(x=>x.id===r.id)||{}).avatar,42,'happy')}</span><div><b>${esc(r.name)}</b><div class="answer-text">${esc(fmt(r.value))}</div></div><span class="answer-check">✓</span></div>`).join('')}</section>`;
+  const ids = Array.isArray(p?.answered) ? p.answered : [];
+  if (!ids.length) return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>En attente…</small></div><p class="muted">Les joueurs qui ont répondu apparaîtront ici.</p></section>`;
+  return `<section class="live-answers card"><div class="section-title"><span>💬 Réponses en direct</span><small>${ids.length} reçue${ids.length>1?'s':''}</small></div>${ids.map(id=>`<div class="live-answer-row"><span class="answer-avatar">${avatarMarkup(((st.players || []).find(x=>x.id===id)||{}).avatar,42,'happy')}</span><div><b>${esc(nameOf(id))}</b><div class="answer-text muted">a répondu</div></div><span class="answer-check">✓</span></div>`).join('')}</section>`;
 };
 const progress = p => {
   const answered = Array.isArray(p?.answered) ? p.answered : [];
