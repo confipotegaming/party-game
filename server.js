@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.9';
+const APP_VERSION = '0.1.10';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -51,7 +51,7 @@ const newCode = () => {
 function setPhase(room, ph) {
   clearTimeout(room.timer);
   room.phase = {
-    n: ++room.pn, answers: {}, rawAnswers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [], drawSeq: 0 } : {}), ...ph,
+    n: ++room.pn, answers: {}, rawAnswers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [], drawOps: [], drawSeq: 0 } : {}), ...ph,
     endsAt: ph.duration ? Date.now() + ph.duration * 1000 : null,
   };
   if (ph.duration) room.timer = setTimeout(() => endPhase(room), ph.duration * 1000);
@@ -168,12 +168,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
+  socket.on('host:stop-game', () => { const { room } = ctx(); if (room && socket.data.isHost && room.game) toLobby(room); });
   socket.on('host:lobby', () => { const { room } = ctx(); if (room && socket.data.isHost) toLobby(room); });
   socket.on('host:sync-draw', () => {
     const { room } = ctx();
     const ph = room && room.phase;
     if (!room || !socket.data.isHost || !ph || ph.kind !== 'draw') return;
-    socket.emit('draw', { n: ph.n, full: true, ops: ph.drawOps || [] });
+    socket.emit('draw', { n: ph.n, seq: ph.drawSeq || 0, full: true, ops: ph.drawOps || [] });
   });
 
   socket.on('join', ({ code, name, pid, avatar }, ack) => {
