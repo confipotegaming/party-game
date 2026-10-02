@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="showtv.css"></head>
 <body><div class="studio-beams"><i></i><i></i><i></i><i></i></div><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/pixel.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -63,7 +63,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ boardSpin:'Mode plateau', boardResults:'Mode plateau', survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', bossPick:'Boss Fight', boss:'Boss Fight', bossOver:'Game over', bossEnding:'Fin', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ boardSpin:'Mode plateau', boardResults:'Mode plateau', survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', bossPick:'Boss Fight', boss:'Boss Fight', bossOver:'Game over', bossEnding:'Fin', text:'Répondez', number:'Estimation', guess:'Trouvez', pixel:'Pixel Flou', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 // Puce de difficulté de la question en cours (★★☆ Moyen · ×1,25).
 const diffChip = p => { const d = p?.difficulty; return d ? `<span class="chip diff diff-${d.level}" title="Bonus de points : ×${String(d.bonus).replace('.', ',')}">${d.stars} ${esc(d.label)}${d.bonus > 1 ? ` · ×${String(d.bonus).replace('.', ',')}` : ''}</span>` : ''; };
 const DIFF_MODES = [['mix', '🎢 Progressive', 'Du facile au difficile'], ['1', '★☆☆ Facile', 'Pour s’échauffer'], ['2', '★★☆ Moyen', 'Un bon défi'], ['3', '★★★ Difficile', 'Pour les cracks (bonus ×1,5)']];
@@ -470,6 +470,9 @@ function render() {
     const ctx = { emit: (e, a) => s.emit(e, a), head, scoreBoard, stopGameButton, bindStop, avatarMarkup, nameOf,
       avatarOf: id => ((st.players || []).find(x => x.id === id) || {}).avatar };
     p.kind === 'survey' ? window.SurveyGame.host(app, p, ctx) : window.SurveyGame.hostSetup(app, p, ctx);
+  } else if (p.kind === 'pixel') {
+    window.PixelGame.host(app, p, { off, head, scoreBoard, stopGameButton, bindStop, avatarMarkup, nameOf,
+      avatarOf: id => ((st.players || []).find(x => x.id === id) || {}).avatar });
   } else if (p.kind === 'lobby') {
     const minFor = id => ((st.games || []).find(g => g.id === id) || {}).minPlayers || st.min;
     const need = sel ? minFor(sel) : st.min;
@@ -489,7 +492,7 @@ function render() {
       ${boardLobby(pl)}
       <div class="tv-section-head"><h2>Les <em>épreuves</em> du soir</h2><p>Choisissez, puis lancez depuis le pupitre</p></div>
       <div class="games">${eps.map(e => `<button class="tv-ep tone-${e.tone} ${sel === e.id ? 'sel' : ''}" data-g="${e.id}">
-        <span class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></span>
+        <span class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['pixelflou', 'boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></span>
         <span class="tv-ep-body"><span class="tv-ep-title">${esc(e.name)}</span><span class="tv-ep-quote">« ${esc(e.tagline)} »</span>
         <span class="tv-ep-meta"><span class="tag">${esc(e.category)}</span>${window.ShowTV.intensityBars(e.intensity)} ${window.ShowTV.INTENSITY_LABEL[e.intensity]} · ${e.solo ? 'Solo OK' : (e.minPlayers || st.min) + '+ joueurs'}</span></span></button>`).join('')}</div>
       ${sel && ((st.games || []).find(g => g.id === sel) || {}).difficulty ? `<section class="diff-picker card"><b>Difficulté des questions</b><div class="diff-options">${DIFF_MODES.map(([v, l, h]) => `<button class="${diffMode === v ? 'sel' : ''}" data-diff="${v}"><span>${l}</span><small>${h}</small></button>`).join('')}</div></section>` : ''}
@@ -537,7 +540,7 @@ function render() {
     bindStop();
   } else if (p.kind === 'reveal') {
     stopDrawResync();
-    app.innerHTML = `${head(p)}${p.data?.survey ? `<div class="prompt">${esc(p.prompt)}</div>${window.SurveyGame.reveal(p.data.survey)}` : ''}
+    app.innerHTML = `${head(p)}${p.data?.survey ? `<div class="prompt">${esc(p.prompt)}</div>${window.SurveyGame.reveal(p.data.survey)}` : ''}${p.data?.pixel ? window.PixelGame.reveal(p.data.pixel) : ''}
       <div class="tv-reveal">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br><span class="muted">${esc(l.sub)}</span></div><span class="pts" data-count="${Number(l.pts) || 0}" data-prefix="+">+${esc(l.pts)}</span></div>`).join('') || '<div class="line"><b>Aucun point cette manche.</b></div>'}</div>
       <div><button id="next">Suivant ▶</button></div>`;
     document.getElementById('next').onclick = () => { window.partyAudio.click(); s.emit('host:skip'); };

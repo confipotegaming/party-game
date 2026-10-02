@@ -1,0 +1,730 @@
+{
+ "mario": {
+  "file": "5838998d9af2.jpg",
+  "title": "Mario_and_Luigi.jpg",
+  "crop": [
+   0.76,
+   0.38,
+   0.6
+  ],
+  "author": "Chris Favero from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mario_and_Luigi.jpg"
+ },
+ "luigi": {
+  "file": "1539cba69d87.jpg",
+  "title": "Mario_and_Luigi.jpg",
+  "crop": [
+   0.27,
+   0.15,
+   0.68
+  ],
+  "author": "Chris Favero from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mario_and_Luigi.jpg"
+ },
+ "pikachu": {
+  "file": "a60440ff5c4f.jpg",
+  "title": "Cosplay_of_Pikachu_from_Pokemon_at_GalaxyCon_Richmond_2020_(49666784027).jpg",
+  "crop": [
+   0.5,
+   0.42,
+   1.0
+  ],
+  "author": "Super Festivals from Ft. Lauderdale, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Pikachu_from_Pokemon_at_GalaxyCon_Richmond_2020_%2849666784027%29.jpg"
+ },
+ "sonic": {
+  "file": "1240a137161d.jpg",
+  "title": "WW_Chicago_2011_-_Sonic_the_Hedgehog.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "GabboT",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WW_Chicago_2011_-_Sonic_the_Hedgehog.jpg"
+ },
+ "link": {
+  "file": "cae4a3547c01.jpg",
+  "title": "Twilight_Princess_Link_and_Ocarina_of_Time_Zelda_cosplay_at_Anime_Boston_2025_-_20250525_1323.jpg",
+  "crop": [
+   0.3,
+   0.3,
+   0.62
+  ],
+  "author": "Abzeronow",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Twilight_Princess_Link_and_Ocarina_of_Time_Zelda_cosplay_at_Anime_Boston_2025_-_20250525_1323.jpg"
+ },
+ "pacman": {
+  "file": "63b261804798.jpg",
+  "title": "Pac-Man_cosplayers_at_FanimeCon_2010-05-29_4.JPG",
+  "crop": [
+   0.22,
+   0.5,
+   1.0
+  ],
+  "author": "BrokenSphere",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Pac-Man_cosplayers_at_FanimeCon_2010-05-29_4.JPG"
+ },
+ "yoshi": {
+  "file": "673e0e8ed31a.jpg",
+  "title": "Anime_Expo_2013_-_Yoshi_Cosplay_(9228424562).jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "William Tung from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2013_-_Yoshi_Cosplay_%289228424562%29.jpg"
+ },
+ "peach": {
+  "file": "8a31c216e070.jpg",
+  "title": "AVCON_2012_-_Princess_Peach.jpg",
+  "crop": [
+   0.5,
+   0.33,
+   1.0
+  ],
+  "author": "Ashley Hull",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AVCON_2012_-_Princess_Peach.jpg"
+ },
+ "donkeykong": {
+  "file": "c1ee9cab0313.jpg",
+  "title": "Anime_Expo_2011_-_Donkey_Kong_(5893313508).jpg",
+  "crop": [
+   0.55,
+   0.4,
+   0.85
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2011_-_Donkey_Kong_%285893313508%29.jpg"
+ },
+ "bowser": {
+  "file": "65ef61ba69ab.jpg",
+  "title": "AVCON_2012_-_Bowser.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "batasan",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AVCON_2012_-_Bowser.jpg"
+ },
+ "invader": {
+  "file": "f4389e4ec8e4.jpg",
+  "title": "Space_Invaders_and_spray_can_mosaic_graffiti_in_Paris.jpg",
+  "crop": [
+   0.45,
+   0.5,
+   1.0
+  ],
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Space_Invaders_and_spray_can_mosaic_graffiti_in_Paris.jpg"
+ },
+ "steve": {
+  "file": "5bac5206bf42.jpg",
+  "title": "Florida_Supercon_2011_-_Steve_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Bob B. Brown",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Florida_Supercon_2011_-_Steve_Cosplayer.jpg"
+ },
+ "toad": {
+  "file": "f45dd4c15d1b.jpg",
+  "title": "MCM_2013_-_Toad,_Luigi_&_Mario_(8978170431)_(cropped,_Toad).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Roger Murmann from Eppertshausen, Deutschland",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:MCM_2013_-_Toad%2C_Luigi_%26_Mario_%288978170431%29_%28cropped%2C_Toad%29.jpg"
+ },
+ "rondoudou": {
+  "file": "30b7ca4b941e.jpg",
+  "title": "Jigglypuff_cosplay.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "RightCowLeftCoast",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Jigglypuff_cosplay.jpg"
+ },
+ "crewmate": {
+  "file": "0cb803311f62.jpg",
+  "title": "Among_Us_cosplay_at_Insomnia_Gaming_Festival_i70_-_April_2023.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Captain Galaxy",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Among_Us_cosplay_at_Insomnia_Gaming_Festival_i70_-_April_2023.jpg"
+ },
+ "blinky": {
+  "file": "2e3aec76f7ec.jpg",
+  "title": "Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_(4836635185).jpg",
+  "crop": [
+   0.27,
+   0.5,
+   1.0
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_%284836635185%29.jpg"
+ },
+ "creeper": {
+  "file": "21113a3aa347.jpg",
+  "title": "Otakuthon_2014-_Creeper_(15006627906).jpg",
+  "crop": [
+   0.4,
+   0.3,
+   0.9
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Otakuthon_2014-_Creeper_%2815006627906%29.jpg"
+ },
+ "megaman": {
+  "file": "9e5a16fb0e0d.jpg",
+  "title": "Mega_Man!_(9638931597).jpg",
+  "crop": [
+   0.35,
+   0.5,
+   0.85
+  ],
+  "author": "Dave Monk from Seattle, USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mega_Man%21_%289638931597%29.jpg"
+ },
+ "bulbizarre": {
+  "file": "5071851cba21.jpg",
+  "title": "FanimeCon_2018_439_(40640207730).jpg",
+  "crop": [
+   0.38,
+   0.75,
+   0.6
+  ],
+  "author": "Michael Ocampo from United States",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:FanimeCon_2018_439_%2840640207730%29.jpg"
+ },
+ "salameche": {
+  "file": "49df926f31c9.jpg",
+  "title": "Anime_Expo_2013_-_Charmander_Cosplay_(9228423198).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "William Tung from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2013_-_Charmander_Cosplay_%289228423198%29.jpg"
+ },
+ "carapuce": {
+  "file": "c06a56704b57.jpg",
+  "title": "WonderCon_2013_-_Squirtle_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "William Tung",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2013_-_Squirtle_Cosplayer.jpg"
+ },
+ "wario": {
+  "file": "5fb3f761c500.jpg",
+  "title": "WonderCon_2012_-_Wario_(6873356234).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2012_-_Wario_%286873356234%29.jpg"
+ },
+ "waluigi": {
+  "file": "c239b47ca558.jpg",
+  "title": "Waluigi_Cosplayer_at_Crunchyroll_Expo_2018.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "czarcats",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Waluigi_Cosplayer_at_Crunchyroll_Expo_2018.jpg"
+ },
+ "crash": {
+  "file": "a1ddf489cd3e.jpg",
+  "title": "Comic_Con_Experience_-_2014_(16038827505).jpg",
+  "crop": [
+   0.5,
+   0.6,
+   1.0
+  ],
+  "author": "Ricardo 清介 八木",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Comic_Con_Experience_-_2014_%2816038827505%29.jpg"
+ },
+ "rayman": {
+  "file": "e7b5fc642b3a.jpg",
+  "title": "Montreal_Comiccon_2016_-_Rayman_(28225331866).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Montreal_Comiccon_2016_-_Rayman_%2828225331866%29.jpg"
+ },
+ "bomberman": {
+  "file": "2edd02415de1.jpg",
+  "title": "Cosplayer_of_Bomberman_20060520.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "7sigma",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplayer_of_Bomberman_20060520.jpg"
+ },
+ "knuckles": {
+  "file": "74d6938a645e.jpg",
+  "title": "Sonic_Cast.jpg",
+  "crop": [
+   0.47,
+   0.45,
+   1.0
+  ],
+  "author": "Oliver Ayala",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Sonic_Cast.jpg"
+ },
+ "tails": {
+  "file": "4d1697dad900.jpg",
+  "title": "New_York_Comic_Con_2014_-_Tails_(15314294238).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Richie S from Brooklyn, NY, United States",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:New_York_Comic_Con_2014_-_Tails_%2815314294238%29.jpg"
+ },
+ "samus": {
+  "file": "385025c24dae.jpg",
+  "title": "Cosplay_of_Samus_Aran_at_Otakon_2022.png",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "stupid systemus",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Samus_Aran_at_Otakon_2022.png"
+ },
+ "lapincretin": {
+  "file": "6686710a0c44.jpg",
+  "title": "Rabbid_cosplay_(edit).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Sunrise Ottah from USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Rabbid_cosplay_%28edit%29.jpg"
+ },
+ "ectoplasma": {
+  "file": "bb385e15e41a.jpg",
+  "title": "Gengar_keychain.jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Wwemeowmeow",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Gengar_keychain.jpg"
+ },
+ "ronflex": {
+  "file": "ca25543e858f.jpg",
+  "title": "MAGFest_IMG_8541_(32102985541).jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "peyj_turner",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:MAGFest_IMG_8541_%2832102985541%29.jpg"
+ },
+ "boo": {
+  "file": "1fa0022f269f.jpg",
+  "title": "Mural_de_un_Boo.jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Germanico5468504",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mural_de_un_Boo.jpg"
+ },
+ "goomba": {
+  "file": "5ae774e066c4.jpg",
+  "title": "Villaquilambre_-_Navatejera,_Centro_Joven_6_(cropped_Goomba).jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Zarateman",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Villaquilambre_-_Navatejera%2C_Centro_Joven_6_%28cropped_Goomba%29.jpg"
+ },
+ "masterchief": {
+  "file": "771e730ed3e6.jpg",
+  "title": "Cosplay_of_Master_Chief_at_Cos-Gen_2022.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Chongkian",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Master_Chief_at_Cos-Gen_2022.jpg"
+ },
+ "mspacman": {
+  "file": "5dfe6948c270.jpg",
+  "title": "Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_(4836635185).jpg",
+  "crop": [
+   0.82,
+   0.45,
+   0.8
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_%284836635185%29.jpg"
+ },
+ "shyguy": {
+  "file": "c0993892ce4f.jpg",
+  "title": "Montreal_Mini-Comiccon_2014-_Shy_Guy_(15351832943).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Montreal_Mini-Comiccon_2014-_Shy_Guy_%2815351832943%29.jpg"
+ },
+ "ryu": {
+  "file": "75e0f694bf6b.jpg",
+  "title": "Ryu_cosplay_at_EVO_2011.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Andy L (Liang)",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Ryu_cosplay_at_EVO_2011.jpg"
+ },
+ "spyro": {
+  "file": "67ff1760f342.jpg",
+  "title": "Spyro_profile.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "vages",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Spyro_profile.jpg"
+ },
+ "ness": {
+  "file": "b60df6e4103f.jpg",
+  "title": "EarthBound_Ness_cosplayer_(4846603113).jpg",
+  "crop": [
+   0.5,
+   0.12,
+   1.0
+  ],
+  "author": "ElCapitanBSC from Baltimore, MD, USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:EarthBound_Ness_cosplayer_%284846603113%29.jpg"
+ },
+ "sackboy": {
+  "file": "5c541a79b966.jpg",
+  "title": "Sackboy!_(7791287744).jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Tim Bartel from Cologne, Germany",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Sackboy%21_%287791287744%29.jpg"
+ },
+ "chunli": {
+  "file": "346dc608149f.jpg",
+  "title": "Cosplayer_of_Chun-Li,_Street_Fighter_20140216e.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "kxz Chen",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplayer_of_Chun-Li%2C_Street_Fighter_20140216e.jpg"
+ },
+ "kratos": {
+  "file": "6131574f85ea.jpg",
+  "title": "Kratos_cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Mooshuu",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Kratos_cosplayer.jpg"
+ },
+ "cuphead": {
+  "file": "b798f1ec8068.jpg",
+  "title": "CupheadCosplay.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "AnticoMu90",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:CupheadCosplay.jpg"
+ },
+ "shovelknight": {
+  "file": "d8e25d3ad737.jpg",
+  "title": "Katsucon_cosplay_(16366554819).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "peyj_turner",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Katsucon_cosplay_%2816366554819%29.jpg"
+ },
+ "slime": {
+  "file": "d609d2551adc.jpg",
+  "title": "Fancy_Frontier_23_(12564405895).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   0.8
+  ],
+  "author": "othree",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Fancy_Frontier_23_%2812564405895%29.jpg"
+ },
+ "chocobo": {
+  "file": "c85d694985db.jpg",
+  "title": "Chocobo_-otakon_-otakon2021_-finalfantasy.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "stupid systemus",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Chocobo_-otakon_-otakon2021_-finalfantasy.jpg"
+ },
+ "isabelle": {
+  "file": "8f952e8dce2e.jpg",
+  "title": "WonderCon_2017_-_Isabelle_(Animal_Crossing)_cosplay.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "W10002",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2017_-_Isabelle_%28Animal_Crossing%29_cosplay.jpg"
+ },
+ "pikmin": {
+  "file": "300d693db07c.jpg",
+  "title": "Otakuthon_2014-_Olimar_and_his_Pikmin_harem_(14843007360).jpg",
+  "crop": [
+   0.4,
+   0.4,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Otakuthon_2014-_Olimar_and_his_Pikmin_harem_%2814843007360%29.jpg"
+ },
+ "frogger": {
+  "file": "3a2d5536ac31.jpg",
+  "title": "Sega_-_Gremlin_-_Frogger_-_December_1st_1981_Play_Meter_advert.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   0.85
+  ],
+  "author": "Sega/Gremlin",
+  "license": "Domaine public",
+  "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Public_domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Sega_-_Gremlin_-_Frogger_-_December_1st_1981_Play_Meter_advert.jpg"
+ },
+ "gamewatch": {
+  "file": "f44a585f4356.jpg",
+  "title": "FLORIDA_SUPERCON_2009_COSTUME_COMPETITION_-_3620847460.jpg",
+  "crop": [
+   0.5,
+   0.6,
+   1.0
+  ],
+  "author": "Super Festivals",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:FLORIDA_SUPERCON_2009_COSTUME_COMPETITION_-_3620847460.jpg"
+ },
+ "hollowknight": {
+  "file": "b7796e8a520a.jpg",
+  "title": "Polymanga_2024_-_53629048559.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Stéphane Gallay",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Polymanga_2024_-_53629048559.jpg"
+ },
+ "pit": {
+  "file": "ce0411e5c20f.jpg",
+  "title": "Anime_Central_2008_-_Pit_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Andrew Evans",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Central_2008_-_Pit_Cosplayer.jpg"
+ },
+ "inkling": {
+  "file": "1732cf4bfdaa.jpg",
+  "title": "AnimeNEXT_2015_-_Cosplay_of_Splatoon_1.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "C. Fountainstand",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AnimeNEXT_2015_-_Cosplay_of_Splatoon_1.jpg"
+ },
+ "kirby": {
+  "file": "86e381378dc0.jpg",
+  "title": "KirbyCosplay.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "Pikawil",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:KirbyCosplay.jpg"
+ },
+ "lemming": {
+  "file": "a0848e76e1fa.jpg",
+  "title": "Lemmings_Cosplay.jpg",
+  "crop": [
+   0.45,
+   0.4,
+   0.8
+  ],
+  "author": "Luca Mascaro",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Lemmings_Cosplay.jpg"
+ }
+}

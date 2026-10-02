@@ -91,7 +91,7 @@
     const strip = words.map(w => `${esc(w)}<span>★</span>`).join('');
     document.getElementById('ticker').innerHTML = strip + strip;
     document.getElementById('eps').innerHTML = eps.map(e => `<article class="tv-ep tone-${e.tone}">
-      <div class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></div>
+      <div class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['pixelflou', 'boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></div>
       <div class="tv-ep-body"><span class="tv-ep-title">${esc(e.name)}</span><span class="tv-ep-quote">« ${esc(e.tagline)} »</span>
         <span class="tv-ep-meta"><span class="tag">${esc(e.category)}</span>${window.ShowTV.intensityBars(e.intensity)} ${window.ShowTV.INTENSITY_LABEL[e.intensity]} · ${e.solo ? 'Solo OK' : (e.minPlayers || 2) + '+ joueurs'}</span>
         <a class="tv-ep-launch" href="host.html?game=${encodeURIComponent(e.id)}">Lancer l’épreuve</a></div></article>`).join('');

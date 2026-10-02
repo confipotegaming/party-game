@@ -12,7 +12,7 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss', 'pixelflou',
 ]) games[id] = require('./games/' + id);
 // Mode plateau : tirage des mini-jeux à la roue. Le jeu du boss en est exclu (voir games/_board.js).
 const board = require('./games/_board');

@@ -32,9 +32,10 @@
     academie: 'L’examen d’entrée que personne n’a révisé.',
     wario: 'Quatre secondes par épreuve. Le chaos à l’état pur.',
     boss: 'Tous ensemble contre un monstre. Pour une fois.',
+    pixelflou: 'Un héros de jeu vidéo, beaucoup trop de pixels. Plissez les yeux.',
   };
   const INTENSITY = { funny: 1, finislaphrase: 1, leplusprobable: 1, choixgroupe: 1, express: 3, cerveau: 3, academie: 3, wario: 3, boss: 3 };
-  const TONES = { 'Humour': 'magenta', 'Culture générale': 'blue', 'Réflexion': 'cyan', 'Réflexes': 'cyan', 'Action': 'orange', 'Vie quotidienne': 'violet', 'Cinéma & séries': 'yellow', 'Culture pop': 'yellow', 'Personnalités': 'violet', 'Survie & aventure': 'orange', 'Objets & quotidien': 'blue' };
+  const TONES = { 'Humour': 'magenta', 'Culture générale': 'blue', 'Réflexion': 'cyan', 'Réflexes': 'cyan', 'Action': 'orange', 'Vie quotidienne': 'violet', 'Cinéma & séries': 'yellow', 'Culture pop': 'yellow', 'Personnalités': 'violet', 'Survie & aventure': 'orange', 'Objets & quotidien': 'blue', 'Jeux vidéo': 'cyan' };
   const pad2 = n => String(n).padStart(2, '0');
   const ICONS = { boss: '⚔️', sondage: '📊' };
   function episode(g, i) {

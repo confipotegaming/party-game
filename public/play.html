@@ -2,7 +2,7 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="showtv.css"></head>
 <body><div class="studio-beams"><i></i><i></i><i></i><i></i></div><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/pixel.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -114,7 +114,7 @@ s.on('state', x => {
   const p = x.phase, done = p.answered.includes(x.me.id);
   const k = p.n + ':' + done;
   const justSent = done && key === p.n + ':false';
-  if (k !== key || p.kind === 'survey' || p.kind === 'bossPick') { key = k; render(p, done); } // mises à jour en direct (Grand Sondage, choix des héros)
+  if (k !== key || p.kind === 'survey' || p.kind === 'bossPick' || p.kind === 'pixel') { key = k; render(p, done); } // mises à jour en direct (Grand Sondage, choix des héros, Pixel Flou)
   try { window.ShowTV.onState(x); if (justSent) window.ShowTV.answered(); window.ShowTV.decorate(app); } catch (err) { console.error('[show]', err); }
 });
 window.ShowTV.watch({ role: 'player', me: () => st && st.me && st.me.id });
@@ -150,6 +150,8 @@ function render(p, done) {
       send: v => s.emit('answer', v), progress: v => s.emit('progress', v) });
   } else if (p.kind === 'survey') {
     window.SurveyGame.player(app, p, { me: st.me.id, top, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
+  } else if (p.kind === 'pixel') {
+    window.PixelGame.player(app, p, { me: st.me.id, top, off, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
   } else if (p.kind === 'surveySetup') {
     app.innerHTML = `${top}${wait('📊 Le Grand Sondage<br>L’hôte choisit le thème…')}`;
   } else if (p.kind === 'boardSpin') {
@@ -298,7 +300,7 @@ function render(p, done) {
       ${opts.map(o => `<button class="choice" data-o="${o.id}">${esc(o.text)}</button>`).join('')}</div>`;
     app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => s.emit('answer', b.dataset.o));
   } else if (p.kind === 'reveal') {
-    app.innerHTML = `${top}${p.data?.survey ? `<div class="card stack"><p class="prompt">${esc(p.title)}</p>${window.SurveyGame.reveal(p.data.survey)}</div>` : wait('Regardez l\'écran !')}`;
+    app.innerHTML = `${top}${p.data?.survey ? `<div class="card stack"><p class="prompt">${esc(p.title)}</p>${window.SurveyGame.reveal(p.data.survey)}</div>` : p.data?.pixel ? `<div class="card stack">${window.PixelGame.reveal(p.data.pixel)}</div>` : wait('Regardez l\'écran !')}`;
   } else if (p.kind === 'scores') {
     const r = [...st.players].sort((a, b) => b.score - a.score);
     const i = r.findIndex(x => x.id === st.me.id), mine = r[i] || me(), tie = r.length > 1 && r.filter(x => x.score === mine.score).length > 1;
