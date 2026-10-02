@@ -562,3 +562,14 @@ input[type=radio]{width:auto;margin-right:8px}
 @keyframes waWin{50%{transform:scale(1.03)}}
 @keyframes waLost{0%{transform:scale(1.6)}30%{transform:scale(1.6) rotate(-15deg)}60%{transform:scale(1.2) rotate(12deg)}100%{transform:scale(.8)}}
 @keyframes waFade{to{opacity:0}}
+
+/* Difficulté des questions */
+.chip.diff{white-space:nowrap}
+.chip.diff-1{background:#b8f2a6}
+.chip.diff-2{background:var(--sun)}
+.chip.diff-3{background:var(--pink);color:#fff}
+.host .diff-picker{display:grid;gap:10px;margin:14px 0}
+.host .diff-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.host .diff-options button{background:#fff;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 14px}
+.host .diff-options button small{font-weight:600;opacity:.7}
+.host .diff-options button.sel{background:var(--sun)}

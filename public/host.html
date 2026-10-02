@@ -6,7 +6,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
-const s = io(); let st = null, off = 0, sel = null, drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null, renderError = null;
+const s = io(); let st = null, off = 0, sel = null, diffMode = 'mix', drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null, renderError = null;
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
@@ -57,13 +57,16 @@ const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.r
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
 const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+// Puce de difficulté de la question en cours (★★☆ Moyen · ×1,25).
+const diffChip = p => { const d = p?.difficulty; return d ? `<span class="chip diff diff-${d.level}" title="Bonus de points : ×${String(d.bonus).replace('.', ',')}">${d.stars} ${esc(d.label)}${d.bonus > 1 ? ` · ×${String(d.bonus).replace('.', ',')}` : ''}</span>` : ''; };
+const DIFF_MODES = [['mix', '🎢 Progressive', 'Du facile au difficile'], ['1', '★☆☆ Facile', 'Pour s’échauffer'], ['2', '★★☆ Moyen', 'Un bon défi'], ['3', '★★★ Difficile', 'Pour les cracks (bonus ×1,5)']];
 const head = p => {
   const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
   const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
   const answered = Array.isArray(p?.answered) ? p.answered.length : 0;
   const expected = Array.isArray(p?.expected) ? p.expected.length : 0;
   const progress = expected ? `<span class="chip">${answered}/${expected} réponses</span>` : '';
-  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${category}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
+  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${category}${diffChip(p)}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
 };
 const scoreBoard = () => {
   const rows = [...(st?.players || [])].sort((a,b)=>b.score-a.score);
@@ -305,10 +308,12 @@ function render() {
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
       <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['sondage', 'academie', 'wario'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      ${sel && ((st.games || []).find(g => g.id === sel) || {}).difficulty ? `<section class="diff-picker card"><b>Difficulté des questions</b><div class="diff-options">${DIFF_MODES.map(([v, l, h]) => `<button class="${diffMode === v ? 'sel' : ''}" data-diff="${v}"><span>${l}</span><small>${h}</small></button>`).join('')}</div></section>` : ''}
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
-    document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel); };
+    app.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { window.partyAudio.click(); diffMode = b.dataset.diff; render(); });
+    document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel, { difficulty: diffMode }); };
   } else if (p.kind === 'text' || p.kind === 'number') {
     app.innerHTML = `<div class="host-game-grid"><div><div class="host-main">${head(p)}<div class="prompt">${esc(p.prompt)}</div>${progress(p)}${liveAnswers(p)}${stopGameButton()}</div></div>${scoreBoard()}</div>`;
   bindStop();

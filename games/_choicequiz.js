@@ -3,6 +3,7 @@
 // mode 'survive'  : les options ok « survivent » (Survivrais-tu ?)
 // mode 'majority' : l'option la plus votée rapporte des points à ses électeurs (Le choix du groupe)
 const { shuffle } = require('./_textquiz');
+const diff = require('./_difficulty');
 module.exports = (cfg) => {
   const rounds = Math.min(cfg.rounds || 5, cfg.questions.length);
   const pts = cfg.pts || 500;
@@ -16,7 +17,8 @@ module.exports = (cfg) => {
   };
   return {
     id: cfg.id, name: cfg.name, desc: cfg.desc, category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'],
-    start(room, api) { room.g = { qs: shuffle(cfg.questions).slice(0, rounds), i: 0 }; ask(room, api); },
+    difficulty: diff.graded(cfg.questions),
+    start(room, api) { room.g = { qs: diff.pick(cfg.questions, rounds, diff.modeOf(room)), i: 0 }; ask(room, api); },
     validate(ph, pid, v) { return ph.step === 'vote' && ph.options.some(o => o.id === v) ? v : undefined; },
     onEnd(room, ph, api) {
       const g = room.g, mode = cfg.mode;

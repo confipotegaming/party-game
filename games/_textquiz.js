@@ -18,6 +18,7 @@ const matches = (accepted, g) =>
   accepted.some(x => x === g || (x.length >= 6 && lev(x, g) <= (x.length >= 12 ? 2 : 1)));
 
 const shuffle = (a) => a.map(x => [Math.random(), x]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+const diff = require('./_difficulty');
 
 module.exports = function makeTextQuiz(cfg) {
   const rounds = cfg.rounds || 5;
@@ -28,7 +29,7 @@ module.exports = function makeTextQuiz(cfg) {
   function askClue(room, api) {
     const g = room.g, q = g.qs[g.i], clues = cluesOf(q);
     api.setPhase({
-      kind: 'guess', step: 'clue', title: 'Trouvez la réponse', prompt: q.p || cfg.prompt, category: categoryOf(q),
+      kind: 'guess', step: 'clue', title: 'Trouvez la réponse', prompt: q.p || cfg.prompt, category: categoryOf(q), difficulty: diff.info(q.d),
       data: { clues: cfg.lastOnly ? [clues[g.clue]] : clues.slice(0, g.clue + 1), found: g.found.map(f => f.pid) },
       round: g.i + 1, rounds, duration: clueSeconds, clueIdx: g.clue, nClues: clues.length,
       accepted: [q.a, ...(q.alias || []), ...(q.accepted || [])].filter(Boolean).map(norm),
@@ -41,10 +42,11 @@ module.exports = function makeTextQuiz(cfg) {
   }
 
   return {
-    id: cfg.id, name: cfg.name, desc: cfg.desc, category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'], category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'], questions: cfg.questions,
+    id: cfg.id, name: cfg.name, desc: cfg.desc, category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'], questions: cfg.questions,
+    difficulty: diff.graded(cfg.questions),
 
     start(room, api) {
-      room.g = { qs: shuffle(cfg.questions).slice(0, rounds), i: 0, found: [], clue: 0 };
+      room.g = { qs: diff.pick(cfg.questions, rounds, diff.modeOf(room)), i: 0, found: [], clue: 0 };
       askQuestion(room, api);
     },
 
@@ -55,7 +57,7 @@ module.exports = function makeTextQuiz(cfg) {
       if (!g || !matches(ph.accepted, g)) return;
       const left = Math.max(0, (ph.endsAt - Date.now()) / (ph.duration * 1000));
       const share = (ph.nClues - ph.clueIdx) / ph.nClues;
-      return Math.round(1000 * share * (0.5 + 0.5 * left) / 10) * 10;
+      return Math.round(1000 * share * (0.5 + 0.5 * left) * diff.bonus(ph.difficulty && ph.difficulty.level) / 10) * 10;
     },
 
     onEnd(room, ph, api) {
@@ -68,7 +70,7 @@ module.exports = function makeTextQuiz(cfg) {
         const someoneLeft = api.ids().some(id => !g.found.some(f => f.pid === id));
         if (someoneLeft && g.clue + 1 < ph.nClues) { g.clue++; return askClue(room, api); }
         return api.setPhase({
-          kind: 'reveal', step: 'reveal', title: `Réponse : ${q.a}`, prompt: q.p || cfg.prompt, category: categoryOf(q),
+          kind: 'reveal', step: 'reveal', title: `Réponse : ${q.a}`, prompt: q.p || cfg.prompt, category: categoryOf(q), difficulty: diff.info(q.d),
           lines: g.found.map(f => ({
             main: api.name(f.pid), sub: ph.nClues > 1 ? `trouvé à l'indice ${f.clue + 1}` : 'trouvé !', pts: f.pts,
           })),
