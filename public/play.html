@@ -17,7 +17,7 @@ function join(code, name, pid, avatar) {
   s.emit('join', { code, name, pid, avatar }, r => {
     if (r.error) { localStorage.removeItem('pg'); joined = null; return form(r.error); }
     joined = { code: code.toUpperCase(), pid: r.pid, name: r.name, avatar: avatar || chosenAvatar };
-    chosenAvatar = joined.avatar; localStorage.setItem('pg', JSON.stringify(joined)); localStorage.setItem('pg-avatar', chosenAvatar);
+    chosenAvatar = joined.avatar; localStorage.setItem('pg', JSON.stringify(joined)); localStorage.setItem('pg-avatar', JSON.stringify(chosenAvatar));
   });
 }
 s.on('connect', () => { const j = joined || saved(); if (j) { chosenAvatar=j.avatar||chosenAvatar; join(j.code, j.name, j.pid, chosenAvatar); } else form(); });
