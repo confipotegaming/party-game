@@ -6,7 +6,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
-const s = io(); let st = null, off = 0, sel = null, diffMode = 'mix', drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null, renderError = null;
+const s = io(); let st = null, off = 0, sel = null, diffMode = 'mix', boardTurns = 5, drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null, renderError = null;
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
@@ -57,7 +57,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', bossPick:'Boss Fight', boss:'Boss Fight', bossOver:'Game over', bossEnding:'Fin', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ boardSpin:'Mode plateau', boardResults:'Mode plateau', survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', bossPick:'Boss Fight', boss:'Boss Fight', bossOver:'Game over', bossEnding:'Fin', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 // Puce de difficulté de la question en cours (★★☆ Moyen · ×1,25).
 const diffChip = p => { const d = p?.difficulty; return d ? `<span class="chip diff diff-${d.level}" title="Bonus de points : ×${String(d.bonus).replace('.', ',')}">${d.stars} ${esc(d.label)}${d.bonus > 1 ? ` · ×${String(d.bonus).replace('.', ',')}` : ''}</span>` : ''; };
 const DIFF_MODES = [['mix', '🎢 Progressive', 'Du facile au difficile'], ['1', '★☆☆ Facile', 'Pour s’échauffer'], ['2', '★★☆ Moyen', 'Un bon défi'], ['3', '★★★ Difficile', 'Pour les cracks (bonus ×1,5)']];
@@ -67,7 +67,7 @@ const head = p => {
   const answered = Array.isArray(p?.answered) ? p.answered.length : 0;
   const expected = Array.isArray(p?.expected) ? p.expected.length : 0;
   const progress = expected ? `<span class="chip">${answered}/${expected} réponses</span>` : '';
-  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${category}${diffChip(p)}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
+  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${boardChip()}${category}${diffChip(p)}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
 };
 const scoreBoard = () => {
   const rows = [...(st?.players || [])].sort((a,b)=>b.score-a.score);
@@ -86,7 +86,17 @@ const progress = p => {
   const names = answered.map(nameOf).map(esc).join(' · ');
   return `<section class="answer-progress card"><div class="progress-top"><b>${answered.length} réponse${answered.length>1?'s':''}</b><span>${expected.length ? `sur ${expected.length}` : 'en cours'}</span></div><div class="progress-bar"><i style="width:${Math.round(done*100)}%"></i></div>${names ? `<p class="muted">${names}</p>` : '<p class="muted">Les joueurs répondent…</p>'}</section>`;
 };
-const stopGameButton = () => `<div class="game-stop-bar"><button id="stop-game" class="danger">⏹ Arrêter le mini-jeu</button></div>`;
+const stopGameButton = () => `<div class="game-stop-bar"><button id="stop-game" class="danger">${st?.board ? '⏭ Passer ce mini-jeu' : '⏹ Arrêter le mini-jeu'}</button></div>`;
+// Mode plateau : puce « Tour 2/5 » pendant les mini-jeux.
+const boardChip = () => st?.board && !st.board.done ? `<span class="chip board-chip">🎲 Tour ${Math.min(st.board.turn + 1, st.board.turns)}/${st.board.turns}${st.board.final ? ' · points ×2' : ''}</span>` : '';
+// Sur le plateau, les écrans de résultats des jeux téléphone renvoient au plateau (pas de « Rejouer »).
+function boardResultActions(prefix) {
+  if (!st?.board) return;
+  const r = document.getElementById(prefix + '-replay'), m = document.getElementById(prefix + '-menu'), f = document.getElementById(prefix + '-final');
+  if (r) r.remove();
+  if (m) m.remove();
+  if (f) { f.textContent = '🎲 Retour au plateau'; f.className = 'alt'; }
+}
 function renderFallback(err) {
   if (!st) return;
   const p = st.phase || {};
@@ -97,6 +107,92 @@ const antics=['Le champion parade !','Deux joueurs se chamaillent pour la 2e pla
 let anticIndex=Math.floor(Math.random()*antics.length);
 const rankBoard = (items, final=false) => { const names=['winner','p2','p3','p4','p5']; const scene=window.partyBanter.pick(items,anticIndex)||antics[anticIndex%antics.length]; return `<div class="rank-scene has-banter"><div class="scene-prop banter">${esc(scene)}</div><div class="scene-floor"></div>${items.slice(0,5).map((x,i)=>`<div class="scene-player ${names[i]}"><div>${avatarMarkup(x.avatar,82,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}${final?' · '+x.score+' pts':''}</span></div>`).join('')}</div><div class="rank-list">${items.map((x,i)=>`<div class="rank-row"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div></div>`).join('')}</div>`; };
 setInterval(()=>{ if(st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores')) { anticIndex++; render(); } }, 6500);
+// ----- Mode plateau : lobby, roue des mini-jeux et plateau de course -----
+const WHEEL_COLORS = ['#ffd23f', '#ff5d8f', '#35d0ba', '#8c7bff', '#ff9f43', '#4dabf7', '#a9e34b', '#f783ac'];
+function boardLobby(pl) {
+  const wheelGames = (st.games || []).filter(g => g.wheel && pl.length >= (g.minPlayers || st.min));
+  const ok = pl.length >= st.min && wheelGames.length;
+  return `<section class="board-lobby card"><div class="board-lobby-head"><div class="board-lobby-icon">🎡</div><div><span class="game-new chip">Nouveau</span><h2>Mode plateau</h2>
+    <p>La roue désigne les mini-jeux les uns après les autres. Chaque mini-jeu rapporte des points selon votre place (🥇 10 · 🥈 6 · 🥉 4…) et le <b>dernier tour compte double</b>. Le plus gros total gagne !</p></div></div>
+    <div class="board-lobby-opts"><div><b>Nombre de tours</b><div class="board-turns">${(st.boardTurns || [3, 5, 8, 10]).map(t => `<button class="${boardTurns === t ? 'sel' : ''}" data-turns="${t}">${t}</button>`).join('')}</div></div>
+    <div><b>Difficulté des questions</b><div class="board-turns">${DIFF_MODES.map(([v, l]) => `<button class="${diffMode === v ? 'sel' : ''}" data-bdiff="${v}">${l}</button>`).join('')}</div></div></div>
+    <div class="board-lobby-foot"><button class="alt" id="board-go" ${ok ? '' : 'disabled'}>🎲 Lancer le plateau</button><span class="muted">${pl.length < st.min ? `Il faut au moins ${st.min} joueurs.` : `${wheelGames.length} mini-jeux dans la roue`}</span></div></section>`;
+}
+// Roue en SVG : la case `target` finit sous le pointeur (en haut).
+function wheelSvg(segs) {
+  const n = segs.length, R = 250, step = 2 * Math.PI / n;
+  const pt = (a, r) => [R + r * Math.sin(a), R - r * Math.cos(a)];
+  return `<svg viewBox="0 0 ${2 * R} ${2 * R}" class="wheel-svg"><g id="wheel-rot" style="transform-origin:${R}px ${R}px">${segs.map((g, i) => {
+    const a0 = i * step, a1 = a0 + step, [x0, y0] = pt(a0, R - 6), [x1, y1] = pt(a1, R - 6), mid = (a0 + a1) / 2, deg = mid * 180 / Math.PI;
+    const [ix, iy] = pt(mid, R * 0.85), [tx, ty] = pt(mid, R * 0.48);
+    const name = g.name.length > 15 ? g.name.slice(0, 14) + '…' : g.name;
+    return `<path d="M${R},${R} L${x0},${y0} A${R - 6},${R - 6} 0 ${step > Math.PI ? 1 : 0} 1 ${x1},${y1} Z" fill="${WHEEL_COLORS[i % WHEEL_COLORS.length]}" stroke="#1d1a3b" stroke-width="5"/>
+      <text x="${ix}" y="${iy}" font-size="30" text-anchor="middle" dominant-baseline="central" transform="rotate(${deg} ${ix} ${iy})">${g.icon}</text>
+      <text x="${tx}" y="${ty}" class="wheel-label" text-anchor="middle" dominant-baseline="central" transform="rotate(${deg > 180 ? deg + 90 : deg - 90} ${tx} ${ty})">${esc(name)}</text>`;
+  }).join('')}</g><circle cx="${R}" cy="${R}" r="${R - 4}" fill="none" stroke="#1d1a3b" stroke-width="8"/><circle cx="${R}" cy="${R}" r="38" fill="#fff" stroke="#1d1a3b" stroke-width="6"/><text x="${R}" y="${R}" font-size="38" text-anchor="middle" dominant-baseline="central">🎲</text></svg>`;
+}
+let wheelLoop = null;
+function renderBoardSpin(p) {
+  const d = p.data, n = d.segments.length, seg = 360 / n;
+  if (app.dataset.wheel != p.n) {
+    app.dataset.wheel = p.n;
+    app.innerHTML = `<div class="board-spin">
+      <header class="game-head"><div><div class="eyebrow">🎲 Mode plateau · Tour ${p.round}/${p.rounds}</div><h1>${esc(p.title)}</h1><div class="host-chips">${d.final ? '<span class="chip bad">🔥 Points ×2</span>' : ''}<span class="chip">${d.turns - d.turn} tour${d.turns - d.turn > 1 ? 's' : ''} restant${d.turns - d.turn > 1 ? 's' : ''}</span></div></div><div>${timer(p)}</div></header>
+      <div class="board-spin-grid"><div class="wheel-wrap"><div class="wheel-pointer">▼</div>${wheelSvg(d.segments)}</div>
+        <div class="stack"><section class="wheel-result card" id="wheel-result"><div class="eyebrow">La roue tourne…</div><h2>???</h2><p class="muted">Croisez les doigts !</p></section>
+        ${boardMini(d)}
+        <div class="row board-actions"><button class="alt" id="board-launch">▶ Lancer le mini-jeu</button><button class="bt-ghost" id="board-quit">🏠 Quitter le plateau</button></div></div></div></div>`;
+    document.getElementById('board-launch').onclick = () => s.emit('host:skip');
+    document.getElementById('board-quit').onclick = () => { if (confirm('Quitter le plateau ? La partie en cours sera perdue.')) s.emit('host:lobby'); };
+    // Angle final : plusieurs tours complets, puis la case tirée sous le pointeur (légèrement décentrée).
+    const jitter = ((p.n * 7919) % 100 / 100 - 0.5) * seg * 0.6;
+    const end = 360 * 6 - (d.target + 0.5) * seg + jitter;
+    let lastTick = -1, revealed = false;
+    cancelAnimationFrame(wheelLoop);
+    const frame = () => {
+      if (!st?.phase || st.phase.n !== p.n) return;
+      const rot = document.getElementById('wheel-rot'); if (!rot) return;
+      const t = Math.max(0, Math.min(1, (Date.now() + off - d.spinAt) / d.spinMs));
+      const ease = 1 - Math.pow(1 - t, 4), angle = end * ease;
+      rot.style.transform = `rotate(${angle}deg)`;
+      const tick = Math.floor((angle + seg / 2) / seg);
+      if (tick !== lastTick && t > 0 && t < 1) { lastTick = tick; window.partyAudio.click(); }
+      if (t >= 1 && !revealed) {
+        revealed = true;
+        const box = document.getElementById('wheel-result');
+        box.innerHTML = `<div class="eyebrow">${esc(d.chosen.category)}</div><h2>${d.chosen.icon} ${esc(d.chosen.name)}</h2><p>${esc(d.chosen.desc || '')}</p>`;
+        box.classList.add('won');
+        document.querySelector('.wheel-wrap').classList.add('done');
+      }
+      if (t < 1) wheelLoop = requestAnimationFrame(frame);
+    };
+    wheelLoop = requestAnimationFrame(frame);
+  }
+}
+// Plateau de course : chaque joueur avance d'autant de cases que ses points de plateau.
+function boardTrack(d) {
+  const max = Math.max(d.maxPoints || 1, ...d.standings.map(x => x.points)), cells = 20;
+  return `<section class="board-track card"><div class="section-title"><span>🎲 Le plateau</span><small>🏁 ${max} pts max</small></div>${d.standings.map((x, i) => {
+    const pos = Math.round(cells * x.points / max), av = (st.players.find(q => q.id === x.id) || {}).avatar;
+    return `<div class="track-lane ${i === 0 && x.points ? 'lead' : ''}"><div class="track-name"><b>${i + 1}. ${esc(x.name)}</b><small>${x.points} pts${x.wins ? ` · ${'⭐'.repeat(Math.min(x.wins, 5))}` : ''}</small></div>
+      <div class="track-cells">${Array.from({ length: cells + 1 }, (_, c) => `<i class="${c < pos ? 'on' : ''} ${c === cells ? 'goal' : ''}"></i>`).join('')}<span class="track-pawn" style="left:calc(${pos} * 100% / ${cells + 1})">${avatarMarkup(av, 44, i === 0 ? 'smug' : 'happy')}</span></div></div>`;
+  }).join('')}</section>`;
+}
+const boardLog = d => d.log.length ? `<section class="board-log"><b>Mini-jeux joués :</b> ${d.log.map((g, i) => `<span class="chip">${i + 1}. ${g.icon} ${esc(g.name)}${g.winners.length ? ` — 🏆 ${esc(g.winners.join(', '))}` : ''}</span>`).join('')}</section>` : '';
+const boardMini = d => `<section class="board-mini card"><div class="section-title"><span>🏆 Points de plateau</span></div>${d.standings.map((x, i) => `<div class="line"><span>${i + 1}. ${esc(x.name)}${x.wins ? ' ' + '⭐'.repeat(Math.min(x.wins, 5)) : ''}</span><span class="pts">${x.points}</span></div>`).join('')}</section>${boardLog(d)}`;
+function renderBoardResults(p) {
+  delete app.dataset.wheel;
+  const d = p.data, medal = ['🥇', '🥈', '🥉'];
+  app.innerHTML = `<div class="board-results">
+    <header class="game-head"><div><div class="eyebrow">🎲 Mode plateau · Tour ${p.round}/${p.rounds}${d.multiplier > 1 ? ' · points ×2' : ''}</div><h1>${d.game.icon} ${esc(d.game.name)} : résultats</h1></div><div>${timer(p)}</div></header>
+    <section class="board-podium">${d.rows.map((r, i) => `<div class="bt-res-row ${r.place === 1 && r.gain ? 'first' : ''}" style="animation-delay:${i * 120}ms"><span class="bt-res-place">${medal[r.place - 1] || r.place}</span>
+      <span class="bt-res-avatar">${avatarMarkup((st.players.find(q => q.id === r.id) || {}).avatar, 54, r.place === 1 ? 'smug' : 'happy')}</span>
+      <div class="bt-res-name"><b>${esc(r.name)}</b><span class="bt-res-title">${r.score} pts dans le mini-jeu</span></div><strong class="bt-res-score">+${r.gain}</strong></div>`).join('') || '<p class="card">Personne n’a joué ce mini-jeu.</p>'}</section>
+    ${boardTrack(d)}${boardLog(d)}
+    <div class="row board-actions"><button class="alt" id="board-next">${d.last ? '🏆 Voir le vainqueur' : '🎡 Tourner la roue'}</button><button class="bt-ghost" id="board-quit">🏠 Quitter le plateau</button></div></div>`;
+  document.getElementById('board-next').onclick = () => s.emit('host:skip');
+  document.getElementById('board-quit').onclick = () => { if (confirm('Quitter le plateau ? La partie en cours sera perdue.')) s.emit('host:lobby'); };
+}
 // ----- Cerveau Turbo : suivi en direct puis résultats -----
 const brainTypes = { add:'➕ Addition', sub:'➖ Soustraction', mul:'✖️ Multiplication', missing:'❓ Nombre manquant', chain:'🔗 Calcul en chaîne', sequence:'🔢 Suite logique', odd:'🔍 Intrus', least:'⚖️ Comparaison', pattern:'🔷 Formes', memo:'🧠 Mémoire', shell:'🃏 Bonneteau', simon:'🎨 Séquence', colorTap:'🎯 Couleur', green:'🟢 Feu vert', starOnly:'⭐ Réflexe', compare:'📏 Plus grand', count:'🧮 Comptage', twice:'👯 Doublon' };
 function brainClock() {
@@ -154,6 +250,7 @@ function renderBrainResults(p) {
   document.getElementById('bt-replay').onclick = () => s.emit('host:action', 'replay');
   document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
   document.getElementById('bt-final').onclick = () => s.emit('host:skip');
+  boardResultActions('bt');
 }
 // ----- Cérébrale Académie : examen en direct puis diplômes -----
 function academyClock() {
@@ -227,6 +324,7 @@ function renderAcademyResults(p) {
   document.getElementById('ca-replay').onclick = () => s.emit('host:action', 'replay');
   document.getElementById('ca-menu').onclick = () => s.emit('host:lobby');
   document.getElementById('ca-final').onclick = () => s.emit('host:skip');
+  boardResultActions('ca');
 }
 // ----- Warioware : suivi en direct puis résultats -----
 const warioHearts = (n, max) => Array.from({ length: max }, (_, i) => i < n ? '❤️' : '🖤').join('');
@@ -276,17 +374,24 @@ function renderWarioResults(p) {
   document.getElementById('bt-replay').onclick = () => s.emit('host:action', 'replay');
   document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
   document.getElementById('bt-final').onclick = () => s.emit('host:skip');
+  boardResultActions('bt');
 }
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
-  const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm('Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
+  const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm(st.board ? 'Passer ce mini-jeu ? Personne ne marque de points et la roue tourne à nouveau.' : 'Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
   if (!window.BossGame.KINDS.includes(p.kind)) window.BossGame.leave();
   if (window.BossGame.KINDS.includes(p.kind)) {
     window.BossGame.host(app, p, { emit: (e, a) => s.emit(e, a), players: pl, timer: timer(p), stopButton: stopGameButton(), bindStop, off });
   } else if (p.kind === 'error') {
     stopDrawResync();
-    app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Erreur</span><h1>${esc(p.title || 'Erreur')}</h1><p>${esc(p.prompt || 'Un problème est survenu.')}</p><p class="muted">${esc(p.error || '')}</p><button id="back">Retour au menu</button></section>`;
+    app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Erreur</span><h1>${esc(p.title || 'Erreur')}</h1><p>${esc(p.prompt || 'Un problème est survenu.')}</p><p class="muted">${esc(p.error || '')}</p><div class="row">${st.board && st.game ? '<button class="alt" id="board-skip">🎡 Passer au mini-jeu suivant</button>' : ''}<button id="back">Retour au menu</button></div></section>`;
     document.getElementById('back').onclick=()=>s.emit('host:lobby');
+    const sk=document.getElementById('board-skip'); if(sk) sk.onclick=()=>s.emit('host:stop-game');
+  } else if (p.kind === 'boardSpin') {
+    stopDrawResync();
+    renderBoardSpin(p);
+  } else if (p.kind === 'boardResults') {
+    renderBoardResults(p);
   } else if (p.kind === 'brain') {
     renderBrainHost(p, bindStop);
   } else if (p.kind === 'brainResults') {
@@ -311,6 +416,8 @@ function render() {
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
+      ${boardLobby(pl)}
+      <div class="section-title games-title"><span>🎮 Ou choisissez un mini-jeu</span></div>
       <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['boss', 'academie', 'wario'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       ${sel && ((st.games || []).find(g => g.id === sel) || {}).difficulty ? `<section class="diff-picker card"><b>Difficulté des questions</b><div class="diff-options">${DIFF_MODES.map(([v, l, h]) => `<button class="${diffMode === v ? 'sel' : ''}" data-diff="${v}"><span>${l}</span><small>${h}</small></button>`).join('')}</div></section>` : ''}
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
@@ -318,6 +425,9 @@ function render() {
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
     app.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { window.partyAudio.click(); diffMode = b.dataset.diff; render(); });
     document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel, { difficulty: diffMode }); };
+    app.querySelectorAll('[data-turns]').forEach(b => b.onclick = () => { window.partyAudio.click(); boardTurns = +b.dataset.turns; render(); });
+    app.querySelectorAll('[data-bdiff]').forEach(b => b.onclick = () => { window.partyAudio.click(); diffMode = b.dataset.bdiff; render(); });
+    const bg = document.getElementById('board-go'); if (bg) bg.onclick = () => { window.partyAudio.enable(); s.emit('host:board-start', { turns: boardTurns, difficulty: diffMode }); };
   } else if (p.kind === 'text' || p.kind === 'number') {
     app.innerHTML = `<div class="host-game-grid"><div><div class="host-main">${head(p)}<div class="prompt">${esc(p.prompt)}</div>${progress(p)}${liveAnswers(p)}${stopGameButton()}</div></div>${scoreBoard()}</div>`;
   bindStop();
@@ -360,7 +470,9 @@ function render() {
   } else if (p.kind === 'scores') {
     stopDrawResync();
     const r = [...pl].sort((a, b) => b.score - a.score);
-    app.innerHTML = `<h1 class="big" style="font-size:4rem">Classement final</h1><p class="muted score-subtitle">Place aux célébrations 🎉</p>${rankBoard(r,true)}
+    const bd = p.data && p.data.standings ? p.data : null;
+    if (bd) { const rk = Object.fromEntries(bd.standings.map((x, i) => [x.id, i])); r.sort((a, b) => (rk[a.id] ?? 99) - (rk[b.id] ?? 99)); }
+    app.innerHTML = `<h1 class="big" style="font-size:4rem">${bd ? '🎲 Vainqueur du plateau' : 'Classement final'}</h1><p class="muted score-subtitle">${bd ? `${bd.log.length} mini-jeu${bd.log.length > 1 ? 'x' : ''} joué${bd.log.length > 1 ? 's' : ''} · égalité départagée au nombre de victoires` : 'Place aux célébrations 🎉'}</p>${rankBoard(r,true)}${bd ? boardTrack(bd) + boardLog(bd) : ''}
       <div><button id="back">Retour au menu</button></div>`;
     document.getElementById('back').onclick = () => { window.partyAudio.click(); s.emit('host:lobby'); };
   }

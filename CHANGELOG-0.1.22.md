@@ -1,20 +1,18 @@
 # Version 0.1.22
 
-## ⚔️ Nouveau jeu : Boss Fight (coopératif, jouable en solo)
-- **Tous contre un** dans un donjon en pixel art façon Zelda Game Boy, en temps réel sur l'écran de l'hôte.
-- **Choix du héros** : Archer, Magicien, Tank, Soigneur ou Invocateur. Tout le monde voit qui a choisi quoi,
-  on peut changer d'avis jusqu'à l'entrée dans le donjon ; les retardataires reçoivent une classe au hasard.
-- **Attaques spéciales** : Pluie de flèches (Archer), Météore (Magicien), Rempart : toute l'équipe invincible
-  4 s (Tank), Soin sacré : +1 cœur à tous et relève les K.O. (Soigneur), Invocation d'un esprit qui tire seul (Invocateur).
-  Le Tank pare aussi un coup sur deux, et le Soigneur soigne en continu les héros proches de lui.
-- **5 cœurs par héros**, chaque coup retire un quart de cœur (comme dans Zelda).
-- **Un boss, 3 métamorphoses**, tirées au hasard parmi Sephiroth, Ganondorf, Bowser, le Roi Bob-omb, Diablo, Mewtwo,
-  Dr Eggman et Ghirahim, chacun avec ses attaques (plumes noires, boule d'énergie à renvoyer, bob-ombs, éclairs…).
-  Chaque forme est plus rapide que la précédente, et les héros K.O. se relèvent à chaque métamorphose.
-- **Manette sur le téléphone** : joystick, bouton d'attaque (maintenu = tir continu) et bouton spécial avec temps de recharge,
-  cœurs du héros et vibration quand on est touché. Au clavier : flèches/ZQSD, J ou Espace, K.
-- **Game Over** si toute l'équipe tombe : l'hôte peut continuer (le bonus de victoire baisse de 100) ou abandonner.
-- **Cinématique de fin** : fondu au blanc, les héros marchent dans une prairie vers une maison isolée, musique douce
-  et bruit du vent, crédits « Les Confipotes, le jeu », puis END GAME et fin de la musique.
-- **Points pour tous les héros** : 500 pts de victoire + une part selon les dégâts infligés + un bonus par allié relevé.
-- Musiques et bruitages dédiés (thème du donjon, écran de choix, morceau de fin).
+## 🎲 Nouveau : le mode plateau (façon Mario Party)
+- Depuis le lobby, **« Lancer le plateau »** : on choisit le nombre de tours (3, 5, 8 ou 10) et la difficulté des questions.
+- À chaque tour, **une roue tourne** sur l'écran de l'hôte et désigne le mini-jeu à jouer, qui se lance tout seul.
+- Chaque mini-jeu rapporte des **points de plateau selon la place** : 🥇 10 · 🥈 6 · 🥉 4 · 3 · 2 · 1, le dernier ne marque rien
+  (les ex æquo partagent la meilleure place). **Le dernier tour compte double.**
+- Entre deux mini-jeux, **le plateau** montre la course des joueurs vers l'arrivée 🏁, les points gagnés et les jeux déjà joués.
+- Le plus gros total gagne ; en cas d'égalité, le nombre de mini-jeux gagnés départage.
+- L'hôte peut **passer un mini-jeu** (personne ne marque, la roue retourne) ou quitter le plateau.
+
+## 🎯 Un tirage vraiment varié
+- Aucun mini-jeu ne revient avant que **tous les autres** soient sortis dans la partie.
+- Jamais la même **famille de gameplay** (écriture + vote, devinettes, quiz de culture, jeux téléphone…) que l'un des 3 derniers jeux.
+- Les jeux joués récemment dans la soirée (plateau ou non) sont écartés : une nouvelle partie ne reprend pas les mêmes jeux.
+- Bonus pour les jeux et familles les moins joués, pénalité pour un thème identique au jeu précédent.
+- Seuls les jeux jouables avec le nombre de joueurs présents peuvent sortir.
+- **Le jeu du boss est exclu de la roue** (id contenant « boss », ou `boss: true` / `board: false` dans son module).

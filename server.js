@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.22';
+const APP_VERSION = '0.1.23';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -14,6 +14,11 @@ for (const id of [
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
   'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss',
 ]) games[id] = require('./games/' + id);
+// Mode plateau : tirage des mini-jeux à la roue. Le jeu du boss en est exclu (voir games/_board.js).
+const board = require('./games/_board');
+const SPIN_MS = 6500;      // durée de l'animation de la roue
+const SPIN_REVEAL_S = 6;   // affichage du jeu tiré avant son lancement
+const RESULTS_S = 25;      // écran du plateau entre deux mini-jeux
 
 const app = express();
 const server = http.createServer(app);
@@ -79,7 +84,9 @@ function setPhase(room, ph) {
 
 function endPhase(room) {
   const ph = room.phase;
-  if (!room.game || !ph || ph.done) return;
+  if (!ph || ph.done) return;
+  if (ph.board) { ph.done = true; clearTimeout(room.timer); return boardOnEnd(room, ph); }
+  if (!room.game) return;
   ph.done = true;
   clearTimeout(room.timer);
   try {
@@ -97,11 +104,125 @@ function apiFor(room) {
     name: (id) => (room.players[id] || {}).name || '?',
     addScore: (id, n) => { if (room.players[id]) room.players[id].score += n; },
     end: () => endPhase(room), // termine la phase en cours avant la fin du chrono
-    finish: () => setPhase(room, { kind: 'scores' }),
+    // En mode plateau, la fin d'un mini-jeu renvoie au plateau au lieu du classement final.
+    finish: () => (room.board && room.game ? boardAfterGame(room) : setPhase(room, { kind: 'scores' })),
     // Jeux en temps réel : diffusion d'un évènement à toute la salle (hôte + joueurs), sans l'état complet
     emit: (event, data) => io.to(room.code).emit(event, data),
     alive: () => rooms[room.code] === room, // faux une fois la salle fermée (l'hôte est parti)
   };
+}
+
+// ----- Mode plateau : la roue enchaîne les mini-jeux, le meilleur total de points l'emporte -----
+const connectedCount = (room) => Object.values(room.players).filter(p => p.connected).length;
+// Historique des mini-jeux joués dans la soirée (plateau ou non) : le tirage évite de les ressortir trop vite.
+function remember(room, id) {
+  room.playHistory = [...(room.playHistory || []), id].slice(-60);
+}
+// Pendant le plateau, le score affiché des joueurs est leur total de points de plateau.
+function syncBoardScores(room) {
+  for (const p of Object.values(room.players)) p.score = room.board.points[p.id] || 0;
+}
+function boardStandings(room) {
+  const b = room.board;
+  return Object.keys(b.points).filter(id => room.players[id]).map(id => ({
+    id, name: room.players[id].name, points: b.points[id], wins: b.wins[id] || 0,
+  })).sort((a, b2) => b2.points - a.points || b2.wins - a.wins);
+}
+function boardData(room) {
+  const b = room.board;
+  return {
+    turn: b.turn, turns: b.turns, standings: boardStandings(room), log: b.log,
+    maxPoints: board.PLACE_POINTS[0] * (b.turns + 1), // la dernière manche compte double
+  };
+}
+
+function boardStart(room, opts) {
+  const turns = board.TURN_CHOICES.includes(Number(opts && opts.turns)) ? Number(opts.turns) : board.clampTurns(opts && opts.turns);
+  room.board = { turn: 0, turns, points: {}, wins: {}, played: [], failed: [], log: [], next: null };
+  for (const p of Object.values(room.players)) if (p.connected) { room.board.points[p.id] = 0; room.board.wins[p.id] = 0; }
+  syncBoardScores(room);
+  boardSpin(room);
+}
+
+function boardSpin(room) {
+  const b = room.board;
+  room.game = null;
+  room.g = null;
+  const pool = board.eligible(games, connectedCount(room), MIN_PLAYERS, b.failed);
+  if (!pool.length) return boardFinal(room);
+  const chosen = board.pickNext(pool, { session: b.played, history: room.playHistory || [] });
+  const w = board.wheel(pool, chosen);
+  b.next = chosen.id;
+  const final = b.turn + 1 >= b.turns;
+  setPhase(room, {
+    kind: 'boardSpin', board: true, step: 'spin', category: 'Plateau',
+    title: final ? 'Dernier tour : points doublés !' : 'La roue des mini-jeux',
+    round: b.turn + 1, rounds: b.turns, duration: SPIN_MS / 1000 + SPIN_REVEAL_S,
+    data: { ...boardData(room), ...w, chosen: { ...board.segment(chosen), desc: chosen.desc }, spinAt: Date.now() + 600, spinMs: SPIN_MS, final },
+  });
+}
+
+function boardPlay(room) {
+  const b = room.board, game = games[b.next];
+  if (!game) return boardSpin(room);
+  for (const p of Object.values(room.players)) p.score = 0; // chaque mini-jeu repart de zéro
+  room.game = game;
+  room.gameCategory = game.category || 'Général';
+  b.played.push(game.id);
+  remember(room, game.id);
+  const api = apiFor(room);
+  try {
+    game.start(room, api);
+    // Le Grand Sondage demande un thème : sur le plateau, on part sur un thème au hasard.
+    if (room.phase && room.phase.kind === 'surveySetup' && game.hostAction) game.hostAction(room, 'start:', api);
+  } catch (err) {
+    console.error('[board:start]', game.id, err);
+    room.phase = { kind: 'error' };
+  }
+  if (room.game === game && room.phase && room.phase.kind === 'error') { // jeu injouable : on retire la roue
+    b.failed.push(game.id);
+    b.played.pop();
+    syncBoardScores(room);
+    boardSpin(room);
+  }
+}
+
+// Fin d'un mini-jeu : classement du mini-jeu → points de plateau. `aborted` : l'hôte a passé le jeu.
+function boardAfterGame(room, aborted = false) {
+  const b = room.board, game = room.game;
+  clearTimeout(room.timer);
+  room.game = null;
+  room.g = null;
+  if (aborted) { syncBoardScores(room); return boardSpin(room); }
+  const final = b.turn + 1 >= b.turns, multiplier = final ? 2 : 1;
+  const scores = {};
+  for (const id of Object.keys(b.points)) { const p = room.players[id]; if (p && p.connected) scores[id] = p.score; }
+  const rows = board.placements(scores, multiplier).map(r => ({ ...r, name: room.players[r.id].name }));
+  for (const r of rows) { b.points[r.id] += r.gain; if (r.place === 1 && r.gain) b.wins[r.id]++; }
+  b.turn++;
+  b.log.push({ ...board.segment(game), winners: rows.filter(r => r.place === 1 && r.gain).map(r => r.name) });
+  syncBoardScores(room);
+  setPhase(room, {
+    kind: 'boardResults', board: true, step: 'results', category: 'Plateau',
+    title: b.turn >= b.turns ? 'Fin du dernier tour !' : 'Le plateau', round: b.turn, rounds: b.turns, duration: RESULTS_S,
+    data: { ...boardData(room), game: board.segment(game), rows, multiplier, last: b.turn >= b.turns },
+  });
+}
+
+function boardFinal(room) {
+  const b = room.board;
+  room.game = null;
+  room.g = null;
+  b.done = true;
+  syncBoardScores(room);
+  // Égalité de points : départage au nombre de mini-jeux gagnés.
+  setPhase(room, { kind: 'scores', board: true, step: 'final', data: boardData(room) });
+}
+
+function boardOnEnd(room, ph) {
+  if (!room.board) return;
+  if (ph.step === 'spin') return boardPlay(room);
+  if (ph.step === 'results') return room.board.turn >= room.board.turns ? boardFinal(room) : boardSpin(room);
 }
 
 function toLobby(room) {
@@ -109,6 +230,7 @@ function toLobby(room) {
   room.game = null;
   room.gameCategory = null;
   room.g = null;
+  room.board = null;
   setPhase(room, { kind: 'lobby', category: null });
 }
 
@@ -121,12 +243,14 @@ function view(room, forHost = false) {
     game: room.game && room.game.id,
     avatars: AVATARS,
     version: APP_VERSION,
-    games: Object.values(games).map(({ id, name, desc, category, categories, minPlayers, difficulty }) => ({
-      id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'], minPlayers: minPlayers || MIN_PLAYERS,
-      difficulty: !!difficulty,
+    games: Object.values(games).map((g) => ({
+      id: g.id, name: g.name, desc: g.desc, category: g.category || 'Général', categories: g.categories || [g.category || 'Général'],
+      minPlayers: g.minPlayers || MIN_PLAYERS, difficulty: !!g.difficulty, icon: board.iconOf(g), wheel: !board.isBoss(g),
     })),
     options: room.options || {},
     min: MIN_PLAYERS,
+    board: room.board ? { turn: room.board.turn, turns: room.board.turns, final: room.board.turn + 1 >= room.board.turns, done: !!room.board.done } : null,
+    boardTurns: board.TURN_CHOICES,
     players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar) })),
     phase: p && {
       n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
@@ -186,6 +310,8 @@ io.on('connection', (socket) => {
     const difficulty = String((opts && opts.difficulty) || 'mix');
     room.options = { difficulty: ['mix', '1', '2', '3'].includes(difficulty) ? difficulty : 'mix' };
     Object.values(room.players).forEach(p => (p.score = 0));
+    room.board = null;
+    remember(room, gameId);
     room.game = games[gameId];
     room.gameCategory = room.game.category || 'Général';
     try {
@@ -196,13 +322,28 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Mode plateau : la roue choisit les mini-jeux (jamais le boss) pendant `turns` tours.
+  socket.on('host:board-start', (opts) => {
+    const { room } = ctx();
+    if (!room || !socket.data.isHost || room.game || room.board) return;
+    if (connectedCount(room) < MIN_PLAYERS) return;
+    const difficulty = String((opts && opts.difficulty) || 'mix');
+    room.options = { difficulty: ['mix', '1', '2', '3'].includes(difficulty) ? difficulty : 'mix' };
+    boardStart(room, opts);
+  });
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
-  socket.on('host:stop-game', () => { const { room } = ctx(); if (room && socket.data.isHost && room.game) toLobby(room); });
+  socket.on('host:stop-game', () => {
+    const { room } = ctx();
+    if (!room || !socket.data.isHost || !room.game) return;
+    if (room.board) boardAfterGame(room, true); // sur le plateau : on passe ce mini-jeu et la roue retourne
+    else toLobby(room);
+  });
   socket.on('host:lobby', () => { const { room } = ctx(); if (room && socket.data.isHost) toLobby(room); });
   // Action propre au jeu en cours (ex. « Rejouer »), si le jeu la gère.
   socket.on('host:action', (action) => {
     const { room } = ctx();
     if (!room || !socket.data.isHost || !room.game || !room.game.hostAction) return;
+    if (room.board && action === 'replay') return; // sur le plateau, un mini-jeu ne se rejoue pas
     try { room.game.hostAction(room, String(action || ''), apiFor(room)); }
     catch (err) { console.error('[game:hostAction]', room.game.id, err); }
   });
@@ -221,7 +362,7 @@ io.on('connection', (socket) => {
     let pl = pid && room.players[pid];
     if (!pl) {
       if (!name) return ack && ack({ error: 'Choisissez un pseudo.' });
-      if (room.game) return ack && ack({ error: 'La partie a déjà commencé.' });
+      if (room.game || room.board) return ack && ack({ error: 'La partie a déjà commencé.' });
       if (Object.values(room.players).some(p => p.name.toLowerCase() === name.toLowerCase()))
         return ack && ack({ error: 'Ce pseudo est déjà pris.' });
       pid = Math.random().toString(36).slice(2, 10);
@@ -309,7 +450,7 @@ io.on('connection', (socket) => {
       delete rooms[room.code];
     } else if (room.players[pid]) {
       room.players[pid].connected = false;
-      if (!room.game) delete room.players[pid]; // au lobby, on retire le joueur
+      if (!room.game && !room.board) delete room.players[pid]; // au lobby, on retire le joueur
       broadcast(room);
     }
   });
