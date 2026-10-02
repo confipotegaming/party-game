@@ -1,8 +1,8 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
-<body><main class="play stack" id="app"></main>
+<title>Soirée jeux</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="showtv.css"></head>
+<body><div class="studio-beams"><i></i><i></i><i></i><i></i></div><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -113,10 +113,13 @@ s.on('state', x => {
   if (!x.me) return;
   const p = x.phase, done = p.answered.includes(x.me.id);
   const k = p.n + ':' + done;
+  const justSent = done && key === p.n + ':false';
   if (k !== key || p.kind === 'survey' || p.kind === 'bossPick') { key = k; render(p, done); } // mises à jour en direct (Grand Sondage, choix des héros)
+  try { window.ShowTV.onState(x); if (justSent) window.ShowTV.answered(); window.ShowTV.decorate(app); } catch (err) { console.error('[show]', err); }
 });
+window.ShowTV.watch({ role: 'player', me: () => st && st.me && st.me.id });
 
-setInterval(() => { if (st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores') && st.me) render(st.phase, st.phase.answered.includes(st.me.id)); }, 6500);
+setInterval(() => { if (st && st.phase && st.phase.kind==='lobby' && st.me) render(st.phase, st.phase.answered.includes(st.me.id)); }, 6500);
 
 setInterval(() => {
   const t = document.getElementById('t');
@@ -298,7 +301,12 @@ function render(p, done) {
     app.innerHTML = `${top}${p.data?.survey ? `<div class="card stack"><p class="prompt">${esc(p.title)}</p>${window.SurveyGame.reveal(p.data.survey)}</div>` : wait('Regardez l\'écran !')}`;
   } else if (p.kind === 'scores') {
     const r = [...st.players].sort((a, b) => b.score - a.score);
-    app.innerHTML = `${top}${wait(`Vous finissez ${r.findIndex(x => x.id === st.me.id) + 1}ᵉ sur ${r.length}.`)}`;
+    const i = r.findIndex(x => x.id === st.me.id), mine = r[i] || me(), tie = r.length > 1 && r.filter(x => x.score === mine.score).length > 1;
+    const last = r.length > 1 && i === r.length - 1 && !tie;
+    const label = tie ? 'Égalité !' : i === 0 ? 'Victoire !' : last ? 'Défaite…' : i === 1 ? 'Si près !' : 'Bien joué';
+    app.innerHTML = `${top}<section class="phone-final rank-${Math.min(i + 1, 4)} ${last ? 'last' : ''}"><div class="tv-episode">Résultats · ${r.length} candidat${r.length > 1 ? 's' : ''}</div>
+      <div class="pf-place">${i + 1}<sup>${i === 0 ? 'er' : 'e'}</sup></div><h1 class="pf-title">${label}</h1><div class="pf-score"><span data-count="${mine.score}">${mine.score}</span> pts</div></section>
+      <div class="pf-list">${r.map((x, k) => `<div class="rest-row ${x.id === st.me.id ? 'me' : ''}"><span class="rest-place">${k + 1}</span>${avatarMarkup(x.avatar, 44, k === 0 ? 'smug' : 'happy')}<b>${esc(x.name)}</b><strong>${x.score.toLocaleString('fr-FR')}</strong></div>`).join('')}</div>`;
   }
 }
 </script></body></html>
