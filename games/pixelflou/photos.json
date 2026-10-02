@@ -1,0 +1,145 @@
+{
+ "mario": {
+  "file": "5838998d9af2.jpg",
+  "title": "Mario_and_Luigi.jpg",
+  "crop": [
+   0.76,
+   0.38,
+   0.6
+  ],
+  "author": "Chris Favero from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mario_and_Luigi.jpg"
+ },
+ "luigi": {
+  "file": "1539cba69d87.jpg",
+  "title": "Mario_and_Luigi.jpg",
+  "crop": [
+   0.27,
+   0.42,
+   0.68
+  ],
+  "author": "Chris Favero from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mario_and_Luigi.jpg"
+ },
+ "pikachu": {
+  "file": "a60440ff5c4f.jpg",
+  "title": "Cosplay_of_Pikachu_from_Pokemon_at_GalaxyCon_Richmond_2020_(49666784027).jpg",
+  "crop": [
+   0.5,
+   0.42,
+   1.0
+  ],
+  "author": "Super Festivals from Ft. Lauderdale, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Pikachu_from_Pokemon_at_GalaxyCon_Richmond_2020_%2849666784027%29.jpg"
+ },
+ "sonic": {
+  "file": "1240a137161d.jpg",
+  "title": "WW_Chicago_2011_-_Sonic_the_Hedgehog.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "GabboT",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WW_Chicago_2011_-_Sonic_the_Hedgehog.jpg"
+ },
+ "link": {
+  "file": "cae4a3547c01.jpg",
+  "title": "Twilight_Princess_Link_and_Ocarina_of_Time_Zelda_cosplay_at_Anime_Boston_2025_-_20250525_1323.jpg",
+  "crop": [
+   0.3,
+   0.3,
+   0.62
+  ],
+  "author": "Abzeronow",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Twilight_Princess_Link_and_Ocarina_of_Time_Zelda_cosplay_at_Anime_Boston_2025_-_20250525_1323.jpg"
+ },
+ "pacman": {
+  "file": "63b261804798.jpg",
+  "title": "Pac-Man_cosplayers_at_FanimeCon_2010-05-29_4.JPG",
+  "crop": [
+   0.22,
+   0.5,
+   1.0
+  ],
+  "author": "BrokenSphere",
+  "license": "CC BY-SA 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Pac-Man_cosplayers_at_FanimeCon_2010-05-29_4.JPG"
+ },
+ "yoshi": {
+  "file": "673e0e8ed31a.jpg",
+  "title": "Anime_Expo_2013_-_Yoshi_Cosplay_(9228424562).jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "William Tung from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2013_-_Yoshi_Cosplay_%289228424562%29.jpg"
+ },
+ "peach": {
+  "file": "8a31c216e070.jpg",
+  "title": "AVCON_2012_-_Princess_Peach.jpg",
+  "crop": [
+   0.5,
+   0.33,
+   1.0
+  ],
+  "author": "Ashley Hull",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AVCON_2012_-_Princess_Peach.jpg"
+ },
+ "donkeykong": {
+  "file": "c1ee9cab0313.jpg",
+  "title": "Anime_Expo_2011_-_Donkey_Kong_(5893313508).jpg",
+  "crop": [
+   0.55,
+   0.4,
+   0.85
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2011_-_Donkey_Kong_%285893313508%29.jpg"
+ },
+ "bowser": {
+  "file": "65ef61ba69ab.jpg",
+  "title": "AVCON_2012_-_Bowser.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "batasan",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AVCON_2012_-_Bowser.jpg"
+ },
+ "invader": {
+  "file": "f4389e4ec8e4.jpg",
+  "title": "Space_Invaders_and_spray_can_mosaic_graffiti_in_Paris.jpg",
+  "crop": [
+   0.45,
+   0.5,
+   1.0
+  ],
+  "author": "Basile Morin",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Space_Invaders_and_spray_can_mosaic_graffiti_in_Paris.jpg"
+ }
+}
