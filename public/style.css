@@ -135,3 +135,19 @@ input[type=radio]{width:auto;margin-right:8px}
 @keyframes ponyPreviewIn{from{opacity:.4;transform:scale(.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @media(max-width:650px){.pony-actions{grid-template-columns:1fr 1fr}.pony-actions #pony-confirm{grid-column:1/-1}.pony-preview{min-height:245px}.pony-preview .avatar-art{width:220px;height:230px}.pony-categories{margin-inline:-4px;padding-inline:4px}}
 @media(max-width:420px){.pony-selector{grid-template-columns:46px 1fr 46px}.pony-customizer .avatar-arrow{width:46px;height:46px}.pony-actions{grid-template-columns:1fr}.pony-actions #pony-confirm{grid-column:auto}}
+
+/* v0.1.14 — éditeur de poney style My Little Pony */
+.pony-layout{display:grid;gap:14px}
+.pony-preview-panel{position:sticky;top:6px;z-index:5;background:linear-gradient(180deg,#e8f6ff,#fff0f8);border:3px solid var(--ink);border-radius:22px;padding:8px 10px;box-shadow:4px 4px 0 var(--ink)}
+.pony-preview{min-height:0}.pony-preview .avatar-art{width:190px;height:196px}
+.pony-presets{justify-content:center}
+.pony-editor{display:grid;gap:14px;min-width:0}
+.pony-section{display:grid;gap:8px}.pony-section>b{font-size:.9rem}
+.pony-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.pony-tile{display:grid;justify-items:center;gap:2px;padding:6px 4px 8px;background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.pony-tile .avatar-art{width:86px;height:90px;filter:none}
+.pony-tile span{font-size:.74rem;font-weight:800;line-height:1.15;text-align:center}
+.pony-tile.active{background:var(--sun);transform:translateY(-2px);outline:3px solid var(--pink);outline-offset:1px}
+@media(max-width:650px){.pony-preview .avatar-art{width:160px;height:166px}.pony-preview{min-height:0}}
+.pony-customizer .pony-actions{grid-template-columns:1fr 1fr}.pony-customizer .pony-actions #pony-confirm{grid-column:1/-1}
+.pony-preview-panel .pony-name span{display:none}
