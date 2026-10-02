@@ -219,5 +219,109 @@
   "license": "CC BY-SA 2.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
   "source": "https://commons.wikimedia.org/wiki/File:Otakuthon_2014-_Creeper_%2815006627906%29.jpg"
+ },
+ "megaman": {
+  "file": "9e5a16fb0e0d.jpg",
+  "title": "Mega_Man!_(9638931597).jpg",
+  "crop": [
+   0.35,
+   0.5,
+   0.85
+  ],
+  "author": "Dave Monk from Seattle, USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Mega_Man%21_%289638931597%29.jpg"
+ },
+ "bulbizarre": {
+  "file": "5071851cba21.jpg",
+  "title": "FanimeCon_2018_439_(40640207730).jpg",
+  "crop": [
+   0.38,
+   0.75,
+   0.6
+  ],
+  "author": "Michael Ocampo from United States",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:FanimeCon_2018_439_%2840640207730%29.jpg"
+ },
+ "salameche": {
+  "file": "49df926f31c9.jpg",
+  "title": "Anime_Expo_2013_-_Charmander_Cosplay_(9228423198).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "William Tung from USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2013_-_Charmander_Cosplay_%289228423198%29.jpg"
+ },
+ "carapuce": {
+  "file": "c06a56704b57.jpg",
+  "title": "WonderCon_2013_-_Squirtle_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "William Tung",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2013_-_Squirtle_Cosplayer.jpg"
+ },
+ "wario": {
+  "file": "5fb3f761c500.jpg",
+  "title": "WonderCon_2012_-_Wario_(6873356234).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2012_-_Wario_%286873356234%29.jpg"
+ },
+ "waluigi": {
+  "file": "c239b47ca558.jpg",
+  "title": "Waluigi_Cosplayer_at_Crunchyroll_Expo_2018.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "czarcats",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Waluigi_Cosplayer_at_Crunchyroll_Expo_2018.jpg"
+ },
+ "crash": {
+  "file": "a1ddf489cd3e.jpg",
+  "title": "Comic_Con_Experience_-_2014_(16038827505).jpg",
+  "crop": [
+   0.5,
+   0.6,
+   1.0
+  ],
+  "author": "Ricardo 清介 八木",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Comic_Con_Experience_-_2014_%2816038827505%29.jpg"
+ },
+ "rayman": {
+  "file": "e7b5fc642b3a.jpg",
+  "title": "Montreal_Comiccon_2016_-_Rayman_(28225331866).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Montreal_Comiccon_2016_-_Rayman_%2828225331866%29.jpg"
  }
 }
