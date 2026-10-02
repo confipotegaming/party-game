@@ -6,6 +6,7 @@ const Q = (question, category, difficulty, answers) => ({
 });
 
 module.exports = [
+  ...require('./sondage-seed'), // au moins 10 questions par catégorie (un fichier par catégorie)
   Q('Citez quelque chose que les gens oublient souvent avant de partir en vacances.', 'Vacances', 'facile', [
     ['Chargeur de téléphone', 38, 'chargeur|chargeur téléphone|chargeur de portable|câble'],
     ['Brosse à dents', 24, 'dentifrice|trousse de toilette'],

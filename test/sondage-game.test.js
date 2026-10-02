@@ -14,6 +14,9 @@ const cfg = require('../games/sondage/config');
 const { store } = require('../games/sondage/store');
 const { makeRoom } = require('./harness');
 
+// Thème « Vacances » réduit à la question de référence (« … oublient souvent avant de partir en vacances »).
+for (const q of store.list({ category: 'Vacances' })) if (!q.question.includes('oublient souvent')) store.setActive(q.id, false);
+
 function startRound(category = 'Vacances') {
   const h = makeRoom();
   h.start(game);
@@ -28,7 +31,7 @@ test('la manche démarre avec le thème choisi et ne révèle aucune réponse', 
   const h = startRound('Vacances');
   const ph = h.room.phase;
   assert.strictEqual(ph.category, 'Vacances');
-  assert.strictEqual(ph.rounds, 1, 'une seule question dans ce thème → une seule manche');
+  assert.strictEqual(ph.rounds, 1, 'une seule question active dans ce thème → une seule manche');
   assert.ok(ph.data.slots.every(s => !s.answer && s.votes === null), 'réponses et points cachés');
   const json = JSON.stringify(ph);
   for (const a of h.room.g.q.answers) assert.ok(!json.includes(a.answer), `« ${a.answer} » ne doit pas fuiter`);
@@ -113,10 +116,10 @@ test('anti-spam, propositions vides et hors manche refusées', () => {
 });
 
 test('sans question active : message d’erreur clair', () => {
-  const all = store.list();
-  all.forEach(q => store.setActive(q.id, false));
+  const active = store.list({ active: true });
+  active.forEach(q => store.setActive(q.id, false));
   const h = makeRoom();
   h.start(game);
   assert.strictEqual(h.room.phase.kind, 'error');
-  all.forEach(q => store.setActive(q.id, true));
+  active.forEach(q => store.setActive(q.id, true));
 });

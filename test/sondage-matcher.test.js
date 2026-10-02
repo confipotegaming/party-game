@@ -60,3 +60,13 @@ test('toutes les questions de démonstration reconnaissent leurs propres variant
     }));
   }
 });
+
+test('au moins 10 questions actives par catégorie, avec les 3 difficultés', () => {
+  const db = require('../data/sondage.json');
+  const cfg = require('../games/sondage/config');
+  for (const cat of cfg.CATEGORIES) {
+    const qs = db.questions.filter(q => q.category === cat && q.active);
+    assert.ok(qs.length >= 10, `${cat} : ${qs.length} questions`);
+    for (const d of Object.keys(cfg.DIFFICULTIES)) assert.ok(qs.some(q => q.difficulty === d), `${cat} : aucune question ${d}`);
+  }
+});
