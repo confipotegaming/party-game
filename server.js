@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.20';
+const APP_VERSION = '0.1.21';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -118,15 +118,17 @@ function view(room, forHost = false) {
     game: room.game && room.game.id,
     avatars: AVATARS,
     version: APP_VERSION,
-    games: Object.values(games).map(({ id, name, desc, category, categories, minPlayers }) => ({
+    games: Object.values(games).map(({ id, name, desc, category, categories, minPlayers, difficulty }) => ({
       id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'], minPlayers: minPlayers || MIN_PLAYERS,
+      difficulty: !!difficulty,
     })),
+    options: room.options || {},
     min: MIN_PLAYERS,
     players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar) })),
     phase: p && {
       n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
       ...(p.kind === 'draw' ? { drawingCount: (p.drawing || []).length } : {}),
-      round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
+      round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data, difficulty: p.difficulty,
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
       answered: Object.keys(p.answers), expected: p.expected, error: p.error,
       ...(forHost && p.live ? { live: p.live } : {}),
@@ -173,10 +175,13 @@ io.on('connection', (socket) => {
     setPhase(room, { kind: 'lobby', category: null });
   });
 
-  socket.on('host:start', (gameId) => {
+  socket.on('host:start', (gameId, opts) => {
     const { room } = ctx();
     if (!room || !socket.data.isHost || !games[gameId]) return;
     if (Object.values(room.players).filter(p => p.connected).length < (games[gameId].minPlayers || MIN_PLAYERS)) return;
+    // Options choisies au lobby (ex. difficulté des questions : 'mix', '1', '2' ou '3').
+    const difficulty = String((opts && opts.difficulty) || 'mix');
+    room.options = { difficulty: ['mix', '1', '2', '3'].includes(difficulty) ? difficulty : 'mix' };
     Object.values(room.players).forEach(p => (p.score = 0));
     room.game = games[gameId];
     room.gameCategory = room.game.category || 'Général';
