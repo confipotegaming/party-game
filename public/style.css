@@ -114,3 +114,24 @@ input[type=radio]{width:auto;margin-right:8px}
 
 /* v0.1.10 — contrôles de manche */
 .game-stop-bar{display:flex;justify-content:flex-end;margin-top:16px}.game-stop-bar .danger{background:#ff6b6b;color:#fff;border-color:var(--ink);box-shadow:4px 4px 0 var(--ink)}.game-stop-bar .danger:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+
+/* v0.1.11 — créateur de poney */
+.pony-customizer{width:min(1120px,100%);margin:0 auto;display:grid;gap:16px}
+.pony-preview-panel{display:grid;justify-items:center;text-align:center;padding:12px 10px 4px}
+.pony-preview{min-height:270px;display:grid;place-items:end center;animation:ponyPreviewIn .35s ease both}
+.pony-preview .avatar-art{width:250px;height:255px}
+.pony-name{display:grid;gap:2px;margin-top:-4px}.pony-name b{font-family:'Bagel Fat One';font-size:1.35rem}.pony-name span{opacity:.7;font-size:.85rem}
+.pony-categories{display:flex;gap:8px;overflow-x:auto;padding:3px 2px 10px;scrollbar-width:thin}
+.pony-cat{white-space:nowrap;border:3px solid var(--ink);background:#fff;border-radius:999px;padding:8px 12px;box-shadow:3px 3px 0 var(--ink);font-weight:900}
+.pony-cat.active{background:var(--sun);transform:translateY(-2px)}
+.pony-selector{display:grid;grid-template-columns:54px 1fr 54px;align-items:center;gap:10px}
+.pony-choice{min-height:76px;display:grid;place-items:center;align-content:center;text-align:center;background:#f1efff;border:3px solid var(--ink);border-radius:18px;padding:8px}.pony-choice-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;opacity:.65;font-weight:900}.pony-choice strong{font-size:1.15rem}.pony-choice small{opacity:.55}
+.pony-customizer .avatar-arrow{width:54px;height:54px;border:3px solid var(--ink);border-radius:50%;background:var(--sun);font-size:2rem;font-weight:900;box-shadow:4px 4px 0 var(--ink)}
+.pony-colors{display:grid;gap:8px}.pony-colors>b{font-size:.85rem}.color-palette{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pony-color{width:31px;height:31px;border-radius:50%;border:3px solid var(--ink);box-shadow:2px 2px 0 var(--ink);padding:0}.pony-color.active{outline:3px solid var(--pink);outline-offset:2px;transform:scale(1.1)}
+.custom-color{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);border-radius:999px;padding:5px 9px;background:#fff;font-size:.8rem;font-weight:800}.custom-color input{width:27px;height:27px;border:0;padding:0;background:transparent}
+.pony-presets{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.pony-presets>span{font-size:.8rem;font-weight:900;margin-right:2px}.preset{padding:7px 10px!important;font-size:.78rem!important}
+.pony-actions{display:grid;grid-template-columns:auto 1fr 1fr 1.4fr;gap:9px}.pony-actions button{min-height:48px}
+@keyframes ponyPreviewIn{from{opacity:.4;transform:scale(.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(max-width:650px){.pony-actions{grid-template-columns:1fr 1fr}.pony-actions #pony-confirm{grid-column:1/-1}.pony-preview{min-height:245px}.pony-preview .avatar-art{width:220px;height:230px}.pony-categories{margin-inline:-4px;padding-inline:4px}}
+@media(max-width:420px){.pony-selector{grid-template-columns:46px 1fr 46px}.pony-customizer .avatar-arrow{width:46px;height:46px}.pony-actions{grid-template-columns:1fr}.pony-actions #pony-confirm{grid-column:auto}}
