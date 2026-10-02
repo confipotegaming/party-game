@@ -151,3 +151,4 @@ input[type=radio]{width:auto;margin-right:8px}
 @media(max-width:650px){.pony-preview .avatar-art{width:160px;height:166px}.pony-preview{min-height:0}}
 .pony-customizer .pony-actions{grid-template-columns:1fr 1fr}.pony-customizer .pony-actions #pony-confirm{grid-column:1/-1}
 .pony-preview-panel .pony-name span{display:none}
+.avatar-art svg{display:block;width:100%;height:100%;overflow:visible}.pony-tile .avatar-art svg{overflow:hidden}

@@ -41,7 +41,7 @@ const AVATARS = [
 ];
 const avatarById = avatar => {
   if (avatar && typeof avatar === 'object' && avatar.type === 'pony') {
-    const safe = { type:'pony', version:2, name:'Mon poney', race:1,
+    const safe = { type:'pony', version:2, name:'Mon poney', race:1, silhouette:1, coat:0, coatColor:'#ffffff',
       bodyColor:'#c9a6e8', mane:0, maneColor:'#2f2a7a', maneColor2:'#ec4f97', streak:1, tail:0,
       eyes:0, eyeColor:'#6a3f9c', mark:1, markColor:'#ec4f97', hat:0, glasses:0, neck:0,
       clothes:0, accessoryColor:'#ffd43b', effect:0 };
@@ -50,8 +50,8 @@ const avatarById = avatar => {
       for (const k of ['name','bodyColor','maneColor','eyeColor','markColor','accessoryColor']) if (avatar[k] !== undefined) safe[k] = avatar[k];
     } else for (const k of Object.keys(safe)) if (k !== 'type' && k !== 'version' && avatar[k] !== undefined) safe[k] = avatar[k];
     const hex = (v, d) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : d;
-    for (const k of ['bodyColor','maneColor','maneColor2','eyeColor','markColor','accessoryColor']) safe[k] = hex(safe[k], '#c9a6e8');
-    for (const k of ['race','mane','streak','tail','eyes','mark','hat','glasses','neck','clothes','effect']) safe[k] = Math.max(0, Math.min(20, Number(safe[k]) | 0));
+    for (const k of ['bodyColor','coatColor','maneColor','maneColor2','eyeColor','markColor','accessoryColor']) safe[k] = hex(safe[k], '#c9a6e8');
+    for (const k of ['race','silhouette','coat','mane','streak','tail','eyes','mark','hat','glasses','neck','clothes','effect']) safe[k] = Math.max(0, Math.min(20, Number(safe[k]) | 0));
     safe.name = String(safe.name || 'Mon poney').slice(0, 24);
     return safe;
   }

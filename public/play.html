@@ -44,37 +44,41 @@ function avatarStep(code,name){
   let pony = window.normalizePony(chosenAvatar) || window.defaultPony();
   const cat = window.PONY_CATALOG, pal = window.PONY_PALETTES;
   const tabs = [
-    {label:'🦄 Race', items:[['race','races','Type de poney']]},
-    {label:'🎨 Pelage', colors:[['bodyColor','Couleur du pelage','body']]},
-    {label:'💇 Crinière', items:[['mane','manes','Coiffure'],['streak','streaks','Style de couleur']], colors:[['maneColor','Couleur principale','mane'],['maneColor2','Seconde couleur / mèche','mane']]},
-    {label:'🌀 Queue', items:[['tail','tails','Forme de la queue']], colors:[['maneColor','Couleur (même que la crinière)','mane']]},
-    {label:'👀 Yeux', items:[['eyes','eyes','Regard']], colors:[['eyeColor','Couleur des yeux','eye']]},
-    {label:'⭐ Marque de beauté', items:[['mark','marks','Symbole']], colors:[['markColor','Couleur de la marque','mane']]},
-    {label:'🎩 Chapeaux', items:[['hat','hats','Chapeau']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
-    {label:'👓 Lunettes', items:[['glasses','glasses','Lunettes']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
-    {label:'🎀 Cou', items:[['neck','necks','Accessoire de cou']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
-    {label:'👗 Tenue', items:[['clothes','clothes','Tenue']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
-    {label:'✨ Effets', items:[['effect','effects','Effet magique']], colors:[['accessoryColor','Couleur de l’effet','accent']]}
+    {label:'🦄 Type', items:[['race','races','Type de poney','full'],['silhouette','silhouettes','Silhouette','full']]},
+    {label:'🎨 Pelage', items:[['coat','coats','Motif du pelage','full']], colors:[['bodyColor','Couleur du pelage','body'],['coatColor','Couleur du motif','body']]},
+    {label:'💇 Crinière', items:[['mane','manes','Coiffure','head'],['streak','streaks','Style de couleur','head']], colors:[['maneColor','Couleur principale','mane'],['maneColor2','Seconde couleur / mèche','mane']]},
+    {label:'🌀 Queue', items:[['tail','tails','Forme de la queue','rear']], colors:[['maneColor','Couleur (même que la crinière)','mane']]},
+    {label:'👀 Yeux', items:[['eyes','eyes','Regard','head']], colors:[['eyeColor','Couleur des yeux','eye']]},
+    {label:'⭐ Marque de beauté', items:[['mark','marks','Symbole','body']], colors:[['markColor','Couleur de la marque','mane']]},
+    {label:'🎩 Chapeaux', items:[['hat','hats','Chapeau','head']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'👓 Lunettes', items:[['glasses','glasses','Lunettes','head']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'🎀 Cou', items:[['neck','necks','Accessoire de cou','head']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'👗 Tenue', items:[['clothes','clothes','Tenue','full']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'✨ Effets', items:[['effect','effects','Effet magique','full']], colors:[['accessoryColor','Couleur de l’effet','accent']]}
   ];
   const presets=[
     ['💜 Twilight',{race:1,bodyColor:'#c9a6e8',mane:0,tail:0,maneColor:'#2f2a7a',maneColor2:'#ec4f97',streak:1,eyes:0,eyeColor:'#6a3f9c',mark:1,markColor:'#ec4f97'}],
-    ['🌈 Rainbow Dash',{race:2,bodyColor:'#9ed8f5',mane:1,tail:1,maneColor:'#ef4b4b',streak:3,eyes:2,eyeColor:'#d14d8c',mark:6,markColor:'#ef4b4b',maneColor2:'#4aa8f0'}],
-    ['🎈 Pinkie Pie',{race:0,bodyColor:'#f9b8d8',mane:2,tail:2,maneColor:'#ec4f97',streak:0,eyes:0,eyeColor:'#3d7bd9',mark:3,markColor:'#5fbcf2',maneColor2:'#ffe25a'}],
-    ['💎 Rarity',{race:1,bodyColor:'#f6f4f8',mane:3,tail:3,maneColor:'#6a3f9c',streak:0,eyes:1,eyeColor:'#3d7bd9',mark:4,markColor:'#5fbcf2'}],
-    ['🍎 Applejack',{race:0,bodyColor:'#ffcf8f',mane:4,tail:4,maneColor:'#ffe25a',streak:0,eyes:0,eyeColor:'#2fa36b',mark:2,markColor:'#ef4b4b',hat:4}],
-    ['🦋 Fluttershy',{race:2,bodyColor:'#fff3a6',mane:3,tail:3,maneColor:'#ffb3d9',streak:0,eyes:3,eyeColor:'#18a7b5',mark:5,markColor:'#ec4f97'}],
-    ['🌙 Luna',{race:3,bodyColor:'#2f3a7a',mane:3,tail:3,maneColor:'#5fbcf2',streak:0,eyes:1,eyeColor:'#18a7b5',mark:8,markColor:'#ffffff',maneColor2:'#2d2a3e',hat:3,accessoryColor:'#2d2a3e'}],
-    ['☀️ Celestia',{race:3,bodyColor:'#f6f4f8',mane:3,tail:3,maneColor:'#4cc38a',maneColor2:'#8f6ae0',streak:2,eyes:1,eyeColor:'#d14d8c',mark:7,markColor:'#ffd43b',hat:3,neck:2,accessoryColor:'#ff6fa8'}]
+    ['🌈 Rainbow Dash',{race:2,bodyColor:'#9ed8f5',mane:1,tail:1,maneColor:'#ef4b4b',streak:4,eyes:7,eyeColor:'#d14d8c',mark:6,markColor:'#ef4b4b',maneColor2:'#4aa8f0'}],
+    ['🎈 Pinkie Pie',{race:0,bodyColor:'#f9b8d8',mane:2,tail:2,maneColor:'#ec4f97',streak:0,eyes:8,eyeColor:'#3d7bd9',mark:3,markColor:'#5fbcf2',maneColor2:'#ffe25a',effect:6,accessoryColor:'#ff6fa8'}],
+    ['💎 Rarity',{race:1,bodyColor:'#f6f4f8',mane:3,tail:3,maneColor:'#6a3f9c',streak:0,eyes:1,eyeColor:'#3d7bd9',mark:4,markColor:'#5fbcf2',effect:1,accessoryColor:'#8f6ae0'}],
+    ['🍎 Applejack',{race:0,bodyColor:'#ffcf8f',mane:4,tail:4,maneColor:'#ffe25a',maneColor2:'#ef4b4b',streak:0,eyes:0,eyeColor:'#2fa36b',mark:2,markColor:'#ef4b4b',hat:4,coat:5}],
+    ['🦋 Fluttershy',{race:2,bodyColor:'#fff3a6',mane:6,tail:6,maneColor:'#ffb3d9',streak:0,eyes:3,eyeColor:'#18a7b5',mark:5,markColor:'#ec4f97'}],
+    ['🎧 DJ Pon-3',{race:1,bodyColor:'#f6f4f8',mane:1,tail:1,maneColor:'#4aa8f0',maneColor2:'#2f3a7a',streak:2,eyes:2,eyeColor:'#c8166b',mark:10,markColor:'#2f3a7a',glasses:2,hat:11,accessoryColor:'#4aa8f0',effect:7}],
+    ['🎀 Pouliche',{race:0,silhouette:0,bodyColor:'#fff3a6',mane:8,tail:4,maneColor:'#ef4b4b',maneColor2:'#ff6fa8',streak:0,eyes:6,eyeColor:'#c97a1f',mark:0,hat:1,accessoryColor:'#ff6fa8'}],
+    ['🌙 Luna',{race:3,silhouette:3,bodyColor:'#2f3a7a',mane:6,tail:6,maneColor:'#4aa8f0',maneColor2:'#2d2a3e',streak:0,eyes:7,eyeColor:'#18a7b5',mark:8,markColor:'#ffffff',hat:3,neck:2,accessoryColor:'#2d2a3e',effect:4}],
+    ['☀️ Celestia',{race:3,silhouette:3,bodyColor:'#f6f4f8',mane:6,tail:6,maneColor:'#4cc38a',maneColor2:'#8f6ae0',streak:4,eyes:1,eyeColor:'#d14d8c',mark:7,markColor:'#ffd43b',hat:2,neck:2,accessoryColor:'#ff6fa8',effect:2}]
   ];
   let active=0;
-  const set=(k,v)=>{pony[k]=v;draw();};
+  const linkTail=window.PONY_MANE_TAIL||[];
+  const set=(k,v)=>{if(k==='mane'&&Number(pony.tail)===linkTail[Number(pony.mane)||0])pony.tail=linkTail[v]||0;pony[k]=v;draw();};
   const draw=()=>{
     const t=tabs[active];
-    const sections=(t.items||[]).map(([k,list,title])=>{
+    const sections=(t.items||[]).map(([k,list,title,focus])=>{
       const opts=cat[list]||[], cur=Math.max(0,Math.min(opts.length-1,Number(pony[k])||0));
       return '<div class="pony-section"><b>'+esc(title)+'</b><div class="pony-tiles">'+opts.map((o,i)=>{
-        const preview=Object.assign({},pony,{[k]:i});
-        return '<button type="button" class="pony-tile '+(i===cur?'active':'')+'" data-k="'+k+'" data-v="'+i+'">'+avatarMarkup(preview,86,'still')+'<span>'+esc(o)+'</span></button>';
+        const hide={eyes:{glasses:0,hat:0},mane:{hat:0,glasses:0},streak:{hat:0,glasses:0},glasses:{hat:0},mark:{clothes:0},neck:{clothes:0}}[k]||{};
+        const preview=Object.assign({},pony,k==='effect'?{}:{effect:0},hide,{[k]:i});
+        return '<button type="button" class="pony-tile '+(i===cur?'active':'')+'" data-k="'+k+'" data-v="'+i+'">'+window.renderAvatar(preview,86,'still',focus)+'<span>'+esc(o)+'</span></button>';
       }).join('')+'</div></div>';
     }).join('')+(t.colors||[]).map(([k,title,pk])=>'<div class="pony-section"><b>'+esc(title)+'</b><div class="color-palette">'+(pal[pk]||[]).map(c=>'<button type="button" class="pony-color '+(String(pony[k]).toLowerCase()===c?'active':'')+'" data-k="'+k+'" data-color="'+c+'" style="background:'+c+'" aria-label="'+c+'"></button>').join('')+'<label class="custom-color"><input class="custom-color-input" data-k="'+k+'" type="color" value="'+(pony[k]||'#ffffff')+'"> 🎨 Autre</label></div></div>').join('');
     app.innerHTML='<h1 class="big join-title">✨ Crée ton poney</h1><div class="card pony-customizer"><div class="step-pill"><b>2</b><span>Personnalise ton poney</span></div>'+
@@ -91,8 +95,9 @@ function avatarStep(code,name){
     document.getElementById('pony-reset').onclick=()=>{pony=window.defaultPony();draw();};
     document.getElementById('pony-random').onclick=()=>{
       const r=a=>a[Math.floor(Math.random()*a.length)];
-      pony=Object.assign(window.defaultPony(),{race:r([0,1,2,3]),bodyColor:r(pal.body),mane:r([0,1,2,3,4,5]),streak:r([0,0,1,2,3]),maneColor:r(pal.mane),maneColor2:r(pal.mane),eyes:r([0,1,2,3]),eyeColor:r(pal.eye),mark:1+Math.floor(Math.random()*(cat.marks.length-1)),markColor:r(pal.mane),accessoryColor:r(pal.accent),hat:Math.random()<.35?1+Math.floor(Math.random()*(cat.hats.length-1)):0,neck:Math.random()<.3?1+Math.floor(Math.random()*(cat.necks.length-1)):0});
-      pony.tail=pony.mane; draw();
+      const mn=Math.floor(Math.random()*cat.manes.length);
+      pony=Object.assign(window.defaultPony(),{race:r([0,1,2,3]),silhouette:r([0,1,1,2,3]),coat:r([0,0,0,1,2,3,4,5,6]),coatColor:r(['#ffffff','#fff3a6','#3d3d4f']),bodyColor:r(pal.body),mane:mn,tail:linkTail[mn]||0,streak:r([0,0,1,2,3,4]),maneColor:r(pal.mane),maneColor2:r(pal.mane),eyes:Math.floor(Math.random()*cat.eyes.length),glasses:Math.random()<.2?1+Math.floor(Math.random()*(cat.glasses.length-1)):0,effect:Math.random()<.3?1+Math.floor(Math.random()*(cat.effects.length-1)):0,clothes:Math.random()<.2?1+Math.floor(Math.random()*(cat.clothes.length-1)):0,eyeColor:r(pal.eye),mark:1+Math.floor(Math.random()*(cat.marks.length-1)),markColor:r(pal.mane),accessoryColor:r(pal.accent),hat:Math.random()<.35?1+Math.floor(Math.random()*(cat.hats.length-1)):0,neck:Math.random()<.3?1+Math.floor(Math.random()*(cat.necks.length-1)):0});
+      draw();
     };
     document.getElementById('pony-back').onclick=()=>form();
     document.getElementById('pony-confirm').onclick=()=>{chosenAvatar=JSON.parse(JSON.stringify(pony));localStorage.setItem('pg-avatar',JSON.stringify(chosenAvatar));window.partyAudio.enable();join(code,name,null,chosenAvatar);};
