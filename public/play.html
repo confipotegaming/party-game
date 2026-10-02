@@ -2,7 +2,7 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/pixel.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/pixel.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -21,6 +21,7 @@ function join(code, name, pid, avatar) {
   });
 }
 s.on('connect', () => { const j = joined || saved(); if (j) { chosenAvatar=j.avatar||chosenAvatar; join(j.code, j.name, j.pid, chosenAvatar); } else form(); });
+s.on('boss', snap => window.BossGame.onSnap(snap)); // Boss Fight : état du combat en temps réel
 s.on('closed', () => { localStorage.removeItem('pg'); joined = null; form('La partie est terminée.'); });
 
 function form(err = '') {
@@ -112,7 +113,7 @@ s.on('state', x => {
   if (!x.me) return;
   const p = x.phase, done = p.answered.includes(x.me.id);
   const k = p.n + ':' + done;
-  if (k !== key || p.kind === 'survey' || p.kind === 'pixel') { key = k; render(p, done); } // le Grand Sondage se met à jour en direct
+  if (k !== key || p.kind === 'survey' || p.kind === 'bossPick' || p.kind === 'pixel') { key = k; render(p, done); } // mises à jour en direct (Grand Sondage, choix des héros, Pixel Flou)
 });
 
 setInterval(() => { if (st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores') && st.me) render(st.phase, st.phase.answered.includes(st.me.id)); }, 6500);
@@ -131,7 +132,11 @@ const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-
 function render(p, done) {
   const m = me();
   const top = `<div class="row player-top"><span class="player-mini">${avatarMarkup(m.avatar,42)}</span><b class="muted">${esc(m.name)} · ${m.score} pts</b>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${p.difficulty ? `<span class="chip diff diff-${p.difficulty.level}">${p.difficulty.stars} ${esc(p.difficulty.label)}</span>` : ''}${timer(p)}</div>`;
-  if (p.kind === 'wario' || p.kind === 'warioResults') {
+  if (!window.BossGame.KINDS.includes(p.kind)) window.BossGame.leave();
+  if (window.BossGame.KINDS.includes(p.kind)) {
+    window.BossGame.player(app, p, { me: st.me.id, top, players: st.players, off,
+      action: v => s.emit('player:action', v), input: v => s.emit('input', v) });
+  } else if (p.kind === 'wario' || p.kind === 'warioResults') {
     window.WarioGame.render(app, p, { me: st.me.id, code: st.code, off, done,
       send: v => s.emit('answer', v), progress: v => s.emit('progress', v) });
   } else if (p.kind === 'brain' || p.kind === 'brainResults') {
@@ -146,6 +151,17 @@ function render(p, done) {
     window.PixelGame.player(app, p, { me: st.me.id, top, off, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
   } else if (p.kind === 'surveySetup') {
     app.innerHTML = `${top}${wait('📊 Le Grand Sondage<br>L’hôte choisit le thème…')}`;
+  } else if (p.kind === 'boardSpin') {
+    const d = p.data, left = Math.max(0, d.spinAt + d.spinMs - Date.now() - off);
+    const show = () => `<div class="card stack board-phone"><div class="eyebrow">🎲 Tour ${p.round}/${p.rounds}${d.final ? ' · points ×2 🔥' : ''}</div>
+      ${Date.now() + off >= d.spinAt + d.spinMs ? `<div class="board-phone-icon">${d.chosen.icon}</div><p class="prompt">${esc(d.chosen.name)}</p><p class="muted">${esc(d.chosen.desc || '')}</p>` : '<div class="board-phone-icon spin">🎡</div><p class="prompt">La roue tourne… regardez l’écran !</p>'}</div>`;
+    app.innerHTML = `${top}${show()}`;
+    if (left) setTimeout(() => { if (st.phase.n === p.n) app.innerHTML = `${top}${show()}`; }, left + 50);
+  } else if (p.kind === 'boardResults') {
+    const d = p.data, mine = d.rows.find(r => r.id === st.me.id), rank = d.standings.findIndex(x => x.id === st.me.id) + 1;
+    app.innerHTML = `${top}<div class="card stack board-phone"><div class="eyebrow">🎲 ${d.game.icon} ${esc(d.game.name)}</div>
+      ${mine ? `<div class="board-phone-icon">${['🥇', '🥈', '🥉'][mine.place - 1] || '🎲'}</div><p class="prompt">${mine.gain ? `+${mine.gain} points de plateau !` : 'Pas de point cette fois…'}</p>` : '<p class="prompt">Regardez l’écran !</p>'}
+      <p class="muted">Vous êtes ${rank}ᵉ sur ${d.standings.length} au plateau${d.last ? ' — fin de partie !' : ` · encore ${d.turns - d.turn} tour${d.turns - d.turn > 1 ? 's' : ''}`}</p></div>`;
   } else if (p.kind === 'lobby') {
     app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}${lobbyRanking()}`;
   } else if (p.kind === 'text' || p.kind === 'number') {

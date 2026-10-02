@@ -1,21 +1,18 @@
 # Version 0.1.22
 
-## 🟪 Nouveau jeu : Pixel Flou
-- Un personnage culte du jeu vidéo s'affiche en **8×8 pixels**, puis l'image devient **plus nette toutes les
-  3 secondes** (8 étapes jusqu'à la photo nette).
-- **De vraies photos libres de droit** (cosplays, mascottes, peluches, street art) venant de Wikimedia Commons,
-  sous licence CC0, CC BY, CC BY-SA ou domaine public. L'auteur et la licence s'affichent à la révélation ;
-  la liste complète est dans `public/assets/pixelflou/CREDITS.md`.
-- **Deux choses à trouver** depuis son téléphone, en autant d'essais qu'on veut :
-  - le **personnage** : jusqu'à 1000 points ;
-  - le **jeu** d'où il vient : jusqu'à 400 points.
-- **Plus on répond tôt, plus on gagne** : −12,5 % de points à chaque étape de netteté. Les points encore
-  en jeu sont affichés en direct.
-- **56 personnages**, sur 3 niveaux (bonus ×1,25 / ×1,5) :
-  - ★☆☆ Facile (17) : Mario, Pikachu, Kirby, Sonic, Link, Pac-Man, Yoshi, Creeper…
-  - ★★☆ Moyen (23) : Mega Man, Salamèche, Crash Bandicoot, Rayman, Samus, Master Chief…
-  - ★★★ Difficile (16) : Ness, Sackboy, Chun-Li, Kratos, Cuphead, Shovel Knight, Hollow Knight, Lemmings…
-- Fautes de frappe tolérées, noms français et anglais acceptés (Rondoudou / Jigglypuff…). Si le personnage
-  porte le nom de son jeu (Pac-Man, Kirby…), une seule réponse rapporte les deux.
-- La manche s'arrête dès que tout le monde a trouvé le personnage et le jeu ; la révélation montre l'image nette.
-- Les noms ne quittent jamais le serveur pendant la manche (seule l'image est envoyée).
+## 🎲 Nouveau : le mode plateau (façon Mario Party)
+- Depuis le lobby, **« Lancer le plateau »** : on choisit le nombre de tours (3, 5, 8 ou 10) et la difficulté des questions.
+- À chaque tour, **une roue tourne** sur l'écran de l'hôte et désigne le mini-jeu à jouer, qui se lance tout seul.
+- Chaque mini-jeu rapporte des **points de plateau selon la place** : 🥇 10 · 🥈 6 · 🥉 4 · 3 · 2 · 1, le dernier ne marque rien
+  (les ex æquo partagent la meilleure place). **Le dernier tour compte double.**
+- Entre deux mini-jeux, **le plateau** montre la course des joueurs vers l'arrivée 🏁, les points gagnés et les jeux déjà joués.
+- Le plus gros total gagne ; en cas d'égalité, le nombre de mini-jeux gagnés départage.
+- L'hôte peut **passer un mini-jeu** (personne ne marque, la roue retourne) ou quitter le plateau.
+
+## 🎯 Un tirage vraiment varié
+- Aucun mini-jeu ne revient avant que **tous les autres** soient sortis dans la partie.
+- Jamais la même **famille de gameplay** (écriture + vote, devinettes, quiz de culture, jeux téléphone…) que l'un des 3 derniers jeux.
+- Les jeux joués récemment dans la soirée (plateau ou non) sont écartés : une nouvelle partie ne reprend pas les mêmes jeux.
+- Bonus pour les jeux et familles les moins joués, pénalité pour un thème identique au jeu précédent.
+- Seuls les jeux jouables avec le nombre de joueurs présents peuvent sortir.
+- **Le jeu du boss est exclu de la roue** (id contenant « boss », ou `boss: true` / `board: false` dans son module).
