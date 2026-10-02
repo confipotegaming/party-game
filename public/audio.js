@@ -1,5 +1,7 @@
 // Musiques génératives locales : chaque mini-jeu a son propre morceau (style, tempo, accords, mélodie),
 // joué par un petit séquenceur Web Audio (batterie, basse, nappes, arpèges, mélodie).
+// Chaque morceau est arrangé comme une vraie chanson (intro filtrée, couplets, refrains, pont composé à la volée,
+// break, final parfois modulé) et chaque nouveau passage est réarrangé : la musique ne tourne plus en boucle courte.
 // Le classement final déclenche une fanfare de victoire façon RPG, suivie d'une boucle triomphale.
 (function(){
   let ctx=null,master=null,musicGain=null,sfxGain=null,noiseBuf=null,enabled=false,lastPhase=null,lastGame=null;
@@ -47,7 +49,7 @@
     dungeon:{kick:'x..x..x.x..x..x.',snare:'....x.......x..x',hat:'x.x.x.x.x.x.x.x.',bass:'RRORRRORRRORR5O.',bassType:'chip',arp:'0123012301230123',arpType:'chip',lead:'chip',delay:.12,fill:'snare',crash:true},
     heroic:{kick:'x.......x.......',snare:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R...R.5.R...R.O.',bassType:'chip',arp:'0.1.2.1.0.1.2.1.',arpType:'chip',lead:'chip',delay:.2,fill:'snare'},
     // Fin du Boss Fight : pas de batterie, nappes douces, boîte à musique et vent
-    pastoral:{bass:'R-------5-------',bassType:'sub',pad:'strings',arp:'0...2...1...2...',arpType:'musicbox',lead:'flute',delay:.4,wind:true},
+    pastoral:{bass:'R-------5-------',bassType:'sub',pad:'strings',arp:'0...2...1...2...',arpType:'musicbox',lead:'flute',delay:.4,wind:true,reverb:.4},
     march:{kick:'x...x...x...x...',snare:'x.xxx.x.x.xxx.x.',tom:'x.......x.......',bass:'R...5...R...5...',bassType:'upright',pad:'brass',arp:'0.1.2.3.2.1.2.3.',arpType:'pluck',lead:'brass',delay:.2,fill:'snare',crash:true}
   };
 
@@ -111,27 +113,93 @@
       'F G Em Am','A5:6 G5:2 F5:8 G5:6 F5:2 E5:8 E5:4 G5:4 B5:4 G5:4 A5:12 r:4',{form:['A','B','A','B']}),
     // Boucle triomphale jouée juste après la fanfare de victoire
     victoryLoop:T(138,'march','C Ab Bb C','G5:2 C6:2 E6:4 D6:2 C6:2 G5:4 Ab5:2 C6:2 Eb6:4 D6:2 C6:2 Ab5:4 Bb5:2 D6:2 F6:4 Eb6:2 D6:2 Bb5:4 C6:4 E6:4 G6:8',
-      'F Em Dm G','A5:4 C6:2 F6:2 E6:4 C6:4 G5:4 B5:2 E6:2 D6:4 B5:4 F5:4 A5:2 D6:2 C6:4 A5:4 B5:4 D6:4 G6:4 F6:4',{form:['A','B','A','B']})
+      'F Em Dm G','A5:4 C6:2 F6:2 E6:4 C6:4 G5:4 B5:2 E6:2 D6:4 B5:4 F5:4 A5:2 D6:2 C6:4 A5:4 B5:4 D6:4 G6:4 F6:4',{intro:false})
   };
   // Alias : variantes d'un même jeu
   THEMES.finisphrase=THEMES.finislaphrase;THEMES.reponseexpress=THEMES.express;THEMES.survivrais=THEMES.survive;
 
-  // Prépare un morceau : liste de mesures (accord, notes de mélodie, couches actives)
-  const compiled={};
-  const compile=name=>{
-    if(compiled[name])return compiled[name];
-    const th=THEMES[name];const st=STYLES[th.style];
-    const form=th.form||['A','B','a','B'];const bars=[];const seen={};
-    form.forEach(tag=>{
-      const key=tag.toUpperCase(),sec=th[key],ch=sec.ch.split(/\s+/).map(parseChord),lead=parseLead(sec.lead);
-      const breakdown=tag!==key;seen[key]=(seen[key]||0)+1;
-      ch.forEach((c,i)=>{
-        const notes=lead.events.filter(e=>e.pos>=i*16&&e.pos<(i+1)*16).map(e=>({...e,pos:e.pos-i*16}));
-        bars.push({chord:c,notes,lead:!breakdown,breakdown,double:seen[key]>1&&!breakdown,first:i===0,last:i===ch.length-1});
+  // ---------- Arrangement : chaque passage du morceau est différent ----------
+  // Un « cycle » enchaîne intro, couplets, refrains, pont (mélodie composée à la volée), break et final.
+  // Les cycles suivants sont réarrangés au hasard (ordre, instruments, harmonies, roulements, modulation),
+  // ce qui donne plusieurs minutes de musique sans boucle audible.
+  const rngFor=seed=>{let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}};
+  const hashStr=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+  const pick=(r,arr)=>arr[Math.floor(r()*arr.length)];
+  // Timbre de remplacement quand la mélodie change d'instrument
+  const ALT={square:'flute',chip:'bell',saw:'brass',pluck:'mallet',mallet:'vibe',vibe:'flute',brass:'reed',flute:'musicbox',soft:'vibe',reed:'flute',twang:'vibe',musicbox:'flute',bell:'flute'};
+  // Cellules rythmiques (positions de départ sur 16 pas) pour les mélodies composées
+  const CELLS=[[0,4,8,12],[0,3,6,8,12],[0,2,4,8,10,12],[0,6,8,12,14],[0,4,6,8,12],[0,2,4,6,8,12],[0,8,10,12],[0,3,6,10,12,14]];
+  const nearest=(pool,target)=>pool.reduce((b,n)=>Math.abs(n-target)<Math.abs(b-target)?n:b,pool[0]);
+  const prepared={};
+  const prepare=name=>{
+    if(prepared[name])return prepared[name];
+    const th=THEMES[name],st=STYLES[th.style];
+    const sec=k=>{const ch=th[k].ch.split(/\s+/).map(parseChord),lead=parseLead(th[k].lead);
+      return{ch,bars:ch.map((c,i)=>lead.events.filter(e=>e.pos>=i*16&&e.pos<(i+1)*16).map(e=>({...e,pos:e.pos-i*16})))}};
+    const A=sec('A'),B=sec('B');
+    // Pont : accords empruntés aux deux parties, terminés sur la cadence de B pour relancer A
+    const C={ch:th.C?th.C.split(/\s+/).map(parseChord):[A.ch[1],B.ch[1],A.ch[2],B.ch[B.ch.length-1]]};
+    // Gamme du morceau (union des notes des accords) pour les notes de passage
+    const scale=new Set();[...A.ch,...B.ch].forEach(c=>c.iv.forEach(i=>scale.add((c.pc+i)%12)));
+    const all=[...A.bars.flat(),...B.bars.flat()].map(n=>n.m);
+    return prepared[name]={name,th,st,A,B,C,scale,lo:Math.min(...all),hi:Math.max(...all)};
+  };
+  // Mélodie inventée sur une grille d'accords : motif rythmique répété, notes d'accord reliées par degrés
+  const composeMelody=(P,chords,r)=>{
+    const cellA=pick(r,CELLS),cellB=pick(r,CELLS),lo=Math.max(P.lo,64),hi=Math.min(P.hi,88);
+    let prev=Math.round((lo+hi)/2);
+    return chords.map((c,bi)=>{
+      const cell=bi===chords.length-1?[0,4,8]:(bi%2?cellB:cellA),pool=[];
+      for(let m=lo;m<=hi;m++)if(c.iv.some(i=>(c.pc+i)%12===m%12))pool.push(m);
+      return cell.map((pos,k)=>{
+        const len=(cell[k+1]??16)-pos;let m;
+        if(pos%4!==0&&r()<.35){const dir=r()<.5?-1:1;m=prev+dir;if(!P.scale.has(((m%12)+12)%12))m+=dir;}
+        else{const tgt=prev+Math.round((r()-.5)*7);m=nearest(pool,tgt);if(m===prev&&r()<.5)m=nearest(pool.filter(n=>n!==prev),prev+(r()<.5?3:-3))}
+        m=Math.max(lo,Math.min(hi,m));prev=m;
+        return{pos,m,len:bi===chords.length-1&&k===cell.length-1?16-pos:Math.max(1,len-(r()<.3?1:0))};
       });
     });
-    return compiled[name]={name,bpm:th.bpm,st,bars};
   };
+  // Sections d'un cycle : clé (A/B/C), intensité 0-3, mode de mélodie, transposition…
+  const S=(key,o)=>Object.assign({key,int:2,mode:'main',lead:true},o);
+  const planCycle=(P,n,r)=>{
+    const th=P.th;
+    if(th.form)return th.form.map((tag,i)=>S(tag.toUpperCase(),{mode:n===0&&i<2?'main':pick(r,['main','harmony','alt']),int:1}));
+    const m=()=>pick(r,['main','main','harmony','octave','alt']);
+    const lift=r()<.45?(r()<.5?1:2):0;
+    if(n===0)return[
+      ...(th.intro===false?[]:[S('A',{int:0,lead:false,intro:true})]),
+      S('A'),S('B'),S('A',{mode:pick(r,['harmony','alt'])}),S('B',{int:3,double:true}),
+      S('C',{int:1}),S('A',{int:0,lead:false,brk:true}),S('A',{mode:m(),int:2}),S('B',{int:3,double:true,mode:pick(r,['main','octave']),tr:lift})];
+    const plans=[
+      [S('A',{mode:m()}),S('B',{mode:m()}),S('C',{int:1}),S('B',{int:3,double:true}),S('B',{int:0,lead:false,brk:true}),S('A',{mode:m()}),S('B',{int:3,double:true,tr:lift})],
+      [S('C',{int:1,mode:'alt'}),S('A',{mode:m()}),S('B',{int:3,double:true}),S('A',{int:0,lead:false,brk:true}),S('C',{int:2}),S('B',{int:3,double:true,mode:'octave',tr:lift})],
+      [S('A',{int:1,mode:'alt'}),S('A',{mode:'harmony'}),S('B',{int:3,double:true}),S('C',{int:2,mode:'harmony'}),S('A',{int:0,lead:false,brk:true}),S('B',{int:3,double:true,tr:lift})]
+    ];
+    return pick(r,plans);
+  };
+  const FILLS=['snare','snare','tom','kick','stop'];
+  const buildCycle=(P,n)=>{
+    const r=rngFor(hashStr(P.name)+n*7919),st=P.st,bars=[];
+    const gen=composeMelody(P,P.C.ch,r);
+    planCycle(P,n,r).forEach((s,si,all)=>{
+      const src=s.key==='C'?{ch:P.C.ch,bars:gen}:P[s.key],tr=s.tr||0;
+      const fill=st.fill==='tom'&&r()<.6?'tom':pick(r,FILLS),alt=ALT[st.lead]||'flute';
+      src.ch.forEach((c0,i)=>{
+        const chord=tr?{pc:(c0.pc+tr)%12,iv:c0.iv}:c0;
+        let notes=(src.bars[i]||[]).map(e=>({...e,m:e.m+tr}));
+        if(s.mode==='octave')notes=notes.map(e=>({...e,m:e.m+(P.hi+tr+12<=93?12:-12)}));
+        // Harmonie : une voix douce sur la note d'accord juste en dessous de la mélodie
+        const harm=s.mode==='harmony'?notes.map(e=>{let h=e.m-3;while(h>e.m-10&&!chord.iv.some(iv=>(chord.pc+iv)%12===((h%12)+12)%12))h--;return{...e,m:h}}):null;
+        bars.push({chord,notes,harm,lead:s.lead,leadType:s.mode==='alt'?alt:st.lead,int:s.int,breakdown:!!(s.brk||s.intro),intro:!!s.intro,brk:!!s.brk,
+          double:!!s.double&&s.lead,first:i===0,last:i===src.ch.length-1,fill:i===src.ch.length-1&&st.kick?fill:null,
+          crash:i===0&&s.int>=2&&(st.crash||si>0&&all[si-1].int<2||r()<.5),secLen:src.ch.length});
+      });
+    });
+    return bars;
+  };
+  // Pour le débogage : premier cycle d'un morceau
+  const compile=name=>{const P=prepare(name);return{name,bpm:P.th.bpm,st:P.st,bars:buildCycle(P,0)}};
 
   // ---------- Moteur audio ----------
   const ensure=()=>{
@@ -144,15 +212,32 @@
     sfxGain=ctx.createGain();sfxGain.gain.value=SFX;sfxGain.connect(master);
     noiseBuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   };
+  // Réverbération : réponse impulsionnelle synthétique (bruit stéréo décroissant), calculée une fois
+  let revBuf=null;
+  const reverbIR=()=>{
+    if(revBuf)return revBuf;const len=Math.floor(ctx.sampleRate*2.6);revBuf=ctx.createBuffer(2,len,ctx.sampleRate);
+    for(let ch=0;ch<2;ch++){const d=revBuf.getChannelData(ch);for(let i=0;i<len;i++){const x=i/len;d[i]=(Math.random()*2-1)*Math.pow(1-x,3.2)*(i<ctx.sampleRate*.012?i/(ctx.sampleRate*.012):1)}}
+    return revBuf;
+  };
+  const panner=(v,dest)=>{const p=ctx.createStereoPanner?ctx.createStereoPanner():ctx.createGain();if(p.pan)p.pan.value=v;p.connect(dest);return p};
   // Bus d'un morceau : permet un fondu propre lors d'un changement de musique
-  const makeBus=(delayTime)=>{
+  const makeBus=(delayTime,revAmt=.22)=>{
     const out=ctx.createGain();out.gain.value=1;out.connect(musicGain);
-    const drums=ctx.createGain();drums.gain.value=1;drums.connect(out);
-    const lead=ctx.createGain();lead.gain.value=1;lead.connect(out);
-    const delay=ctx.createDelay(1.5);delay.delayTime.value=delayTime;const fb=ctx.createGain();fb.gain.value=.32;const send=ctx.createGain();send.gain.value=.28;
-    const damp=ctx.createBiquadFilter();damp.type='lowpass';damp.frequency.value=3200;
-    send.connect(delay);delay.connect(damp);damp.connect(fb);fb.connect(delay);damp.connect(out);
-    return{out,drums,lead,send,inst:out};
+    // Filtre général : ouverture progressive pendant l'intro, creux pendant les breaks
+    const tone=ctx.createBiquadFilter();tone.type='lowpass';tone.frequency.value=18000;tone.Q.value=.6;tone.connect(out);
+    const drums=ctx.createGain();drums.gain.value=1;drums.connect(tone);
+    const lead=ctx.createGain();lead.gain.value=1;lead.connect(tone);
+    const inst=ctx.createGain();inst.gain.value=1;inst.connect(tone);
+    const delay=ctx.createDelay(1.5);delay.delayTime.value=delayTime;const fb=ctx.createGain();fb.gain.value=.3;const send=ctx.createGain();send.gain.value=.26;
+    const damp=ctx.createBiquadFilter();damp.type='lowpass';damp.frequency.value=3000;
+    const dpan=panner(.35,tone);
+    send.connect(delay);delay.connect(damp);damp.connect(fb);fb.connect(delay);damp.connect(dpan);
+    // Réverbe (mélodie + accompagnement, la batterie reste sèche hormis un soupçon)
+    const rev=ctx.createConvolver();rev.buffer=reverbIR();const revIn=ctx.createGain();revIn.gain.value=revAmt;const revHp=filt('highpass',260,.7,rev);
+    revIn.connect(revHp);rev.connect(tone);lead.connect(revIn);inst.connect(revIn);
+    const drumRev=ctx.createGain();drumRev.gain.value=.25;drums.connect(drumRev);drumRev.connect(revIn);
+    // Placement stéréo : arpèges à gauche, accords piqués à droite, charleston légèrement à droite
+    return{out,tone,drums,lead,send,inst,left:panner(-.35,inst),right:panner(.3,inst),hats:panner(.2,drums)};
   };
   const env=(g,t,a,peak,dec,sus,rel,end)=>{g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.setTargetAtTime(peak*sus,t+a,dec);g.gain.setValueAtTime(peak*sus,end);g.gain.setTargetAtTime(.0001,end,rel)};
   const osc=(type,f,t,stop,dest,detune=0)=>{const o=ctx.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);o.detune.value=detune;o.connect(dest);o.start(t);o.stop(stop);return o};
@@ -164,8 +249,8 @@
     kick(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*1.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);const o=osc('sine',160,t,t+.42,g);o.frequency.exponentialRampToValueAtTime(42,t+.13);const c=ctx.createGain();c.connect(d);c.gain.setValueAtTime(v*.35,t);c.gain.exponentialRampToValueAtTime(.001,t+.02);osc('triangle',900,t,t+.03,c)},
     snare(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);noise(t,.22,filt('highpass',1400,.7,g));const b=ctx.createGain();b.connect(d);b.gain.setValueAtTime(v*.4,t);b.gain.exponentialRampToValueAtTime(.001,t+.1);const o=osc('triangle',220,t,t+.12,b);o.frequency.exponentialRampToValueAtTime(160,t+.1)},
     clap(d,t,v){const g=ctx.createGain();g.connect(d);[0,.012,.024].forEach(o=>{g.gain.setValueAtTime(v*.6,t+o);g.gain.exponentialRampToValueAtTime(.05,t+o+.01)});g.gain.exponentialRampToValueAtTime(.001,t+.18);noise(t,.2,filt('bandpass',1500,1.2,g))},
-    hat(d,t,v,open){const g=ctx.createGain();g.connect(d);const len=open?.22:.045;g.gain.setValueAtTime(v*.32,t);g.gain.exponentialRampToValueAtTime(.001,t+len);noise(t,len+.02,filt('highpass',7500,.7,g))},
-    tom(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*.8,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);const o=osc('sine',140,t,t+.37,g);o.frequency.exponentialRampToValueAtTime(70,t+.3)},
+    hat(d,t,v,open){const g=ctx.createGain();g.connect(d);const len=open?.22:.045;g.gain.setValueAtTime(v*.26,t);g.gain.exponentialRampToValueAtTime(.001,t+len);noise(t,len+.02,filt('highpass',7500,.7,filt('lowpass',13000,.5,g)))},
+    tom(d,t,v,p=1){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*.8,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);const o=osc('sine',140*p,t,t+.37,g);o.frequency.exponentialRampToValueAtTime(70*p,t+.3)},
     crash(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*.28,t);g.gain.exponentialRampToValueAtTime(.001,t+1.4);noise(t,1.45,filt('highpass',5000,.5,g))},
     shaker(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v*.16,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+.07);noise(t,.08,filt('highpass',9000,.7,g))},
     tick(d,t,v){const g=ctx.createGain();g.connect(d);g.gain.setValueAtTime(v*.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.03);osc('square',2400,t,t+.035,filt('bandpass',2400,4,g))},
@@ -208,34 +293,56 @@
   const hit=(pat,i)=>pat?pat[i]:'.';
 
   const scheduleStep=(s,t)=>{
-    const sd=s.stepDur,st=s.song.st,barIdx=Math.floor(s.step/16)%s.song.bars.length,i=s.step%16,bar=s.song.bars[barIdx],c=bar.chord,B=s.bus;
-    const brk=bar.breakdown,fillZone=bar.last&&i>=12;
+    const sd=s.stepDur,st=s.P.st,i=s.step%16,bar=s.bar,c=bar.chord,B=s.bus,r=s.rng;
+    const brk=bar.breakdown,lvl=bar.int,fill=bar.fill&&i>=12?bar.fill:null;
+    const hv=()=>.85+r()*.25;// petites variations de vélocité, plus vivant
+    // Filtre : l'intro s'ouvre peu à peu, le break se referme puis rouvre avant la reprise
+    if(i===0&&bar.first){const f=B.tone.frequency,len=bar.secLen*16*sd;f.cancelScheduledValues(t);
+      if(bar.intro){f.setValueAtTime(500,t);f.exponentialRampToValueAtTime(16000,t+len)}
+      else if(bar.brk){f.setValueAtTime(f.value||16000,t);f.exponentialRampToValueAtTime(1400,t+len*.5);f.exponentialRampToValueAtTime(16000,t+len)}
+      else f.setValueAtTime(18000,t)}
     // Batterie
-    const k=hit(st.kick,i);if(k!=='.'&&!brk)DRUM.kick(B.drums,t,k==='g'?.5:1);
-    let sn=hit(st.snare,i);if(fillZone&&st.fill==='snare'&&!brk)sn='x';
-    if(sn!=='.'&&!brk)DRUM.snare(B.drums,t,sn==='g'?.35:fillZone?.6+.1*(i-12):1);
-    if(hit(st.clap,i)!=='.'&&!brk)DRUM.clap(B.drums,t,1);
-    const h=hit(st.hat,i);if(h!=='.')DRUM.hat(B.drums,t,(h==='g'?.45:1)*(brk?.6:1),h==='o');
-    if(hit(st.perc,i)!=='.')DRUM[st.percType||'shaker'](B.drums,t,1);
-    let tm=hit(st.tom,i);if(fillZone&&st.fill==='tom'&&!brk)tm='x';if(tm!=='.')DRUM.tom(B.drums,t,brk?.5:1);
-    if(st.crash&&bar.first&&i===0&&!brk&&s.step>0)DRUM.crash(B.drums,t,1);
-    // Basse
-    const bs=hit(st.bass,i);
-    if(bs!=='.'&&bs!=='-'){let len=1;while(i+len<16&&st.bass[i+len]==='-')len++;bassVoice(st.bassType||'sub',B.inst,bassNote(c,bs),t,len*sd*.92,brk?.6:.9)}
+    const stopFill=fill==='stop'&&i>=14;
+    if(!brk&&!stopFill){
+      let k=hit(st.kick,i);if(lvl===1&&i%8!==0)k='.';if(fill==='kick'&&(i===12||i===14||i===15))k='x';
+      if(k!=='.')DRUM.kick(B.drums,t,k==='g'?.5:1);
+      let sn=hit(st.snare,i);if(lvl===1&&i!==4&&i!==12)sn='.';
+      if(fill==='snare'&&st.fill)sn='x';if(fill==='kick'&&i===13)sn='x';
+      if(sn!=='.')DRUM.snare(B.drums,t,sn==='g'?.35:fill==='snare'?.55+.12*(i-12):hv());
+      if(lvl>=2&&hit(st.clap,i)!=='.')DRUM.clap(B.drums,t,1);
+      if(fill==='tom'&&(st.kick||st.tom))DRUM.tom(B.drums,t,.9,1.5-.18*(i-12));
+    }
+    if(!stopFill){
+      let h=hit(st.hat,i);if(lvl===3&&h==='.'&&st.hat&&i%2===1)h='g';if(brk&&i%4!==2)h='.';
+      if(h!=='.')DRUM.hat(B.hats,t,(h==='g'?.45:1)*(brk?.6:1)*hv(),h==='o');
+      if(lvl>=2&&hit(st.perc,i)!=='.')DRUM[st.percType||'shaker'](B.hats,t,hv());
+      if(!brk&&hit(st.tom,i)!=='.'&&fill!=='tom')DRUM.tom(B.drums,t,lvl<2?.5:1);
+    }
+    if(bar.crash&&i===0&&s.step>0)DRUM.crash(B.drums,t,1);
+    // Basse : tenue dans l'intro et les breaks, relances à l'octave quand ça monte
+    if(brk||lvl===0){if(i===0)bassVoice(st.bassType||'sub',B.inst,bassNote(c,'R'),t,(bar.intro?16:8)*sd*.95,.6);else if(i===8&&!bar.intro)bassVoice(st.bassType||'sub',B.inst,bassNote(c,'5'),t,8*sd*.95,.5)}
+    else{let bs=hit(st.bass,i);if(lvl===3&&i===14&&bs==='.')bs='O';
+      if(bs!=='.'&&bs!=='-'){let len=1;while(i+len<16&&st.bass[i+len]==='-')len++;bassVoice(st.bassType||'sub',B.inst,bassNote(c,bs),t,len*sd*.92,(i%4===0?.92:.82))}}
     // Nappe tenue (1 fois par mesure)
-    if(st.pad&&i===0)padVoicing(c).forEach(n=>voice(st.pad,B.inst,n,t,16*sd*.98,brk?.5:.42));
+    if(st.pad&&i===0)padVoicing(c).forEach(n=>voice(st.pad,B.inst,n,t,16*sd*.98,brk?.5:lvl===3?.46:.4));
     // Accords piqués
-    if(st.chop&&hit(st.chop,i)!=='.'&&!brk)padVoicing(c).forEach(n=>voice(st.chopType||'piano',B.inst,n+12,t,sd*1.2,.35));
-    // Arpège (renforcé pendant les ponts sans mélodie)
-    const arpPat=st.arp||(brk?'0.1.2.1.0.1.2.1.':null);
-    if(arpPat&&arpPat[i]!=='.'){const tones=chordTones(c,60);const idx=+arpPat[i],n=tones[idx%tones.length]+12*Math.floor(idx/tones.length);voice(st.arpType||'pluck',B.inst,n+(brk?12:0),t,sd*1.5,brk?.42:.26,B.send)}
-    // Mélodie
-    if(bar.lead)for(const n of bar.notes)if(n.pos===i){voice(st.lead,B.lead,n.m,t,n.len*sd*.92,.62,B.send);if(bar.double)voice(st.lead==='brass'?'brass':'square',B.lead,n.m-12,t,n.len*sd*.92,.22)}
+    if(st.chop&&hit(st.chop,i)!=='.'&&!brk&&lvl>=2)padVoicing(c).forEach(n=>voice(st.chopType||'piano',B.right,n+12,t,sd*1.2,.32*hv()));
+    // Arpège (renforcé pendant les breaks sans mélodie, allégé quand l'énergie baisse)
+    const arpPat=st.arp||(brk||lvl===1?'0.1.2.1.0.1.2.1.':null);
+    if(arpPat&&arpPat[i]!=='.'&&!(bar.intro&&bar.first)){const tones=chordTones(c,60);const idx=+arpPat[i],n=tones[idx%tones.length]+12*Math.floor(idx/tones.length);voice(st.arpType||'pluck',B.left,n+(brk?12:0),t,sd*1.5,(brk?.4:.26)*hv(),B.send)}
+    // Mélodie (+ voix d'harmonie, + doublure à l'octave dans les refrains)
+    if(bar.lead)bar.notes.forEach((n,k)=>{if(n.pos!==i)return;const dur=n.len*sd*.92,v=(i%4===0?.64:.56)*(.94+r()*.1);
+      voice(bar.leadType,B.lead,n.m,t,dur,v,B.send);
+      if(bar.harm)voice(bar.leadType==='flute'?'soft':'flute',B.lead,bar.harm[k].m,t,dur,v*.42);
+      if(bar.double)voice(st.lead==='brass'?'brass':'square',B.lead,n.m-12,t,dur,.2)});
   };
+  // Mesure suivante : on avance dans le cycle courant, puis on en génère un nouveau
+  const nextBar=s=>{if(!s.queue.length){s.queue=buildCycle(s.P,s.cycle++)}return s.queue.shift()};
   const runScheduler=()=>{
     if(!seq||!ctx)return;
     while(seq.next<ctx.currentTime+.18){
-      const swing=(seq.step%2===1)?(seq.song.st.swing||0)*seq.stepDur*2:0;
+      if(seq.step%16===0)seq.bar=nextBar(seq);
+      const swing=(seq.step%2===1)?(seq.P.st.swing||0)*seq.stepDur*2:0;
       if(seq.next>=ctx.currentTime-.05)scheduleStep(seq,seq.next+swing);
       seq.next+=seq.stepDur;seq.step++;
     }
@@ -250,10 +357,11 @@
     src.connect(bp);bp.connect(g);g.connect(bus.out);[src,l1,l2].forEach(n=>n.start(t));
     bus.extra=[src,l1,l2];
   };
+  const makeSeq=(P,when,bus)=>({P,stepDur:60/P.th.bpm/4,step:0,next:when,bus,queue:[],cycle:0,bar:null,rng:rngFor(hashStr(P.name)^Date.now())});
   const startSong=(name,when)=>{
-    const song=compile(name);const stepDur=60/song.bpm/4;
-    seq={song,stepDur,step:0,next:when,bus:makeBus(stepDur*3)};applyEnergy(true);
-    if(song.st.wind)addWind(seq.bus,when);
+    const P=prepare(name),stepDur=60/P.th.bpm/4;
+    seq=makeSeq(P,when,makeBus(stepDur*3,P.st.reverb));applyEnergy(true);
+    if(P.st.wind)addWind(seq.bus,when);
     if(!schedTimer)schedTimer=setInterval(runScheduler,25);
     runScheduler();
   };
@@ -277,7 +385,7 @@
     L('G6',5,2.8,.85);C('C4 E4 G4 C5',5,2.9);timp('C2',5,1.1);DRUM.crash(bus.drums,t0+5*b,1.3);
     voice('strings',bus.inst,noteToMidi('C3'),t0+5*b,2.9*b,.6);
     // Puis la boucle triomphale prend le relais sur le même bus
-    const loop=compile('victoryLoop');seq={song:loop,stepDur:60/loop.bpm/4,step:0,next:t0+8*b,bus};applyEnergy(true);
+    seq=makeSeq(prepare('victoryLoop'),t0+8*b,bus);applyEnergy(true);
     if(!schedTimer)schedTimer=setInterval(runScheduler,25);
   };
 
