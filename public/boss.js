@@ -314,7 +314,7 @@
   }
 
   // ---------- Rendu du combat (écran de l'hôte) ----------
-  const view = { raf: 0, n: null, parts: [], shake: 0, banner: null, flash: 0, heroes: {}, low: null, lx: null, big: null, bx: null, k: 4, lastHud: '', deathT: 0 };
+  const view = { quiet: false, me: null, raf: 0, n: null, parts: [], shake: 0, banner: null, flash: 0, heroes: {}, low: null, lx: null, big: null, bx: null, k: 4, lastHud: '', deathT: 0 };
   function heroInfo(id) { return view.heroes[id] || { cls: 'archer', color: 0, name: '?' }; }
   function lerpHero(id) {
     const c = net.cur.p.find(e => e.id === id), p = net.prev && net.prev.p.find(e => e.id === id);
@@ -333,37 +333,39 @@
   function particle(x, y, vx, vy, life, col, size = 1, g = 0) { view.parts.push({ x, y, vx, vy, life, max: life, col, size, g }); }
   function burst(x, y, n, cols, sp = 40, life = 0.5, size = 1) { for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = sp * (0.4 + Math.random() * 0.8); particle(x, y, Math.cos(a) * s, Math.sin(a) * s, life * (0.6 + Math.random() * 0.6), cols[i % cols.length], size); } }
 
+  // Sur l'écran d'un joueur (mode clavier + souris), la télé fait déjà le son : on reste muet
+  const fxs = (...a) => { if (!view.quiet) sfx(...a); };
   function handleFx(s) {
     for (const e of s.fx || []) {
       const [k, a, b] = e;
       const hero = () => s.p.find(p => p.id === a);
-      if (k === 'hit') { burst(a, b, 4, ['#ffffff', '#ffd23f'], 50, 0.25); sfx('hit'); }
-      else if (k === 'boom') { burst(a, b, 16, ['#ffffff', '#ffd23f', '#ff8a3d', '#e03030'], 70, 0.6, 2); view.shake = Math.max(view.shake, 0.25); sfx('boom'); }
-      else if (k === 'hurt') { const h = hero(); if (h) burst(h.x, h.y - 6, 6, ['#ff4d6d', '#ffffff'], 40, 0.35); sfx('hurt'); }
-      else if (k === 'block') { const h = hero(); if (h) { burst(h.x, h.y - 6, 6, ['#ffffff', '#4dabff'], 50, 0.3); view.pop(h.x, h.y - 22, 'PARADE !', '#9ad0ff'); } sfx('block'); }
-      else if (k === 'ko') { const h = hero(); if (h) burst(h.x, h.y - 6, 12, ['#ffffff', '#b0b0c0'], 30, 0.8); sfx('ko'); }
+      if (k === 'hit') { burst(a, b, 4, ['#ffffff', '#ffd23f'], 50, 0.25); fxs('hit'); }
+      else if (k === 'boom') { burst(a, b, 16, ['#ffffff', '#ffd23f', '#ff8a3d', '#e03030'], 70, 0.6, 2); view.shake = Math.max(view.shake, 0.25); fxs('boom'); }
+      else if (k === 'hurt') { const h = hero(); if (h) burst(h.x, h.y - 6, 6, ['#ff4d6d', '#ffffff'], 40, 0.35); fxs('hurt'); }
+      else if (k === 'block') { const h = hero(); if (h) { burst(h.x, h.y - 6, 6, ['#ffffff', '#4dabff'], 50, 0.3); view.pop(h.x, h.y - 22, 'PARADE !', '#9ad0ff'); } fxs('block'); }
+      else if (k === 'ko') { const h = hero(); if (h) burst(h.x, h.y - 6, 12, ['#ffffff', '#b0b0c0'], 30, 0.8); fxs('ko'); }
       else if (k === 'heal') { const h = hero(); if (h) particle(h.x, h.y - 14, 0, -18, 0.8, '#52e08a', 2); }
-      else if (k === 'revive') { const h = hero(); if (h) { burst(h.x, h.y - 6, 14, ['#ffd23f', '#ffffff', '#52e08a'], 45, 0.9); view.pop(h.x, h.y - 22, 'DEBOUT !', '#ffd23f'); } sfx('revive'); }
+      else if (k === 'revive') { const h = hero(); if (h) { burst(h.x, h.y - 6, 14, ['#ffd23f', '#ffffff', '#52e08a'], 45, 0.9); view.pop(h.x, h.y - 22, 'DEBOUT !', '#ffd23f'); } fxs('revive'); }
       else if (k === 'special') {
         const h = hero(), col = { archer: '#a3e635', mage: '#ff8a3d', tank: '#4dabff', heal: '#52e08a', summoner: '#6ff8ff' }[b] || '#fff';
         if (h) { burst(h.x, h.y - 6, 20, [col, '#ffffff'], 70, 0.7); view.pop(h.x, h.y - 24, CLASSES[b].special.toUpperCase() + ' !', col); }
         if (b === 'tank') view.flash = Math.max(view.flash, 0.15);
-        sfx('special', b);
+        fxs('special', b);
       }
-      else if (k === 'pew') sfx('pew', b);
-      else if (k === 'swing') sfx('swing');
-      else if (k === 'reflect') { const h = hero(); if (h) { burst(h.x, h.y - 6, 10, ['#9ad0ff', '#ffffff'], 60, 0.4); view.pop(h.x, h.y - 22, 'RENVOI !', '#9ad0ff'); } sfx('reflect'); }
+      else if (k === 'pew') fxs('pew', b);
+      else if (k === 'swing') fxs('swing');
+      else if (k === 'reflect') { const h = hero(); if (h) { burst(h.x, h.y - 6, 10, ['#9ad0ff', '#ffffff'], 60, 0.4); view.pop(h.x, h.y - 22, 'RENVOI !', '#9ad0ff'); } fxs('reflect'); }
       else if (k === 'say') { view.banner = { text: a, t: 2.2 }; }
-      else if (k === 'shoot') sfx('shoot');
-      else if (k === 'thud') { view.shake = Math.max(view.shake, 0.3); sfx('thud'); }
-      else if (k === 'dash') sfx('dash');
-      else if (k === 'zap') { view.flash = Math.max(view.flash, 0.12); sfx('zap'); }
-      else if (k === 'tele') { if (a !== undefined) burst(a, b, 14, ['#ff7ad9', '#ffffff', '#b070e0'], 50, 0.5); sfx('tele'); }
-      else if (k === 'throw') sfx('throw');
-      else if (k === 'morph') { view.flash = 0.6; view.shake = 1.5; sfx('morph'); }
-      else if (k === 'intro') { sfx('intro'); }
-      else if (k === 'dying') { view.deathT = 0; sfx('morph'); }
-      else if (k === 'wiped') sfx('wiped');
+      else if (k === 'shoot') fxs('shoot');
+      else if (k === 'thud') { view.shake = Math.max(view.shake, 0.3); fxs('thud'); }
+      else if (k === 'dash') fxs('dash');
+      else if (k === 'zap') { view.flash = Math.max(view.flash, 0.12); fxs('zap'); }
+      else if (k === 'tele') { if (a !== undefined) burst(a, b, 14, ['#ff7ad9', '#ffffff', '#b070e0'], 50, 0.5); fxs('tele'); }
+      else if (k === 'throw') fxs('throw');
+      else if (k === 'morph') { view.flash = 0.6; view.shake = 1.5; fxs('morph'); }
+      else if (k === 'intro') { fxs('intro'); }
+      else if (k === 'dying') { view.deathT = 0; fxs('morph'); }
+      else if (k === 'wiped') fxs('wiped');
     }
   }
   view.pops = [];
@@ -465,7 +467,7 @@
     // Mort du boss : explosions en chaîne
     if (s.st === 'dying') {
       view.deathT += dt;
-      if (Math.random() < dt * 14) { const ex = b.x + (Math.random() - 0.5) * 50, ey = b.y + (Math.random() - 0.5) * 50; burst(ex, ey, 10, ['#ffffff', '#ffd23f', '#ff8a3d'], 60, 0.5, 2); if (Math.random() < 0.5) sfx('boom'); view.shake = Math.max(view.shake, 0.2); }
+      if (Math.random() < dt * 14) { const ex = b.x + (Math.random() - 0.5) * 50, ey = b.y + (Math.random() - 0.5) * 50; burst(ex, ey, 10, ['#ffffff', '#ffd23f', '#ff8a3d'], 60, 0.5, 2); if (Math.random() < 0.5) fxs('boom'); view.shake = Math.max(view.shake, 0.2); }
     }
     x.setTransform(1, 0, 0, 1, 0, 0);
     // Flash blanc (métamorphose, éclair, fin du boss)
@@ -512,6 +514,7 @@
       const a0 = h.f < 0 ? Math.PI * 0.7 : -Math.PI * 0.3; x.arc(h.x, h.y - 6, 13, a0, a0 + Math.PI * 0.6); x.stroke();
     }
     if (h.sh) { x.strokeStyle = Math.floor(time * 8) % 2 ? '#9ad0ff' : '#4dabff'; x.lineWidth = 1; x.beginPath(); x.arc(h.x, h.y - 6, 11, 0, 7); x.stroke(); }
+    if (view.me === h.id) { const ay = h.y - 31 + Math.floor(time * 4) % 2; R('#000000', h.x - 3, ay - 1, 7, 3); R('#ffd23f', h.x - 2, ay, 5, 1); R('#000000', h.x - 2, ay + 2, 5, 2); R('#ffd23f', h.x - 1, ay + 1, 3, 2); R('#ffd23f', h.x, ay + 3, 1, 1); } // « c'est moi »
   }
 
   // Textes nets par-dessus l'image agrandie (noms, bandeaux)
@@ -561,9 +564,10 @@
   function fitHost() {
     const wrap = document.querySelector('.bf-stage');
     if (!wrap || !view.big) return;
-    const side = window.innerWidth > 1100;
-    const availW = window.innerWidth - (side ? 330 : 40), availH = window.innerHeight - (side ? 90 : 260);
-    const k = Math.max(2, Math.floor(Math.min(availW / W, availH / (H + HUD)) * 2) / 2);
+    let availW, availH;
+    if (view.quiet) { availW = wrap.clientWidth - 16; availH = wrap.clientHeight - 16; } // écran du joueur : la place laissée par la barre d'infos
+    else { const side = window.innerWidth > 1100; availW = window.innerWidth - (side ? 330 : 40); availH = window.innerHeight - (side ? 90 : 260); }
+    const k = Math.max(view.quiet ? 1 : 2, Math.floor(Math.min(availW / W, availH / (H + HUD)) * 2) / 2);
     if (k !== view.k || view.big.width !== W * k) {
       view.k = k; view.big.width = W * k; view.big.height = (H + HUD) * k;
     }
@@ -610,7 +614,7 @@
     const byCls = id => players.filter(pl => picks[pl.id] === id);
     const waiting = players.filter(pl => !picks[pl.id]);
     app.innerHTML = `<div class="bf bf-pick">
-      <header class="bf-title"><small>BOSS FIGHT · COOPÉRATIF</small><h1>CHOISISSEZ VOTRE HÉROS</h1><p>Sur votre téléphone, choisissez une classe. Chacun a une attaque spéciale !</p>${ctx.timer}</header>
+      <header class="bf-title"><small>BOSS FIGHT · COOPÉRATIF</small><h1>CHOISISSEZ VOTRE HÉROS</h1><p>Sur votre téléphone ou votre ordinateur (clavier + souris), choisissez une classe. Chacun a une attaque spéciale !</p>${ctx.timer}</header>
       <section class="bf-classes">${p.data.classes.map((c, i) => `<div class="bf-class ${byCls(c.id).length ? 'taken' : ''}">
         <div class="bf-class-art">${heroImg(c.id, i, 6)}</div>
         <b>${c.icon} ${esc(c.name)}</b><span>${esc(c.desc)}</span>
@@ -627,17 +631,20 @@
     view.heroes = Object.fromEntries((p.data.heroes || []).map(h => [h.id, h]));
     view.formNames = Object.fromEntries((p.data.forms || []).map(f => [f.key, f]));
     if (view.n === p.n && document.body.contains(view.big)) return;
-    view.n = p.n; view.parts = []; view.pops = []; view.banner = null;
+    view.n = p.n; view.parts = []; view.pops = []; view.banner = null; view.quiet = false; view.me = null;
     app.innerHTML = `<div class="bf bf-fight"><div class="bf-stage"><canvas id="bf-canvas" class="pixel"></canvas></div>
       <aside class="bf-side"><div class="bf-side-title">HÉROS</div><div id="bf-heroes">${(p.data.heroes || []).map(h => `<div class="bf-hero" data-id="${esc(h.id)}">
         ${heroImg(h.cls, h.color, 3)}<div class="bf-hero-main"><b style="color:${PLAYER_COLORS[h.color % 8]}">${esc(h.name)}</b><small>${CLASSES[h.cls].icon} ${esc(CLASSES[h.cls].name)} <span class="bf-state"></span></small>
         <div class="bf-hearts">${heartsHTML(20, 2)}</div><div class="bf-cd"><i></i></div></div></div>`).join('')}</div>
         ${p.data.continues ? `<p class="bf-cont">Continues : ${p.data.continues}</p>` : ''}${ctx.stopButton}</aside></div>`;
+    startView();
+    ctx.bindStop();
+  }
+  function startView() {
     view.big = document.getElementById('bf-canvas'); view.bx = view.big.getContext('2d');
     view.low = document.createElement('canvas'); view.low.width = W; view.low.height = H + HUD; view.lx = view.low.getContext('2d');
     view.k = 0; fitHost();
     window.onresize = fitHost;
-    ctx.bindStop();
     hostLoop();
   }
   net.listeners.add(s => {
@@ -813,8 +820,16 @@
     else if (p.kind === 'bossEnding') hostEnding(app, p, ctx);
   }
 
-  // ---------- Téléphone : choix, manette, fin ----------
-  const pad = { n: null, dx: 0, dy: 0, atk: false, sp: 0, last: '', timer: 0, send: null, keys: new Set(), me: null };
+  // ---------- Joueurs : choix des contrôles et du héros, manette (téléphone) ou clavier + souris, fin ----------
+  const pad = { n: null, mode: null, dx: 0, dy: 0, atk: false, sp: 0, last: '', timer: 0, send: null, keys: new Set(), me: null };
+  // Contrôles : « touch » (manette tactile) ou « kb » (clavier + souris). Demandés au début de chaque Boss Fight,
+  // le dernier choix est retenu et proposé par défaut.
+  const ctrl = { mode: null, askedN: null };
+  const guessMode = () => (window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches ? 'kb' : 'touch');
+  try { const m = localStorage.getItem('bf-ctrl'); if (m === 'kb' || m === 'touch') ctrl.mode = m; } catch (e) {}
+  function setMode(m) { ctrl.mode = m; try { localStorage.setItem('bf-ctrl', m); } catch (e) {} }
+  const curMode = () => ctrl.mode || guessMode();
+
   function sendInput(force) {
     if (!pad.send) return;
     const v = { dx: Math.round(pad.dx * 100) / 100, dy: Math.round(pad.dy * 100) / 100, atk: pad.atk, sp: pad.sp };
@@ -822,29 +837,61 @@
     if (!force && sig === pad.last) return;
     pad.last = sig; pad.send(v);
   }
+  // Touches physiques (e.code) : ZQSD en AZERTY = WASD en QWERTY, plus les flèches
+  const KEYS = {
+    up: ['KeyW', 'ArrowUp'], down: ['KeyS', 'ArrowDown'], left: ['KeyA', 'ArrowLeft'], right: ['KeyD', 'ArrowRight'],
+    atk: ['Space', 'KeyJ'], sp: ['KeyE', 'KeyK', 'ShiftLeft', 'ShiftRight'],
+  };
+  const isKey = (code, what) => KEYS[what].includes(code);
+  const GAME_KEYS = new Set(Object.values(KEYS).flat());
   function keyInput() {
-    const k = pad.keys;
-    if (!k.size) return;
-    pad.dx = (k.has('ArrowRight') || k.has('d') ? 1 : 0) - (k.has('ArrowLeft') || k.has('q') || k.has('a') ? 1 : 0);
-    pad.dy = (k.has('ArrowDown') || k.has('s') ? 1 : 0) - (k.has('ArrowUp') || k.has('z') || k.has('w') ? 1 : 0);
+    const k = pad.keys, has = what => KEYS[what].some(c => k.has(c));
+    let dx = (has('right') ? 1 : 0) - (has('left') ? 1 : 0), dy = (has('down') ? 1 : 0) - (has('up') ? 1 : 0);
+    if (dx && dy) { dx *= Math.SQRT1_2; dy *= Math.SQRT1_2; }
+    pad.dx = dx; pad.dy = dy;
+  }
+  const kbKey = t => `<kbd>${t}</kbd>`;
+
+  function playerControls(app, p, ctx) {
+    const guess = guessMode(), cur = ctrl.mode || guess;
+    app.innerHTML = `${ctx.top}<div class="bf-phone bf-phone-pick bf-ctrl-pick"><h2>Comment joues-tu ?</h2>
+      <p class="bf-hint">Choisis tes contrôles pour le Boss Fight.</p>
+      <button class="bf-pick-btn bf-ctrl-btn ${cur === 'touch' ? 'sel' : ''}" data-m="touch"><span class="bf-ctrl-ico">📱</span><span><b>Sur téléphone</b><small>Joystick et boutons tactiles à l'écran. Regarde la télé pour suivre le combat.</small>${guess === 'touch' ? '<i>Recommandé pour cet appareil</i>' : ''}</span></button>
+      <button class="bf-pick-btn bf-ctrl-btn ${cur === 'kb' ? 'sel' : ''}" data-m="kb"><span class="bf-ctrl-ico">⌨️🖱️</span><span><b>Clavier + souris</b><small>ZQSD / WASD ou flèches pour bouger, clic gauche pour attaquer, clic droit pour le spécial. Le combat s'affiche aussi sur ton écran.</small>${guess === 'kb' ? '<i>Recommandé pour cet appareil</i>' : ''}</span></button></div>`;
+    app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+      window.partyAudio && window.partyAudio.click();
+      setMode(b.dataset.m); ctrl.askedN = p.n; playerPick(app, p, ctx);
+    });
   }
 
   function playerPick(app, p, ctx) {
     document.body.classList.remove('bf-pad-mode');
-    const picks = p.data.picks || {}, mine = picks[ctx.me], players = ctx.players || [];
+    if (ctrl.askedN !== p.n) return playerControls(app, p, ctx);
+    const picks = p.data.picks || {}, mine = picks[ctx.me], players = ctx.players || [], kb = curMode() === 'kb';
     app.innerHTML = `${ctx.top}<div class="bf-phone bf-phone-pick"><h2>Choisis ton héros</h2>
+      <div class="bf-ctrl-now"><span>${kb ? '⌨️🖱️ Clavier + souris' : '📱 Manette tactile'}</span><button type="button" id="bf-ctrl-change">Changer</button></div>
       ${p.data.classes.map((c, i) => { const who = players.filter(pl => picks[pl.id] === c.id && pl.id !== ctx.me).map(pl => esc(pl.name)); return `<button class="bf-pick-btn ${mine === c.id ? 'sel' : ''}" data-c="${c.id}">
         ${heroImg(c.id, i, 3)}<span><b>${c.icon} ${esc(c.name)}</b><small>${esc(c.desc)}</small><em>✨ ${esc(c.special)} : ${esc(c.specialDesc || '')}</em>${who.length ? `<i>Aussi : ${who.join(', ')}</i>` : ''}</span></button>`; }).join('')}
-      <p class="bf-hint">${mine ? `Tu joues <b>${esc(CLASSES[mine].name)}</b>. Tu peux encore changer d'avis !` : 'Touche une classe pour la choisir.'}</p></div>`;
+      <p class="bf-hint">${mine ? `Tu joues <b>${esc(CLASSES[mine].name)}</b>. Tu peux encore changer d'avis !` : `${kb ? 'Clique' : 'Touche'} une classe pour la choisir.`}</p></div>`;
     app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { window.partyAudio && window.partyAudio.click(); ctx.action({ pick: b.dataset.c }); });
+    document.getElementById('bf-ctrl-change').onclick = () => { ctrl.askedN = null; playerControls(app, p, ctx); };
   }
 
   function playerFight(app, p, ctx) {
     document.body.classList.add('bf-pad-mode');
-    const me = (p.data.heroes || []).find(h => h.id === ctx.me);
-    if (pad.n === p.n && document.getElementById('bf-pad')) return;
-    pad.n = p.n; pad.send = ctx.input; pad.me = ctx.me; pad.dx = 0; pad.dy = 0; pad.atk = false; pad.last = '';
+    const me = (p.data.heroes || []).find(h => h.id === ctx.me), mode = curMode();
+    if (pad.n === p.n && pad.mode === mode && document.getElementById('bf-pad')) return;
+    cancelAnimationFrame(view.raf); view.n = null; window.onresize = null;
+    pad.n = p.n; pad.mode = mode; pad.send = ctx.input; pad.me = ctx.me; pad.dx = 0; pad.dy = 0; pad.atk = false; pad.last = ''; pad.keys.clear();
+    Object.assign(padState, { hp: null, ko: null, cd: null, msg: '' });
     if (!me) { app.innerHTML = `${ctx.top}<div class="bf-phone"><p class="bf-hint">Le combat a commencé sans toi… regarde l'écran ! 👀</p></div>`; return; }
+    if (mode === 'kb') playerKeyboard(app, p, ctx, me); else playerTouch(app, p, ctx, me);
+    app.querySelector('#bf-switch').onclick = e => { e.stopPropagation(); setMode(mode === 'kb' ? 'touch' : 'kb'); playerFight(app, p, ctx); };
+    clearInterval(pad.timer);
+    pad.timer = setInterval(() => { if (!document.getElementById('bf-pad')) return clearInterval(pad.timer); if (pad.keys.size) keyInput(); sendInput(true); }, 200);
+  }
+
+  function playerTouch(app, p, ctx, me) {
     const cls = CLASSES[me.cls];
     app.innerHTML = `<div class="bf-pad" id="bf-pad">
       <div class="bf-pad-top">${heroImg(me.cls, me.color, 3)}<div><b style="color:${PLAYER_COLORS[me.color % 8]}">${esc(me.name)}</b><small>${cls.icon} ${esc(cls.name)}</small></div><div class="bf-pad-hearts" id="bf-hearts">${heartsHTML(20, 3)}</div></div>
@@ -855,7 +902,7 @@
           <button class="bf-b" id="bf-sp" type="button"><span>✨</span><small>${esc(cls.special)}</small><i id="bf-cdring"></i></button>
           <button class="bf-a" id="bf-atk" type="button"><span>${me.cls === 'tank' ? '⚔️' : cls.icon}</span><small>ATTAQUE</small></button>
         </div>
-      </div></div>`;
+      </div><button type="button" class="bf-switch" id="bf-switch">⌨️🖱️ Clavier</button></div>`;
     // Joystick
     const stick = document.getElementById('bf-stick'), knob = document.getElementById('bf-knob');
     let pid = null;
@@ -877,30 +924,58 @@
     atk.onpointerup = atk.onpointercancel = () => { pad.atk = false; atk.classList.remove('on'); sendInput(); };
     sp.onpointerdown = e => { e.preventDefault(); pad.sp++; sp.classList.add('on'); setTimeout(() => sp.classList.remove('on'), 150); sendInput(); };
     atk.oncontextmenu = sp.oncontextmenu = stick.oncontextmenu = e => e.preventDefault();
-    clearInterval(pad.timer);
-    pad.timer = setInterval(() => { if (!document.getElementById('bf-pad')) return clearInterval(pad.timer); keyInput(); sendInput(true); }, 200);
   }
-  // Clavier (pour tester sur ordinateur) : flèches/ZQSD, J ou Espace = attaque, K = spécial
+
+  // Clavier + souris : le combat s'affiche sur l'écran du joueur, avec une barre d'infos et le rappel des touches
+  function playerKeyboard(app, p, ctx, me) {
+    const cls = CLASSES[me.cls];
+    view.heroes = Object.fromEntries((p.data.heroes || []).map(h => [h.id, h]));
+    view.formNames = Object.fromEntries((p.data.forms || []).map(f => [f.key, f]));
+    view.n = p.n; view.parts = []; view.pops = []; view.banner = null; view.quiet = true; view.me = ctx.me;
+    app.innerHTML = `<div class="bf-pad bf-kb" id="bf-pad">
+      <div class="bf-kb-top">${heroImg(me.cls, me.color, 2)}<div class="bf-kb-who"><b style="color:${PLAYER_COLORS[me.color % 8]}">${esc(me.name)}</b><small>${cls.icon} ${esc(cls.name)}</small></div>
+        <div class="bf-pad-hearts" id="bf-hearts">${heartsHTML(20, 2)}</div>
+        <div class="bf-kb-sp" id="bf-sp"><span>✨ ${esc(cls.special)}</span><div class="bf-kb-bar"><i id="bf-cdring"></i></div></div>
+        <button type="button" class="bf-switch" id="bf-switch">📱 Tactile</button></div>
+      <div class="bf-pad-msg" id="bf-msg">Le boss arrive…</div>
+      <div class="bf-stage bf-kb-stage" id="bf-kb-stage"><canvas id="bf-canvas" class="pixel"></canvas></div>
+      <div class="bf-kb-keys"><span>${kbKey('Z')}${kbKey('Q')}${kbKey('S')}${kbKey('D')} / ${kbKey('W')}${kbKey('A')}${kbKey('S')}${kbKey('D')} / ${kbKey('←↑↓→')} Bouger</span>
+        <span>🖱️ Clic gauche / ${kbKey('Espace')} Attaquer (maintenir)</span><span>🖱️ Clic droit / ${kbKey('E')} Spécial</span></div></div>`;
+    startView();
+    const root = document.getElementById('bf-pad');
+    root.onmousedown = e => {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      if (e.button === 0) { pad.atk = true; sendInput(); }
+      else if (e.button === 2) { pad.sp++; sendInput(); }
+    };
+    root.oncontextmenu = e => e.preventDefault();
+  }
+  // Clavier (mode clavier + souris, ou pour tester la manette sur ordinateur)
   window.addEventListener('keydown', e => {
-    if (!document.getElementById('bf-pad')) return;
-    if (e.key === ' ' || e.key === 'j') pad.atk = true;
-    else if (e.key === 'k' && !e.repeat) pad.sp++;
-    else pad.keys.add(e.key);
-    keyInput(); sendInput();
-  });
-  window.addEventListener('keyup', e => {
-    if (!document.getElementById('bf-pad')) return;
-    if (e.key === ' ' || e.key === 'j') pad.atk = false; else pad.keys.delete(e.key);
-    if (!pad.keys.size) { pad.dx = 0; pad.dy = 0; } else keyInput();
+    if (!document.getElementById('bf-pad') || !GAME_KEYS.has(e.code)) return;
+    e.preventDefault(); // pas de défilement de la page avec Espace / flèches
+    if (isKey(e.code, 'atk')) pad.atk = true;
+    else if (isKey(e.code, 'sp')) { if (!e.repeat) pad.sp++; }
+    else { pad.keys.add(e.code); keyInput(); }
     sendInput();
   });
+  window.addEventListener('keyup', e => {
+    if (!document.getElementById('bf-pad') || !GAME_KEYS.has(e.code)) return;
+    if (isKey(e.code, 'atk')) pad.atk = false;
+    else if (pad.keys.delete(e.code)) keyInput();
+    sendInput();
+  });
+  window.addEventListener('mouseup', e => { if (e.button === 0 && pad.atk && document.getElementById('bf-pad') && pad.mode === 'kb') { pad.atk = false; sendInput(); } });
+  // Fenêtre qui perd le focus : on relâche tout (sinon le héros continue de marcher tout seul)
+  window.addEventListener('blur', () => { if (!document.getElementById('bf-pad')) return; pad.keys.clear(); pad.dx = 0; pad.dy = 0; pad.atk = false; sendInput(); });
   // Mise à jour de la manette à chaque instantané
   const padState = { hp: null, ko: null, cd: null, msg: '' };
   net.listeners.add(s => {
     if (!document.getElementById('bf-pad') || pad.n !== s.n) return;
     const h = s.p.find(e => e.id === pad.me);
     if (!h) return;
-    if (padState.hp !== h.hp) { document.getElementById('bf-hearts').innerHTML = heartsHTML(h.hp, 3); if (padState.hp !== null && h.hp < padState.hp && navigator.vibrate) navigator.vibrate(70); padState.hp = h.hp; }
+    if (padState.hp !== h.hp) { document.getElementById('bf-hearts').innerHTML = heartsHTML(h.hp, pad.mode === 'kb' ? 2 : 3); if (padState.hp !== null && h.hp < padState.hp && navigator.vibrate) navigator.vibrate(70); padState.hp = h.hp; }
     const ring = document.getElementById('bf-cdring');
     if (ring && padState.cd !== h.cd) { ring.style.setProperty('--cd', h.cd); document.getElementById('bf-sp').classList.toggle('ready', h.cd <= 0); if (padState.cd > 0 && h.cd <= 0 && navigator.vibrate) navigator.vibrate(25); padState.cd = h.cd; }
     document.getElementById('bf-pad').classList.toggle('ko', h.ko);
