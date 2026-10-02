@@ -1,9 +1,14 @@
 // Pixel Flou : un personnage culte du jeu vidéo s'affiche en 8×8 pixels, puis devient plus net
 // toutes les 3 secondes. Trouver le personnage rapporte le plus de points, trouver le jeu en rapporte aussi.
-// Plus on répond tôt (image floue), plus on gagne. Les noms restent côté serveur : seul le sprite est envoyé.
+// Plus on répond tôt (image floue), plus on gagne. Les noms restent côté serveur : seule l'image est envoyée
+// (photos sous un nom de fichier neutre).
 const { norm, matches } = require('../_textquiz');
 const diff = require('../_difficulty');
 const { resolve } = require('./sprites');
+// Photos libres de droit (Wikimedia Commons) : public/assets/pixelflou, crédits dans photos.json.
+// Un personnage sans photo garde son pixel art.
+let PHOTOS = {};
+try { PHOTOS = require('./photos.json'); } catch (e) { /* pas encore de photos */ }
 
 const ROUNDS = 6;
 const STEPS = 8; // 8×8 … pleine résolution
@@ -90,6 +95,11 @@ const CHARACTERS = [
 ];
 for (const c of CHARACTERS) {
   c.sprite = resolve(c.s);
+  const ph = PHOTOS[c.s];
+  if (ph) {
+    c.image = '/assets/pixelflou/' + ph.file;
+    c.credit = { author: ph.author, license: ph.license, licenseUrl: ph.licenseUrl, source: ph.source };
+  }
   c.acceptChar = [c.a, ...c.alias].map(norm).filter(Boolean);
   c.acceptGame = [c.g, ...c.galias].map(norm).filter(Boolean);
 }
@@ -116,7 +126,7 @@ function askRound(room, api) {
     kind: 'pixel', step: 'play', title: 'Pixel Flou', prompt: 'Qui est ce personnage ? Et de quel jeu vient-il ?', category: 'Jeux vidéo',
     difficulty: level, round: g.i + 1, rounds: g.qs.length, duration: ROUND_SECONDS, expected: api.ids(),
     data: {
-      sprite: q.sprite, startAt: Date.now(), stepMs: STEP_MS, steps: STEPS, found: {}, events: [],
+      ...(q.image ? { image: q.image } : { sprite: q.sprite }), startAt: Date.now(), stepMs: STEP_MS, steps: STEPS, found: {}, events: [],
       pts: { char: pointsFor(CHAR_PTS, 0, q.d), game: pointsFor(GAME_PTS, 0, q.d) },
     },
   });
@@ -179,7 +189,7 @@ module.exports = {
           sub: [f.char ? `personnage (+${f.char})` : '', f.game ? `jeu (+${f.game})` : ''].filter(Boolean).join(' · '),
           pts,
         })),
-        data: { pixel: { sprite: q.sprite, name: q.a, game: q.g } },
+        data: { pixel: { ...(q.image ? { image: q.image, credit: q.credit } : { sprite: q.sprite }), name: q.a, game: q.g } },
       });
     }
     g.i++;

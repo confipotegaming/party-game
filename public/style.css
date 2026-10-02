@@ -594,3 +594,5 @@ input[type=radio]{width:auto;margin-right:8px}
 .px-game{font-weight:900;font-size:clamp(1.2rem,2.6vw,1.8rem);color:#fff}
 .play .px-name{color:var(--ink);text-shadow:none}.play .px-game{color:var(--ink)}
 .px-meter .progress-bar{background:#dcd6ff;margin-top:0}
+.px-credit{margin-top:8px;font-size:.8rem;color:#e9e5ff;max-width:420px}.px-credit a{color:inherit}
+.play .px-credit{color:#555}

@@ -69,3 +69,16 @@ test('le nom du personnage ne quitte pas le serveur pendant la manche', () => {
   const h = startOn('kirby');
   assert.ok(!JSON.stringify(h.room.phase.data).toLowerCase().includes('kirby'));
 });
+
+test('photos : fichier présent, crédit complet, nom de fichier neutre', () => {
+  const fs = require('fs'), path = require('path');
+  let photos = {};
+  try { photos = require('../games/pixelflou/photos.json'); } catch (e) { /* aucune photo */ }
+  for (const [id, p] of Object.entries(photos)) {
+    assert.ok(SPRITES[id], `${id} : personnage connu`);
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'public', 'assets', 'pixelflou', p.file)), `${id} : image présente`);
+    assert.ok(p.author && p.license && p.licenseUrl && p.source.startsWith('https://commons.wikimedia.org/'), `${id} : crédit`);
+    assert.ok(!p.file.toLowerCase().includes(id), `${id} : le nom du fichier ne trahit pas la réponse`);
+  }
+  for (const q of game.questions) if (photos[q.s]) assert.ok(q.image && q.credit, q.a);
+});
