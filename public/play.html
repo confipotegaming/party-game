@@ -26,9 +26,10 @@ s.on('closed', () => { localStorage.removeItem('pg'); joined = null; form('La pa
 
 function form(err = '') {
   key = '';
-  app.innerHTML = `<h1 class="big join-title">Rejoindre une partie</h1>
+  document.body.classList.remove('cc-open');
+  app.innerHTML = `<header class="cc-head"><div class="cc-steps"><span class="on">Inscription</span><i></i><span>Ton personnage</span><i></i><span>Le plateau</span></div>
+    <h1 class="cc-title">Rejoins le <em>plateau</em></h1></header>
     <div id="join-step" class="card stack join-card">
-      <div class="step-pill"><b>1</b><span>Infos de la partie</span></div>
       <input id="c" placeholder="Code de partie (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
       <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
       <button id="next-avatar">Choisir mon avatar →</button>
@@ -69,41 +70,91 @@ function avatarStep(code,name){
     ['🌙 Luna',{race:3,silhouette:3,bodyColor:'#2f3a7a',mane:6,tail:6,maneColor:'#4aa8f0',maneColor2:'#2d2a3e',streak:0,eyes:7,eyeColor:'#18a7b5',mark:8,markColor:'#ffffff',hat:3,neck:2,accessoryColor:'#2d2a3e',effect:4}],
     ['☀️ Celestia',{race:3,silhouette:3,bodyColor:'#f6f4f8',mane:6,tail:6,maneColor:'#4cc38a',maneColor2:'#8f6ae0',streak:4,eyes:1,eyeColor:'#d14d8c',mark:7,markColor:'#ffd43b',hat:2,neck:2,accessoryColor:'#ff6fa8',effect:2}]
   ];
-  let active=0;
-  const linkTail=window.PONY_MANE_TAIL||[];
-  const set=(k,v)=>{if(k==='mane'&&Number(pony.tail)===linkTail[Number(pony.mane)||0])pony.tail=linkTail[v]||0;pony[k]=v;draw();};
-  const draw=()=>{
-    const t=tabs[active];
-    const sections=(t.items||[]).map(([k,list,title,focus])=>{
-      const opts=cat[list]||[], cur=Math.max(0,Math.min(opts.length-1,Number(pony[k])||0));
-      return '<div class="pony-section"><b>'+esc(title)+'</b><div class="pony-tiles">'+opts.map((o,i)=>{
-        const hide={eyes:{glasses:0,hat:0},mane:{hat:0,glasses:0},streak:{hat:0,glasses:0},glasses:{hat:0},mark:{clothes:0},neck:{clothes:0}}[k]||{};
-        const preview=Object.assign({},pony,k==='effect'?{}:{effect:0},hide,{[k]:i});
-        return '<button type="button" class="pony-tile '+(i===cur?'active':'')+'" data-k="'+k+'" data-v="'+i+'">'+window.renderAvatar(preview,86,'still',focus)+'<span>'+esc(o)+'</span></button>';
-      }).join('')+'</div></div>';
-    }).join('')+(t.colors||[]).map(([k,title,pk])=>'<div class="pony-section"><b>'+esc(title)+'</b><div class="color-palette">'+(pal[pk]||[]).map(c=>'<button type="button" class="pony-color '+(String(pony[k]).toLowerCase()===c?'active':'')+'" data-k="'+k+'" data-color="'+c+'" style="background:'+c+'" aria-label="'+c+'"></button>').join('')+'<label class="custom-color"><input class="custom-color-input" data-k="'+k+'" type="color" value="'+(pony[k]||'#ffffff')+'"> 🎨 Autre</label></div></div>').join('');
-    app.innerHTML='<h1 class="big join-title">✨ Crée ton poney</h1><div class="card pony-customizer"><div class="step-pill"><b>2</b><span>Personnalise ton poney</span></div>'+
-      '<div class="pony-layout"><div class="pony-preview-panel"><div class="pony-preview">'+avatarMarkup(pony,250,'happy')+'</div><div class="pony-name"><b>'+esc(name)+'</b><span>Ton poney se met à jour en direct ✨</span></div></div>'+
-      '<div class="pony-presets"><span>Inspirations</span>'+presets.map((x,i)=>'<button type="button" class="alt preset" data-preset="'+i+'">'+esc(x[0])+'</button>').join('')+'</div>'+
-      '<div class="pony-editor"><div class="pony-categories">'+tabs.map((x,i)=>'<button type="button" class="pony-cat '+(i===active?'active':'')+'" data-cat="'+i+'">'+esc(x.label)+'</button>').join('')+'</div>'+sections+'</div></div>'+
-      '<div class="pony-actions"><button type="button" class="alt" id="pony-back">← Retour</button><button type="button" class="alt" id="pony-random">🎲 Aléatoire</button><button type="button" class="alt" id="pony-reset">↻ Réinitialiser</button><button type="button" id="pony-confirm">✓ Choisir ce poney</button></div></div>';
-    const cats=document.querySelector('.pony-categories'), ac=cats.querySelector('.active'); if(ac) cats.scrollLeft=ac.offsetLeft-cats.offsetWidth/2+ac.offsetWidth/2;
-    document.querySelectorAll('.pony-cat').forEach(b=>b.onclick=()=>{active=+b.dataset.cat;draw();});
-    document.querySelectorAll('.pony-tile').forEach(b=>b.onclick=()=>set(b.dataset.k,+b.dataset.v));
-    document.querySelectorAll('.pony-color').forEach(b=>b.onclick=()=>set(b.dataset.k,b.dataset.color));
-    document.querySelectorAll('.custom-color-input').forEach(i=>i.onchange=()=>set(i.dataset.k,i.value));
-    document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>{pony=Object.assign(window.defaultPony(),presets[+b.dataset.preset][1]);draw();});
-    document.getElementById('pony-reset').onclick=()=>{pony=window.defaultPony();draw();};
-    document.getElementById('pony-random').onclick=()=>{
-      const r=a=>a[Math.floor(Math.random()*a.length)];
-      const mn=Math.floor(Math.random()*cat.manes.length);
-      pony=Object.assign(window.defaultPony(),{race:r([0,1,2,3]),silhouette:r([0,1,1,2,3]),coat:r([0,0,0,1,2,3,4,5,6]),coatColor:r(['#ffffff','#fff3a6','#3d3d4f']),bodyColor:r(pal.body),mane:mn,tail:linkTail[mn]||0,streak:r([0,0,1,2,3,4]),maneColor:r(pal.mane),maneColor2:r(pal.mane),eyes:Math.floor(Math.random()*cat.eyes.length),glasses:Math.random()<.2?1+Math.floor(Math.random()*(cat.glasses.length-1)):0,effect:Math.random()<.3?1+Math.floor(Math.random()*(cat.effects.length-1)):0,clothes:Math.random()<.2?1+Math.floor(Math.random()*(cat.clothes.length-1)):0,eyeColor:r(pal.eye),mark:1+Math.floor(Math.random()*(cat.marks.length-1)),markColor:r(pal.mane),accessoryColor:r(pal.accent),hat:Math.random()<.35?1+Math.floor(Math.random()*(cat.hats.length-1)):0,neck:Math.random()<.3?1+Math.floor(Math.random()*(cat.necks.length-1)):0});
-      draw();
-    };
-    document.getElementById('pony-back').onclick=()=>form();
-    document.getElementById('pony-confirm').onclick=()=>{chosenAvatar=JSON.parse(JSON.stringify(pony));localStorage.setItem('pg-avatar',JSON.stringify(chosenAvatar));window.partyAudio.enable();join(code,name,null,chosenAvatar);};
+  const linkTail=window.PONY_MANE_TAIL||[], base=window.defaultPony();
+  let active=0, history=[], future=[], look=null, mood='happy', rolling=false, quipAt=0;
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+  const looks=presets.map(([label,o])=>({label,pony:Object.assign(window.defaultPony(),o)}));
+  const QUIPS={hat:['Ce chapeau ? Audacieux.','Un chapeau pareil, ça se mérite.'],glasses:['Les lunettes : +30 % de charisme. C’est scientifique.'],effect:['Des effets spéciaux ! Le budget de l’émission explose.'],clothes:['Tenue de gala validée par la production.'],mane:['Cette crinière va faire des jaloux.'],bodyColor:['Couleur de pelage osée. J’adore. Je crois.'],mark:['Marque de beauté enregistrée au registre des stars.'],eyes:['Ce regard… la caméra 3 est conquise.'],neck:['Un accessoire de cou ? Très red carpet.'],race:['Changement d’espèce. On ne juge pas, on filme.']};
+  const quip=k=>{if(Date.now()-quipAt<6000||!QUIPS[k]||!window.ShowTV)return;quipAt=Date.now();window.ShowTV.say('hype',pick(QUIPS[k]),2600);};
+  const commit=(next,label=null)=>{if(same(next,pony))return;history.push(JSON.stringify(pony));if(history.length>40)history.shift();future=[];pony=next;look=label;paint(true);};
+  const set=(k,v)=>{const n=Object.assign({},pony);if(k==='mane'&&Number(n.tail)===linkTail[Number(n.mane)||0])n.tail=linkTail[v]||0;n[k]=v;commit(n);quip(k);};
+  const randomPony=()=>{
+    const r=pick, mn=Math.floor(Math.random()*cat.manes.length);
+    return Object.assign(window.defaultPony(),{race:r([0,1,2,3]),silhouette:r([0,1,1,2,3]),coat:r([0,0,0,1,2,3,4,5,6]),coatColor:r(['#ffffff','#fff3a6','#3d3d4f']),bodyColor:r(pal.body),mane:mn,tail:linkTail[mn]||0,streak:r([0,0,1,2,3,4]),maneColor:r(pal.mane),maneColor2:r(pal.mane),eyes:Math.floor(Math.random()*cat.eyes.length),glasses:Math.random()<.2?1+Math.floor(Math.random()*(cat.glasses.length-1)):0,effect:Math.random()<.3?1+Math.floor(Math.random()*(cat.effects.length-1)):0,clothes:Math.random()<.2?1+Math.floor(Math.random()*(cat.clothes.length-1)):0,eyeColor:r(pal.eye),mark:1+Math.floor(Math.random()*(cat.marks.length-1)),markColor:r(pal.mane),accessoryColor:r(pal.accent),hat:Math.random()<.35?1+Math.floor(Math.random()*(cat.hats.length-1)):0,neck:Math.random()<.3?1+Math.floor(Math.random()*(cat.necks.length-1)):0});
   };
-  draw();
+  const keysOf=t=>[...(t.items||[]).map(x=>x[0]),...(t.colors||[]).map(x=>x[0])];
+  const changed=t=>keysOf(t).some(k=>String(pony[k]??'')!==String(base[k]??''));
+  const tabIcon=l=>l.split(' ')[0], tabText=l=>l.split(' ').slice(1).join(' ');
+  const MOODS=[['happy','😄','Joie'],['smug','😏','Frime'],['grimace','😬','Gêne'],['sleepy','😴','Sieste']];
+  document.body.classList.add('cc-open');
+  app.innerHTML=`<div class="cc">
+    <header class="cc-head"><div class="cc-steps"><span class="done">Inscription</span><i></i><span class="on">Ton personnage</span><i></i><span>Le plateau</span></div>
+      <h1 class="cc-title">Crée ton <em>poney</em></h1></header>
+    <div class="cc-grid">
+      <section class="cc-stage-col">
+        <div class="cc-stage"><div class="cc-spot"></div><div class="cc-floor"><i></i></div><div class="cc-pony" id="cc-pony"></div><div class="cc-burst" id="cc-burst"></div><div class="cc-host" id="cc-host"></div>
+          <div class="cc-tools"><button type="button" class="cc-tool" id="cc-undo" title="Annuler">↶</button><button type="button" class="cc-tool" id="cc-redo" title="Rétablir">↷</button></div>
+          <div class="cc-moods">${MOODS.map(([m,e,t])=>`<button type="button" class="cc-mood" data-mood="${m}" title="${t}">${e}</button>`).join('')}</div></div>
+        <div class="cc-plate"><span class="cc-plate-tag">Candidat·e</span><b>${esc(name)}</b><small id="cc-look">Création originale</small></div>
+      </section>
+      <section class="cc-panel">
+        <div class="cc-looks"><div class="cc-label">Looks prêts à porter</div><div class="cc-looks-row">${looks.map((x,i)=>`<button type="button" class="cc-lookcard" data-look="${i}">${window.renderAvatar(x.pony,64,'still')}<span>${esc(x.label)}</span></button>`).join('')}</div></div>
+        <nav class="cc-rail" id="cc-rail">${tabs.map((t,i)=>`<button type="button" class="cc-tab" data-cat="${i}"><span class="cc-tab-ico">${tabIcon(t.label)}</span><span class="cc-tab-txt">${esc(tabText(t.label))}</span><i class="cc-dot"></i></button>`).join('')}</nav>
+        <div class="cc-options" id="cc-options"></div>
+      </section>
+    </div>
+    <footer class="cc-bar"><button type="button" class="bt-ghost" id="pony-back" title="Retour">←</button><button type="button" class="bt-ghost" id="pony-reset">↻ <span>Réinitialiser</span></button><button type="button" class="alt" id="pony-random">🎲 <span>Aléatoire</span></button><button type="button" id="pony-confirm">Monter sur le plateau ▶</button></footer>
+  </div>`;
+  const $=id=>document.getElementById(id);
+  if(window.Mascot){const h=window.Mascot.mount($('cc-host'));window.Mascot.setStage(h);setTimeout(()=>h.say(pick(['À toi de jouer ! Fais-moi un look de star.','Les caméras t’attendent. Pas de pression.','Montre-moi ce que tu as dans la crinière.']),'intro',3600),500);}
+  function options(){
+    const t=tabs[active];
+    return `<div class="cc-tabtitle"><span>${tabIcon(t.label)}</span>${esc(tabText(t.label))}</div>`+(t.items||[]).map(([k,list,title,focus])=>{
+      const opts=cat[list]||[], cur=Math.max(0,Math.min(opts.length-1,Number(pony[k])||0));
+      const hide={eyes:{glasses:0,hat:0},mane:{hat:0,glasses:0},streak:{hat:0,glasses:0},glasses:{hat:0},mark:{clothes:0},neck:{clothes:0}}[k]||{};
+      return `<div class="cc-section"><div class="cc-label">${esc(title)} <small>${cur+1}/${opts.length}</small></div><div class="cc-tiles">${opts.map((o,i)=>{
+        const preview=Object.assign({},pony,k==='effect'?{}:{effect:0},hide,{[k]:i});
+        return `<button type="button" class="cc-tile ${i===cur?'active':''}" data-k="${k}" data-v="${i}">${window.renderAvatar(preview,86,'still',focus)}<span>${esc(o)}</span></button>`;
+      }).join('')}</div></div>`;
+    }).join('')+(t.colors||[]).map(([k,title,pk])=>`<div class="cc-section"><div class="cc-label">${esc(title)}</div><div class="cc-swatches">${(pal[pk]||[]).map(c=>`<button type="button" class="cc-swatch ${String(pony[k]).toLowerCase()===c?'active':''}" data-k="${k}" data-color="${c}" style="--c:${c}" aria-label="${c}"></button>`).join('')}<label class="cc-custom" title="Couleur sur mesure"><input class="custom-color-input" data-k="${k}" type="color" value="${pony[k]||'#ffffff'}"><span>＋</span></label></div></div>`).join('');
+  }
+  function paint(bump){
+    $('cc-pony').innerHTML=window.renderAvatar(pony,300,mood);
+    if(bump){const el=$('cc-pony');el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');const b=$('cc-burst');b.classList.remove('on');void b.offsetWidth;b.classList.add('on');}
+    const match=looks.find(x=>same(x.pony,pony));
+    $('cc-look').textContent=match?'Look : '+match.label:(look||'Création originale');
+    app.querySelectorAll('.cc-lookcard').forEach((b,i)=>b.classList.toggle('active',looks[i]===match));
+    app.querySelectorAll('.cc-tab').forEach((b,i)=>{b.classList.toggle('active',i===active);b.classList.toggle('changed',changed(tabs[i]));});
+    app.querySelectorAll('.cc-mood').forEach(b=>b.classList.toggle('active',b.dataset.mood===mood));
+    const keep=$('cc-options').scrollTop;$('cc-options').innerHTML=options();$('cc-options').scrollTop=keep;
+    $('cc-undo').disabled=!history.length;$('cc-redo').disabled=!future.length;
+  }
+  const centerTab=()=>{const rail=$('cc-rail'),ac=rail.querySelector('.active');if(ac&&rail.scrollWidth>rail.clientWidth)rail.scrollLeft=ac.offsetLeft-rail.offsetWidth/2+ac.offsetWidth/2;};
+  app.querySelector('.cc').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||rolling)return;
+    if(b.dataset.cat!==undefined){active=+b.dataset.cat;paint(false);centerTab();return;}
+    if(b.dataset.k&&b.dataset.v!==undefined)return set(b.dataset.k,+b.dataset.v);
+    if(b.dataset.k&&b.dataset.color)return set(b.dataset.k,b.dataset.color);
+    if(b.dataset.look!==undefined){const x=looks[+b.dataset.look];commit(JSON.parse(JSON.stringify(x.pony)),'Look : '+x.label);return;}
+    if(b.dataset.mood){mood=b.dataset.mood;paint(false);return;}
+  });
+  app.querySelector('.cc').addEventListener('change',e=>{const i=e.target.closest('.custom-color-input');if(i)set(i.dataset.k,i.value);});
+  $('cc-undo').onclick=()=>{if(!history.length)return;future.push(JSON.stringify(pony));pony=JSON.parse(history.pop());look=null;paint(true);};
+  $('cc-redo').onclick=()=>{if(!future.length)return;history.push(JSON.stringify(pony));pony=JSON.parse(future.pop());look=null;paint(true);};
+  $('pony-reset').onclick=()=>commit(window.defaultPony());
+  $('pony-random').onclick=()=>{
+    if(rolling)return;rolling=true;const start=JSON.stringify(pony);let n=0;
+    const spin=setInterval(()=>{pony=randomPony();$('cc-pony').innerHTML=window.renderAvatar(pony,300,'still');window.partyAudio.tick();
+      if(++n>=8){clearInterval(spin);rolling=false;const final=randomPony();pony=JSON.parse(start);commit(final,'Tirage au sort 🎲');window.partyAudio.good(2);if(window.ShowTV)window.ShowTV.say('hype',pick(['Le hasard a parlé ! Il a du goût.','Tirage au sort ! Personne n’est responsable de ce look.','La roue du style a tranché.']),2600);}},85);
+  };
+  $('pony-back').onclick=()=>{document.body.classList.remove('cc-open');form();};
+  $('pony-confirm').onclick=()=>{
+    chosenAvatar=JSON.parse(JSON.stringify(pony));localStorage.setItem('pg-avatar',JSON.stringify(chosenAvatar));window.partyAudio.enable();
+    if(window.ShowTV){window.ShowTV.flash('#ffd60a');window.ShowTV.confetti(90);window.ShowTV.say('win',`${name} entre sur le plateau ! Quel style.`,3200);}
+    document.body.classList.remove('cc-open');join(code,name,null,chosenAvatar);
+  };
+  paint(false);
 }
 
 s.on('state', x => {
