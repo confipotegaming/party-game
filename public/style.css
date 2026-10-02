@@ -575,3 +575,50 @@ input[type=radio]{width:auto;margin-right:8px}
 .host .diff-options button{background:#fff;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 14px}
 .host .diff-options button small{font-weight:600;opacity:.7}
 .host .diff-options button.sel{background:var(--sun)}
+/* ===== Mode plateau : lobby, roue des mini-jeux, plateau de course ===== */
+.host .board-lobby{display:grid;gap:14px;margin:14px 0;background:linear-gradient(135deg,#fff 0 60%,#fff3a8)}
+.board-lobby-head{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.board-lobby-head h2{color:var(--ink);font-size:2.4rem;margin:4px 0}
+.board-lobby-icon{font-size:4.5rem;animation:wheelIdle 6s linear infinite}
+.board-lobby-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.board-turns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.board-turns button{background:#fff;padding:8px 14px;font-size:.95rem}
+.board-turns button.sel{background:var(--sun)}
+.board-lobby-foot{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.board-lobby-foot button{font-size:1.3rem}
+.games-title{margin-top:10px}
+.board-chip{background:var(--sun)}
+.board-spin-grid{display:grid;grid-template-columns:minmax(300px,560px) 1fr;gap:22px;align-items:start;margin-top:14px}
+.wheel-wrap{position:relative;filter:drop-shadow(8px 8px 0 var(--ink))}
+.wheel-svg{display:block;width:100%;height:auto}
+.wheel-label{font-family:"Nunito",sans-serif;font-weight:900;font-size:17px;fill:#1d1a3b}
+.wheel-pointer{position:absolute;left:50%;top:-18px;transform:translateX(-50%);z-index:2;font-size:3.4rem;line-height:1;color:var(--pink);-webkit-text-stroke:3px var(--ink)}
+.wheel-wrap.done .wheel-pointer{animation:btBump .5s ease 3}
+.wheel-result{text-align:center}
+.wheel-result h2{color:var(--ink);font-size:2.4rem;margin:6px 0}
+.wheel-result.won{background:var(--sun);animation:btPop .45s ease both}
+.board-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.board-actions button{font-size:1.2rem}
+.board-mini .line{padding:6px 0}
+.board-log{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:#fff}
+.board-log .chip{font-size:.85rem;padding:4px 12px;color:var(--ink)}
+.board-results{display:grid;gap:16px}
+.board-podium{display:grid;gap:10px}
+.board-track{display:grid;gap:12px}
+.board-track .section-title{color:var(--ink)}
+.track-lane{display:grid;grid-template-columns:170px 1fr;gap:12px;align-items:center}
+.track-name{display:grid}
+.track-name small{opacity:.7}
+.track-cells{position:relative;display:grid;grid-template-columns:repeat(21,1fr);gap:3px;height:34px;align-items:center}
+.track-cells i{height:24px;border:3px solid var(--ink);border-radius:8px;background:#efedff}
+.track-cells i.on{background:var(--mint)}
+.track-lane.lead .track-cells i.on{background:var(--sun)}
+.track-cells i.goal{background:repeating-conic-gradient(var(--ink) 0 25%,#fff 0 50%) 0 0/12px 12px}
+.track-pawn{position:absolute;bottom:4px;width:calc(100% / 21);display:grid;justify-items:center;transition:left 1.2s cubic-bezier(.3,1.4,.5,1);pointer-events:none}
+.board-phone{text-align:center}
+.board-phone-icon{font-size:4.5rem;line-height:1.1}
+.board-phone-icon.spin{animation:wheelIdle 1.2s linear infinite}
+@keyframes wheelIdle{to{transform:rotate(360deg)}}
+@media (max-width:900px){.board-spin-grid{grid-template-columns:1fr}.track-lane{grid-template-columns:1fr}}
+.board-mini .section-title,.board-track .section-title{color:var(--ink)}
+.board-lobby .muted,.wheel-result .muted{color:var(--ink);opacity:.7}
