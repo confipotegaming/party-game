@@ -42,33 +42,58 @@ function form(err = '') {
 }
 function avatarStep(code,name){
   let pony = window.normalizePony(chosenAvatar) || window.defaultPony();
-  const cat = window.PONY_CATALOG;
-  const categories = [
-    ['bodyColor','Couleur du corps','bodyColors'],['bodyShape','Forme du corps','bodyShapes'],['mane','Cheveux / crinière','manes'],['tail','Queue','tails'],['eyes','Yeux','eyes'],['pupils','Pupilles','pupils'],['ears','Oreilles','ears'],['horn','Corne','horns'],['wings','Ailes','wings'],['mark','Tatouage / marque','marks'],['clothes','Vêtements','clothes'],['hat','Chapeaux','hats'],['glasses','Lunettes','glasses'],['jewelry','Bijoux','jewelry'],['accessory','Accessoires','accessories'],['pattern','Motifs','patterns'],['effect','Effets spéciaux','effects']
+  const cat = window.PONY_CATALOG, pal = window.PONY_PALETTES;
+  const tabs = [
+    {label:'🦄 Race', items:[['race','races','Type de poney']]},
+    {label:'🎨 Pelage', colors:[['bodyColor','Couleur du pelage','body']]},
+    {label:'💇 Crinière', items:[['mane','manes','Coiffure'],['streak','streaks','Style de couleur']], colors:[['maneColor','Couleur principale','mane'],['maneColor2','Seconde couleur / mèche','mane']]},
+    {label:'🌀 Queue', items:[['tail','tails','Forme de la queue']], colors:[['maneColor','Couleur (même que la crinière)','mane']]},
+    {label:'👀 Yeux', items:[['eyes','eyes','Regard']], colors:[['eyeColor','Couleur des yeux','eye']]},
+    {label:'⭐ Marque de beauté', items:[['mark','marks','Symbole']], colors:[['markColor','Couleur de la marque','mane']]},
+    {label:'🎩 Chapeaux', items:[['hat','hats','Chapeau']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'👓 Lunettes', items:[['glasses','glasses','Lunettes']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'🎀 Cou', items:[['neck','necks','Accessoire de cou']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'👗 Tenue', items:[['clothes','clothes','Tenue']], colors:[['accessoryColor','Couleur des accessoires','accent']]},
+    {label:'✨ Effets', items:[['effect','effects','Effet magique']], colors:[['accessoryColor','Couleur de l’effet','accent']]}
+  ];
+  const presets=[
+    ['💜 Twilight',{race:1,bodyColor:'#c9a6e8',mane:0,tail:0,maneColor:'#2f2a7a',maneColor2:'#ec4f97',streak:1,eyes:0,eyeColor:'#6a3f9c',mark:1,markColor:'#ec4f97'}],
+    ['🌈 Rainbow Dash',{race:2,bodyColor:'#9ed8f5',mane:1,tail:1,maneColor:'#ef4b4b',streak:3,eyes:2,eyeColor:'#d14d8c',mark:6,markColor:'#ef4b4b',maneColor2:'#4aa8f0'}],
+    ['🎈 Pinkie Pie',{race:0,bodyColor:'#f9b8d8',mane:2,tail:2,maneColor:'#ec4f97',streak:0,eyes:0,eyeColor:'#3d7bd9',mark:3,markColor:'#5fbcf2',maneColor2:'#ffe25a'}],
+    ['💎 Rarity',{race:1,bodyColor:'#f6f4f8',mane:3,tail:3,maneColor:'#6a3f9c',streak:0,eyes:1,eyeColor:'#3d7bd9',mark:4,markColor:'#5fbcf2'}],
+    ['🍎 Applejack',{race:0,bodyColor:'#ffcf8f',mane:4,tail:4,maneColor:'#ffe25a',streak:0,eyes:0,eyeColor:'#2fa36b',mark:2,markColor:'#ef4b4b',hat:4}],
+    ['🦋 Fluttershy',{race:2,bodyColor:'#fff3a6',mane:3,tail:3,maneColor:'#ffb3d9',streak:0,eyes:3,eyeColor:'#18a7b5',mark:5,markColor:'#ec4f97'}],
+    ['🌙 Luna',{race:3,bodyColor:'#2f3a7a',mane:3,tail:3,maneColor:'#5fbcf2',streak:0,eyes:1,eyeColor:'#18a7b5',mark:8,markColor:'#ffffff',maneColor2:'#2d2a3e',hat:3,accessoryColor:'#2d2a3e'}],
+    ['☀️ Celestia',{race:3,bodyColor:'#f6f4f8',mane:3,tail:3,maneColor:'#4cc38a',maneColor2:'#8f6ae0',streak:2,eyes:1,eyeColor:'#d14d8c',mark:7,markColor:'#ffd43b',hat:3,neck:2,accessoryColor:'#ff6fa8'}]
   ];
   let active=0;
-  const colorMap={bodyColor:'Couleur du corps',maneColor:'Couleur des cheveux',eyeColor:'Couleur des yeux',markColor:'Couleur de la marque',accessoryColor:'Couleur des accessoires'};
-  const presets=[['🌸 Kawaii',{bodyColor:'#f6a6c9',mane:0,maneColor:'#fff8f0',eyes:0,mark:1,clothes:1,hat:1,effect:5}],['🌈 Arc-en-ciel',{bodyColor:'#8fd3ff',mane:9,maneColor:'#ff6b9e',wings:8,pattern:8,effect:7}],['🎸 Rock',{bodyColor:'#34304a',mane:6,maneColor:'#24213a',clothes:4,glasses:4,mark:9,accessory:2}],['🖤 Gothique',{bodyColor:'#34304a',mane:7,maneColor:'#24213a',clothes:5,wings:5,hat:5,mark:18,glasses:1}],['✨ Magique',{bodyColor:'#d9c7ff',mane:10,maneColor:'#b889ff',horn:5,wings:7,mark:11,pattern:10,effect:3}],['🐾 Furry',{bodyShape:5,ears:2,tail:5,pattern:7,bodyColor:'#d9c7ff',mane:11,mark:13}]];
-  const colorChoices=['#f6a6c9','#8fd3ff','#b99cff','#ffe47a','#9ee6a8','#ffb36b','#f47f86','#fff8f0','#34304a','#d9c7ff','#73ffcb','#ff6b9e'];
+  const set=(k,v)=>{pony[k]=v;draw();};
   const draw=()=>{
-    const [keyName,label,listKey]=categories[active], list=cat[listKey]||[];
-    const isBodyColor=keyName==='bodyColor';
-    const bodyColors=['#f6a6c9','#8fd3ff','#b99cff','#ffe47a','#9ee6a8','#ffb36b','#f47f86','#fff8f0','#34304a','#d9c7ff','#73ffcb','#ff6b9e'];
-    const idx=isBodyColor?Math.max(0,bodyColors.indexOf(pony.bodyColor)):Math.max(0,Math.min(list.length-1,Number(pony[keyName])||0));
-    if(isBodyColor && !/^#[0-9a-f]{6}$/i.test(pony.bodyColor)) pony.bodyColor='#f6a6c9';
-    if(!isBodyColor) pony[keyName]=idx;
-    const colorKey=keyName==='bodyShape'?'bodyColor':keyName==='mane'?'maneColor':keyName==='eyes'?'eyeColor':keyName==='mark'?'markColor':keyName==='accessory'?'accessoryColor':null;
-    app.innerHTML='<h1 class="big join-title">✨ Crée ton poney</h1><div class="card pony-customizer"><div class="step-pill"><b>2</b><span>Personnalise ton avatar</span></div><div class="pony-preview-panel"><div class="pony-preview">'+avatarMarkup(pony,250,'happy')+'</div><div class="pony-name"><b>'+esc(pony.name||'Mon poney')+'</b><span>Ton avatar se met à jour en direct ✨</span></div></div><div class="pony-categories">'+categories.map((x,i)=>'<button type="button" class="pony-cat '+(i===active?'active':'')+'" data-cat="'+i+'">'+esc(x[1])+'</button>').join('')+'</div><div class="pony-selector"><button type="button" class="avatar-arrow" id="pony-prev">‹</button><div class="pony-choice"><span class="pony-choice-label">'+esc(label)+'</span><strong>'+esc(isBodyColor?(list[idx]||'Rose'):(list[idx]||'Aucun'))+'</strong><small>'+((isBodyColor?window.PONY_CATALOG.bodyColors.indexOf(list[idx])+1:idx+1))+' / '+list.length+'</small></div><button type="button" class="avatar-arrow" id="pony-next">›</button></div>'+
-      (colorKey?'<div class="pony-colors"><b>'+esc(colorMap[colorKey])+'</b><div class="color-palette">'+colorChoices.map(x=>'<button type="button" class="pony-color '+(pony[colorKey]===x?'active':'')+'" data-color="'+x+'" style="background:'+x+'"></button>').join('')+'<label class="custom-color"><input id="custom-color" type="color" value="'+(pony[colorKey]||'#ffffff')+'"> 🎨 personnalisée</label></div></div>':'')+
-      '<div class="pony-presets"><span>Styles rapides</span>'+presets.map((x,i)=>'<button type="button" class="alt preset" data-preset="'+i+'">'+esc(x[0])+'</button>').join('')+'</div><div class="pony-actions"><button type="button" class="alt" id="pony-back">← Retour</button><button type="button" class="alt" id="pony-random">🎲 Avatar aléatoire</button><button type="button" class="alt" id="pony-reset">↻ Réinitialiser</button><button type="button" id="pony-confirm">✓ Choisir cet avatar</button></div></div>';
+    const t=tabs[active];
+    const sections=(t.items||[]).map(([k,list,title])=>{
+      const opts=cat[list]||[], cur=Math.max(0,Math.min(opts.length-1,Number(pony[k])||0));
+      return '<div class="pony-section"><b>'+esc(title)+'</b><div class="pony-tiles">'+opts.map((o,i)=>{
+        const preview=Object.assign({},pony,{[k]:i});
+        return '<button type="button" class="pony-tile '+(i===cur?'active':'')+'" data-k="'+k+'" data-v="'+i+'">'+avatarMarkup(preview,86,'still')+'<span>'+esc(o)+'</span></button>';
+      }).join('')+'</div></div>';
+    }).join('')+(t.colors||[]).map(([k,title,pk])=>'<div class="pony-section"><b>'+esc(title)+'</b><div class="color-palette">'+(pal[pk]||[]).map(c=>'<button type="button" class="pony-color '+(String(pony[k]).toLowerCase()===c?'active':'')+'" data-k="'+k+'" data-color="'+c+'" style="background:'+c+'" aria-label="'+c+'"></button>').join('')+'<label class="custom-color"><input class="custom-color-input" data-k="'+k+'" type="color" value="'+(pony[k]||'#ffffff')+'"> 🎨 Autre</label></div></div>').join('');
+    app.innerHTML='<h1 class="big join-title">✨ Crée ton poney</h1><div class="card pony-customizer"><div class="step-pill"><b>2</b><span>Personnalise ton poney</span></div>'+
+      '<div class="pony-layout"><div class="pony-preview-panel"><div class="pony-preview">'+avatarMarkup(pony,250,'happy')+'</div><div class="pony-name"><b>'+esc(name)+'</b><span>Ton poney se met à jour en direct ✨</span></div></div>'+
+      '<div class="pony-presets"><span>Inspirations</span>'+presets.map((x,i)=>'<button type="button" class="alt preset" data-preset="'+i+'">'+esc(x[0])+'</button>').join('')+'</div>'+
+      '<div class="pony-editor"><div class="pony-categories">'+tabs.map((x,i)=>'<button type="button" class="pony-cat '+(i===active?'active':'')+'" data-cat="'+i+'">'+esc(x.label)+'</button>').join('')+'</div>'+sections+'</div></div>'+
+      '<div class="pony-actions"><button type="button" class="alt" id="pony-back">← Retour</button><button type="button" class="alt" id="pony-random">🎲 Aléatoire</button><button type="button" class="alt" id="pony-reset">↻ Réinitialiser</button><button type="button" id="pony-confirm">✓ Choisir ce poney</button></div></div>';
+    const cats=document.querySelector('.pony-categories'), ac=cats.querySelector('.active'); if(ac) cats.scrollLeft=ac.offsetLeft-cats.offsetWidth/2+ac.offsetWidth/2;
     document.querySelectorAll('.pony-cat').forEach(b=>b.onclick=()=>{active=+b.dataset.cat;draw();});
-    document.getElementById('pony-prev').onclick=()=>{if(isBodyColor){pony.bodyColor=bodyColors[(idx-1+bodyColors.length)%bodyColors.length];}else pony[keyName]=(idx-1+list.length)%list.length;draw();};
-    document.getElementById('pony-next').onclick=()=>{if(isBodyColor){pony.bodyColor=bodyColors[(idx+1)%bodyColors.length];}else pony[keyName]=(idx+1)%list.length;draw();};
-    document.querySelectorAll('.pony-color').forEach(b=>b.onclick=()=>{pony[colorKey]=b.dataset.color;draw();});
-    const cc=document.getElementById('custom-color'); if(cc) cc.oninput=()=>{pony[colorKey]=cc.value;draw();};
-    document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>{Object.assign(pony,presets[+b.dataset.preset][1]);draw();});
+    document.querySelectorAll('.pony-tile').forEach(b=>b.onclick=()=>set(b.dataset.k,+b.dataset.v));
+    document.querySelectorAll('.pony-color').forEach(b=>b.onclick=()=>set(b.dataset.k,b.dataset.color));
+    document.querySelectorAll('.custom-color-input').forEach(i=>i.onchange=()=>set(i.dataset.k,i.value));
+    document.querySelectorAll('.preset').forEach(b=>b.onclick=()=>{pony=Object.assign(window.defaultPony(),presets[+b.dataset.preset][1]);draw();});
     document.getElementById('pony-reset').onclick=()=>{pony=window.defaultPony();draw();};
-    document.getElementById('pony-random').onclick=()=>{categories.forEach(([k,,lk])=>{const a=cat[lk]||[];pony[k]=Math.floor(Math.random()*Math.max(1,a.length));});['bodyColor','maneColor','eyeColor','markColor','accessoryColor'].forEach(k=>pony[k]=colorChoices[Math.floor(Math.random()*colorChoices.length)]);draw();};
+    document.getElementById('pony-random').onclick=()=>{
+      const r=a=>a[Math.floor(Math.random()*a.length)];
+      pony=Object.assign(window.defaultPony(),{race:r([0,1,2,3]),bodyColor:r(pal.body),mane:r([0,1,2,3,4,5]),streak:r([0,0,1,2,3]),maneColor:r(pal.mane),maneColor2:r(pal.mane),eyes:r([0,1,2,3]),eyeColor:r(pal.eye),mark:1+Math.floor(Math.random()*(cat.marks.length-1)),markColor:r(pal.mane),accessoryColor:r(pal.accent),hat:Math.random()<.35?1+Math.floor(Math.random()*(cat.hats.length-1)):0,neck:Math.random()<.3?1+Math.floor(Math.random()*(cat.necks.length-1)):0});
+      pony.tail=pony.mane; draw();
+    };
     document.getElementById('pony-back').onclick=()=>form();
     document.getElementById('pony-confirm').onclick=()=>{chosenAvatar=JSON.parse(JSON.stringify(pony));localStorage.setItem('pg-avatar',JSON.stringify(chosenAvatar));window.partyAudio.enable();join(code,name,null,chosenAvatar);};
   };
