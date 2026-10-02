@@ -18,24 +18,36 @@ function startDrawResync(n) {
   drawSyncTimer = setInterval(() => { if (st?.phase?.kind === 'draw' && st.phase.n === n) s.emit('host:sync-draw'); }, 1000);
 }
 function stopDrawResync() { clearInterval(drawSyncTimer); drawSyncTimer = null; lastDrawSeq = 0; }
-function paintSegments(segs, replace=false) {
-  const cv = document.getElementById('cv');
-  if (!cv) return;
-  const c = cv.getContext('2d');
-  if (replace) c.clearRect(0, 0, cv.width, cv.height);
-  c.lineWidth = 6; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#1d1a3b';
-  (segs || []).forEach(([x0, y0, x1, y1]) => {
-    c.beginPath(); c.moveTo(x0 * cv.width, y0 * cv.height); c.lineTo(x1 * cv.width, y1 * cv.height); c.stroke();
+function hexToRgba(hex){ const n=parseInt(hex.slice(1),16); return [n>>16,(n>>8)&255,n&255,255]; }
+function floodFillCanvas(cv,x,y,color){
+  const c=cv.getContext('2d',{willReadFrequently:true}), w=cv.width,h=cv.height,px=Math.floor(x*w),py=Math.floor(y*h);
+  const img=c.getImageData(0,0,w,h),d=img.data, idx=(py*w+px)*4, target=[d[idx],d[idx+1],d[idx+2],d[idx+3]], fc=hexToRgba(color);
+  if(target.every((v,i)=>v===fc[i])) return;
+  const same=i=>d[i]===target[0]&&d[i+1]===target[1]&&d[i+2]===target[2]&&d[i+3]===target[3], stack=[[px,py]], seen=new Uint8Array(w*h);
+  while(stack.length){const [cx,cy]=stack.pop();if(cx<0||cy<0||cx>=w||cy>=h)continue;const si=cy*w+cx;if(seen[si])continue;const i=si*4;if(!same(i))continue;seen[si]=1;d[i]=fc[0];d[i+1]=fc[1];d[i+2]=fc[2];d[i+3]=fc[3];stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]);}
+  c.putImageData(img,0,0);
+}
+function paintSegments(segs, replace=false){
+  const cv=document.getElementById('cv'); if(!cv)return; const c=cv.getContext('2d');
+  if(replace)c.clearRect(0,0,cv.width,cv.height);
+  (segs||[]).forEach(op=>{
+    const color=op.color||'#1d1a3b', width=op.width||6, tool=op.tool||'pen';
+    c.lineWidth=width; c.lineCap='round';c.lineJoin='round';c.strokeStyle=tool==='eraser'?'#ffffff':color;
+    const list=op.segs||[]; list.forEach(([x0,y0,x1,y1])=>{c.beginPath();c.moveTo(x0*cv.width,y0*cv.height);c.lineTo(x1*cv.width,y1*cv.height);c.stroke();});
   });
 }
-s.on('draw', d => {
-  const cv = document.getElementById('cv');
-  if (!cv || !st?.phase || st.phase.kind !== 'draw' || st.phase.n !== d.n) return;
-  if (d.full) { lastDrawSeq = d.seq || lastDrawSeq; return paintSegments(d.segs, true); }
-  if (d.seq && d.seq <= lastDrawSeq) return;
-  lastDrawSeq = d.seq || lastDrawSeq;
-  if (d.clear) return paintSegments([], true);
-  paintSegments(d.segs, false);
+function paintOps(ops, replace=false){
+  const cv=document.getElementById('cv'); if(!cv)return; if(replace)cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  (ops||[]).forEach(op=>{ if(op.action==='segments')paintSegments([op]); else if(op.action==='fill')floodFillCanvas(cv,op.x,op.y,op.color||'#1d1a3b'); });
+}
+s.on('draw',d=>{
+  const cv=document.getElementById('cv'); if(!cv||!st?.phase||st.phase.kind!=='draw'||st.phase.n!==d.n)return;
+  if(d.full){lastDrawSeq=d.seq||lastDrawSeq;return paintOps(d.ops||[],true);}
+  if(d.seq&&d.seq<=lastDrawSeq)return; lastDrawSeq=d.seq||lastDrawSeq;
+  if(d.clear)return paintOps([],true);
+  if(d.action==='fill')return floodFillCanvas(cv,d.x,d.y,d.color||'#1d1a3b');
+  if(d.action==='segments')paintSegments([d],false);
+  if(d.action==='undo')return paintOps(d.ops||[],true);
 });
 setInterval(() => {
   const t = document.getElementById('t');
@@ -117,10 +129,7 @@ function render() {
       app.dataset.dn = p.n;
       drawSyncN = p.n;
       app.innerHTML = `<div class="host-game-grid draw-layout"><div class="host-main">${head(p)}<p class="muted" id="who"></p><canvas id="cv" class="board" width="800" height="600"></canvas><div class="chips" id="fc"></div>${liveAnswers(p)}</div>${scoreBoard()}</div>`;
-      // Snapshot immédiat + resynchronisation périodique : le host récupère aussi
-      // le dessin si un paquet temps réel a été perdu.
-      s.emit('host:sync-draw');
-      startDrawResync(p.n);
+      s.emit('host:sync-draw'); startDrawResync(p.n);
     }
     document.getElementById('who').textContent = `${nameOf(p.data.drawer)} dessine : devinez sur votre téléphone !`;
     document.getElementById('fc').innerHTML = p.answered.map(id => `<span class="chip">${esc(nameOf(id))} a trouvé !</span>`).join('');
