@@ -144,6 +144,17 @@ function render(p, done) {
     window.SurveyGame.player(app, p, { me: st.me.id, top, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
   } else if (p.kind === 'surveySetup') {
     app.innerHTML = `${top}${wait('📊 Le Grand Sondage<br>L’hôte choisit le thème…')}`;
+  } else if (p.kind === 'boardSpin') {
+    const d = p.data, left = Math.max(0, d.spinAt + d.spinMs - Date.now() - off);
+    const show = () => `<div class="card stack board-phone"><div class="eyebrow">🎲 Tour ${p.round}/${p.rounds}${d.final ? ' · points ×2 🔥' : ''}</div>
+      ${Date.now() + off >= d.spinAt + d.spinMs ? `<div class="board-phone-icon">${d.chosen.icon}</div><p class="prompt">${esc(d.chosen.name)}</p><p class="muted">${esc(d.chosen.desc || '')}</p>` : '<div class="board-phone-icon spin">🎡</div><p class="prompt">La roue tourne… regardez l’écran !</p>'}</div>`;
+    app.innerHTML = `${top}${show()}`;
+    if (left) setTimeout(() => { if (st.phase.n === p.n) app.innerHTML = `${top}${show()}`; }, left + 50);
+  } else if (p.kind === 'boardResults') {
+    const d = p.data, mine = d.rows.find(r => r.id === st.me.id), rank = d.standings.findIndex(x => x.id === st.me.id) + 1;
+    app.innerHTML = `${top}<div class="card stack board-phone"><div class="eyebrow">🎲 ${d.game.icon} ${esc(d.game.name)}</div>
+      ${mine ? `<div class="board-phone-icon">${['🥇', '🥈', '🥉'][mine.place - 1] || '🎲'}</div><p class="prompt">${mine.gain ? `+${mine.gain} points de plateau !` : 'Pas de point cette fois…'}</p>` : '<p class="prompt">Regardez l’écran !</p>'}
+      <p class="muted">Vous êtes ${rank}ᵉ sur ${d.standings.length} au plateau${d.last ? ' — fin de partie !' : ` · encore ${d.turns - d.turn} tour${d.turns - d.turn > 1 ? 's' : ''}`}</p></div>`;
   } else if (p.kind === 'lobby') {
     app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}${lobbyRanking()}`;
   } else if (p.kind === 'text' || p.kind === 'number') {
