@@ -2,7 +2,7 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/pixel.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -112,7 +112,7 @@ s.on('state', x => {
   if (!x.me) return;
   const p = x.phase, done = p.answered.includes(x.me.id);
   const k = p.n + ':' + done;
-  if (k !== key || p.kind === 'survey') { key = k; render(p, done); } // le Grand Sondage se met à jour en direct
+  if (k !== key || p.kind === 'survey' || p.kind === 'pixel') { key = k; render(p, done); } // le Grand Sondage se met à jour en direct
 });
 
 setInterval(() => { if (st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores') && st.me) render(st.phase, st.phase.answered.includes(st.me.id)); }, 6500);
@@ -142,6 +142,8 @@ function render(p, done) {
       send: v => s.emit('answer', v), progress: v => s.emit('progress', v) });
   } else if (p.kind === 'survey') {
     window.SurveyGame.player(app, p, { me: st.me.id, top, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
+  } else if (p.kind === 'pixel') {
+    window.PixelGame.player(app, p, { me: st.me.id, top, off, send: (guess, cb) => s.emit('player:action', { guess }, cb) });
   } else if (p.kind === 'surveySetup') {
     app.innerHTML = `${top}${wait('📊 Le Grand Sondage<br>L’hôte choisit le thème…')}`;
   } else if (p.kind === 'lobby') {
@@ -279,7 +281,7 @@ function render(p, done) {
       ${opts.map(o => `<button class="choice" data-o="${o.id}">${esc(o.text)}</button>`).join('')}</div>`;
     app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => s.emit('answer', b.dataset.o));
   } else if (p.kind === 'reveal') {
-    app.innerHTML = `${top}${p.data?.survey ? `<div class="card stack"><p class="prompt">${esc(p.title)}</p>${window.SurveyGame.reveal(p.data.survey)}</div>` : wait('Regardez l\'écran !')}`;
+    app.innerHTML = `${top}${p.data?.survey ? `<div class="card stack"><p class="prompt">${esc(p.title)}</p>${window.SurveyGame.reveal(p.data.survey)}</div>` : p.data?.pixel ? `<div class="card stack">${window.PixelGame.reveal(p.data.pixel)}</div>` : wait('Regardez l\'écran !')}`;
   } else if (p.kind === 'scores') {
     const r = [...st.players].sort((a, b) => b.score - a.score);
     app.innerHTML = `${top}${wait(`Vous finissez ${r.findIndex(x => x.id === st.me.id) + 1}ᵉ sur ${r.length}.`)}`;

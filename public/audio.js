@@ -96,6 +96,8 @@
       'Em Am D7 D','G5:4 B5:4 E6:4 D6:2 B5:2 C6:4 A5:4 E5:4 G5:2 A5:2 F#5:2 A5:2 C6:2 D6:2 E6:2 D6:2 C6:2 A5:2 F#5:8 A5:4 r:4'),
     wario:T(156,'wario','C Eb F G','G5:1 G5:1 C6:2 G5:2 E6:2 D6:2 C6:2 Bb5:4 G5:1 G5:1 Eb6:2 G5:2 Bb5:2 G5:2 Eb5:2 F5:4 A5:1 A5:1 F6:2 C6:2 A5:2 C6:2 D6:2 Eb6:4 D6:2 B5:2 G5:2 D5:2 G5:4 r:4',
       'Ab Bb C C','C6:2 Eb6:2 Ab6:4 G6:2 Eb6:2 C6:4 D6:2 F6:2 Bb6:4 Ab6:2 F6:2 D6:4 E6:2 G6:2 C7:4 Bb6:2 G6:2 E6:4 C6:2 r:2 C6:2 r:2 C5:4 r:4'),
+    pixelflou:T(150,'chip','C G Am F','E6:1 G6:1 C7:2 G6:2 E6:2 C6:2 D6:2 E6:4 D6:1 G6:1 B6:2 G6:2 D6:2 B5:2 C6:2 D6:4 C6:1 E6:1 A6:2 E6:2 C6:2 A5:2 B5:2 C6:4 A5:2 C6:2 F6:2 A6:2 G6:4 r:4',
+      'F G Em Am','A5:2 C6:2 F6:4 E6:2 C6:2 A5:4 B5:2 D6:2 G6:4 F6:2 D6:2 B5:4 G5:2 B5:2 E6:4 D6:2 B5:2 G5:4 A5:2 C6:2 E6:2 A6:2 G6:4 E6:4'),
     // Boucle triomphale jouée juste après la fanfare de victoire
     victoryLoop:T(138,'march','C Ab Bb C','G5:2 C6:2 E6:4 D6:2 C6:2 G5:4 Ab5:2 C6:2 Eb6:4 D6:2 C6:2 Ab5:4 Bb5:2 D6:2 F6:4 Eb6:2 D6:2 Bb5:4 C6:4 E6:4 G6:8',
       'F Em Dm G','A5:4 C6:2 F6:2 E6:4 C6:4 G5:4 B5:2 E6:2 D6:4 B5:4 F5:4 A5:2 D6:2 C6:4 A5:4 B5:4 D6:4 G6:4 F6:4',{form:['A','B','A','B']})
