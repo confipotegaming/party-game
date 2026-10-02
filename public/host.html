@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -56,7 +56,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ brain:'Défis express', brainResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 const head = p => {
   const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
   const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
@@ -93,6 +93,64 @@ const antics=['Le champion parade !','Deux joueurs se chamaillent pour la 2e pla
 let anticIndex=Math.floor(Math.random()*antics.length);
 const rankBoard = (items, final=false) => { const names=['winner','p2','p3','p4','p5']; const scene=final?antics[anticIndex%antics.length]:'La partie commence déjà à chambrer…'; return `<div class="rank-scene"><div class="scene-prop">${esc(scene)}</div><div class="scene-floor"></div>${items.slice(0,5).map((x,i)=>`<div class="scene-player ${names[i]}"><div>${avatarMarkup(x.avatar,82,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}${final?' · '+x.score+' pts':''}</span></div>`).join('')}</div><div class="rank-list">${items.map((x,i)=>`<div class="rank-row"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div></div>`).join('')}</div>`; };
 setInterval(()=>{ if(st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores')) { anticIndex++; render(); } }, 6500);
+// ----- Cerveau Turbo : suivi en direct puis résultats -----
+const brainTypes = { add:'➕ Addition', sub:'➖ Soustraction', mul:'✖️ Multiplication', missing:'❓ Nombre manquant', chain:'🔗 Calcul en chaîne', sequence:'🔢 Suite logique', odd:'🔍 Intrus', least:'⚖️ Comparaison', pattern:'🔷 Formes', memo:'🧠 Mémoire', shell:'🃏 Bonneteau', simon:'🎨 Séquence', colorTap:'🎯 Couleur', green:'🟢 Feu vert', starOnly:'⭐ Réflexe', compare:'📏 Plus grand', count:'🧮 Comptage', twice:'👯 Doublon' };
+function brainClock() {
+  const p = st?.phase; if (!p || p.kind !== 'brain') return;
+  const t = Date.now() + off, start = p.data.startAt, left = start + p.data.playMs - t;
+  const cd = document.getElementById('bt-host-count'), tm = document.getElementById('bt-host-t'), bar = document.getElementById('bt-host-bar');
+  if (!cd || !tm) return;
+  if (t < start) { const s = start - t; cd.textContent = s > 3000 ? 'PRÊT ?' : Math.ceil(s / 1000); cd.className = 'bt-host-count on'; tm.textContent = Math.round(p.data.playMs / 1000); }
+  else { cd.textContent = t - start < 700 ? 'GO !' : ''; cd.className = 'bt-host-count' + (t - start < 700 ? ' on go' : ''); tm.textContent = Math.max(0, Math.ceil(left / 1000)); bar.style.width = Math.max(0, 100 * left / p.data.playMs) + '%'; tm.parentElement.classList.toggle('hurry', left < 10000); }
+}
+setInterval(brainClock, 150);
+function renderBrainHost(p, bindStop) {
+  if (app.dataset.bn != p.n) {
+    app.dataset.bn = p.n;
+    app.innerHTML = `<div class="bt-host">
+      <header class="bt-host-head"><div><div class="eyebrow">Défis express · Partie ${p.round || 1}</div><h1>🧠 Cerveau Turbo</h1><p class="muted">Calcul, logique, mémoire, réflexes : jouez sur votre téléphone !</p></div>
+        <div class="bt-host-clock"><small>TEMPS</small><b id="bt-host-t">60</b></div></header>
+      <div class="bt-host-timebar"><i id="bt-host-bar"></i></div>
+      <div class="bt-host-count" id="bt-host-count"></div>
+      <section class="bt-host-live" id="bt-live">${p.expected.map(id => `<div class="bt-live-row" data-id="${esc(id)}"><span class="bt-live-rank"></span><span class="bt-live-avatar">${avatarMarkup(((st.players || []).find(x => x.id === id) || {}).avatar, 54, 'happy')}</span><div class="bt-live-name"><b>${esc(nameOf(id))}</b><small class="bt-live-type">Prêt·e…</small></div><div class="bt-live-stats"><span class="bt-live-combo"></span><span class="bt-live-solved"></span></div><strong class="bt-live-score">0</strong></div>`).join('')}</section>
+      ${stopGameButton()}</div>`;
+    bindStop();
+  }
+  const live = p.live || {};
+  const rows = p.expected.map(id => ({ id, ...(live[id] || { score: 0, solved: 0, errors: 0, combo: 0 }) })).sort((a, b) => b.score - a.score);
+  rows.forEach((r, i) => {
+    const el = app.querySelector(`.bt-live-row[data-id="${CSS.escape(r.id)}"]`); if (!el) return;
+    const finished = (p.answered || []).includes(r.id), mult = Math.min(5, 1 + Math.floor((r.combo || 0) / 3));
+    el.style.order = i;
+    el.classList.toggle('lead', i === 0 && r.score > 0);
+    el.classList.toggle('finished', finished);
+    el.querySelector('.bt-live-rank').textContent = i + 1;
+    const sc = el.querySelector('.bt-live-score');
+    if (sc.textContent !== String(r.score)) { sc.textContent = r.score; sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
+    el.querySelector('.bt-live-type').textContent = finished ? '✓ Terminé !' : (brainTypes[r.type] || 'Prêt·e…');
+    el.querySelector('.bt-live-combo').innerHTML = r.combo >= 3 ? `🔥 ×${mult}` : '';
+    el.querySelector('.bt-live-solved').textContent = `✅ ${r.solved || 0} · ❌ ${r.errors || 0}`;
+  });
+  brainClock();
+}
+function renderBrainResults(p) {
+  delete app.dataset.bn;
+  const rows = p.data?.rows || [], medal = ['🥇', '🥈', '🥉'];
+  const fmtS = ms => ms ? (ms / 1000).toFixed(1).replace('.', ',') + ' s' : '—';
+  app.innerHTML = `<div class="bt-host bt-host-results">
+    <h1 class="bt-end-title">TEMPS ÉCOULÉ !</h1>
+    <p class="muted score-subtitle">Partie ${p.round || 1} · les points sont ajoutés au classement de la soirée</p>
+    <section class="bt-host-podium">${rows.map((r, i) => `<div class="bt-res-row ${i === 0 ? 'first' : ''}" style="animation-delay:${i * 120}ms">
+      <span class="bt-res-place">${medal[i] || i + 1}</span>
+      <span class="bt-res-avatar">${avatarMarkup(((st.players || []).find(x => x.id === r.id) || {}).avatar, 62, i === 0 ? 'smug' : 'happy')}</span>
+      <div class="bt-res-name"><b>${esc(r.name)}</b><span class="bt-res-title">${esc(r.icon)} ${esc(r.title)}</span></div>
+      <div class="bt-res-stats"><span>✅ ${r.solved}</span><span>❌ ${r.errors}</span><span>🎯 ${r.accuracy} %</span><span>⏱️ ${fmtS(r.avgMs)}</span><span>🔥 ${r.maxCombo}</span></div>
+      <strong class="bt-res-score">+${r.score}</strong></div>`).join('') || '<p>Aucun résultat.</p>'}</section>
+    <div class="bt-host-actions"><button id="bt-replay">🔁 Rejouer</button><button class="alt" id="bt-menu">🏠 Retour aux mini-jeux</button><button class="bt-ghost" id="bt-final">🏆 Classement final</button></div></div>`;
+  document.getElementById('bt-replay').onclick = () => s.emit('host:action', 'replay');
+  document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
+  document.getElementById('bt-final').onclick = () => s.emit('host:skip');
+}
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
   const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm('Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
@@ -100,15 +158,21 @@ function render() {
     stopDrawResync();
     app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Erreur</span><h1>${esc(p.title || 'Erreur')}</h1><p>${esc(p.prompt || 'Un problème est survenu.')}</p><p class="muted">${esc(p.error || '')}</p><button id="back">Retour au menu</button></section>`;
     document.getElementById('back').onclick=()=>s.emit('host:lobby');
+  } else if (p.kind === 'brain') {
+    renderBrainHost(p, bindStop);
+  } else if (p.kind === 'brainResults') {
+    renderBrainResults(p);
   } else if (p.kind === 'lobby') {
-    const ok = pl.length >= st.min && sel;
+    const minFor = id => ((st.games || []).find(g => g.id === id) || {}).minPlayers || st.min;
+    const need = sel ? minFor(sel) : st.min;
+    const ok = pl.length >= need && sel;
     app.innerHTML = `
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span></button>`).join('')}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'cerveau' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
-      <span class="muted"> ${pl.length < st.min ? `Il faut au moins ${st.min} joueurs.` : !sel ? 'Choisissez un jeu.' : ''}</span></div>`;
+      <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
     document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel); };
   } else if (p.kind === 'text' || p.kind === 'number') {

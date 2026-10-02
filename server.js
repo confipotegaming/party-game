@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.11';
+const APP_VERSION = '0.1.16';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau',
 ]) games[id] = require('./games/' + id);
 
 const app = express();
@@ -115,8 +115,8 @@ function view(room, forHost = false) {
     game: room.game && room.game.id,
     avatars: AVATARS,
     version: APP_VERSION,
-    games: Object.values(games).map(({ id, name, desc, category, categories }) => ({
-      id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'],
+    games: Object.values(games).map(({ id, name, desc, category, categories, minPlayers }) => ({
+      id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'], minPlayers: minPlayers || MIN_PLAYERS,
     })),
     min: MIN_PLAYERS,
     players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar) })),
@@ -126,6 +126,7 @@ function view(room, forHost = false) {
       round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
       answered: Object.keys(p.answers), expected: p.expected, error: p.error,
+      ...(forHost && p.live ? { live: p.live } : {}),
       ...(forHost ? { answers: Object.entries(p.answers).map(([id, value]) => ({ id, name: (room.players[id] || {}).name || '?', value: publicAnswer(p, (p.rawAnswers || {})[id], value) })) } : {}),
     },
   };
@@ -172,7 +173,7 @@ io.on('connection', (socket) => {
   socket.on('host:start', (gameId) => {
     const { room } = ctx();
     if (!room || !socket.data.isHost || !games[gameId]) return;
-    if (Object.values(room.players).filter(p => p.connected).length < MIN_PLAYERS) return;
+    if (Object.values(room.players).filter(p => p.connected).length < (games[gameId].minPlayers || MIN_PLAYERS)) return;
     Object.values(room.players).forEach(p => (p.score = 0));
     room.game = games[gameId];
     room.gameCategory = room.game.category || 'Général';
@@ -187,6 +188,13 @@ io.on('connection', (socket) => {
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
   socket.on('host:stop-game', () => { const { room } = ctx(); if (room && socket.data.isHost && room.game) toLobby(room); });
   socket.on('host:lobby', () => { const { room } = ctx(); if (room && socket.data.isHost) toLobby(room); });
+  // Action propre au jeu en cours (ex. « Rejouer »), si le jeu la gère.
+  socket.on('host:action', (action) => {
+    const { room } = ctx();
+    if (!room || !socket.data.isHost || !room.game || !room.game.hostAction) return;
+    try { room.game.hostAction(room, String(action || ''), apiFor(room)); }
+    catch (err) { console.error('[game:hostAction]', room.game.id, err); }
+  });
   socket.on('host:sync-draw', () => {
     const { room } = ctx();
     const ph = room && room.phase;
@@ -231,6 +239,14 @@ io.on('connection', (socket) => {
     reply('ok');
     broadcast(room);
     if (ph.expected.every(id => id in ph.answers)) endPhase(room);
+  });
+
+  // Progression en direct d'un joueur (jeux qui la gèrent), relayée seulement à l'écran de l'hôte
+  socket.on('progress', (value) => {
+    const { room, pid } = ctx();
+    const ph = room && room.phase;
+    if (!ph || ph.done || !room.game || !room.game.progress || !ph.expected.includes(pid) || pid in ph.answers) return;
+    if (room.game.progress(ph, pid, value) && room.host) io.to(room.host).emit('state', view(room, true));
   });
 
   // Dessin : le dessinateur envoie des segments, relayés à l'écran de l'hôte
