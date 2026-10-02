@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.8';
+const APP_VERSION = '0.1.9';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -173,7 +173,7 @@ io.on('connection', (socket) => {
     const { room } = ctx();
     const ph = room && room.phase;
     if (!room || !socket.data.isHost || !ph || ph.kind !== 'draw') return;
-    socket.emit('draw', { n: ph.n, full: true, segs: ph.drawing || [] });
+    socket.emit('draw', { n: ph.n, full: true, ops: ph.drawOps || [] });
   });
 
   socket.on('join', ({ code, name, pid, avatar }, ack) => {
@@ -217,25 +217,23 @@ io.on('connection', (socket) => {
 
   // Dessin : le dessinateur envoie des segments, relayés à l'écran de l'hôte
   socket.on('draw', (d, ack) => {
-    const { room, pid } = ctx();
-    const ph = room && room.phase;
-    if (!room || !ph || ph.kind !== 'draw' || ph.drawer !== pid || ph.done || !d) return;
-    const out = { n: ph.n, seq: ++ph.drawSeq };
-    if (d.clear) {
-      ph.drawing = [];
-      out.clear = true;
-    } else if (Array.isArray(d.segs)) {
-      // Keep only finite normalized coordinates. This prevents malformed packets
-      // from breaking the host canvas and makes the stream deterministic.
-      out.segs = d.segs.slice(0, 250).filter(a => Array.isArray(a) && a.length === 4 && a.every(x => Number.isFinite(x) && x >= 0 && x <= 1));
-      if (!out.segs.length) return;
-      ph.drawing.push(...out.segs);
-      if (ph.drawing.length > 16000) ph.drawing.splice(0, ph.drawing.length - 16000);
+    const { room, pid } = ctx(); const ph = room && room.phase;
+    if(!room||!ph||ph.kind!=='draw'||ph.drawer!==pid||ph.done||!d)return;
+    const out={n:ph.n,seq:++ph.drawSeq};
+    if(d.action==='clear'){ph.drawing=[];ph.drawOps=[];out.clear=true;io.to(room.host).emit('draw',out);}
+    else if(d.action==='undo'){ph.drawOps.pop();ph.drawing=[];for(const op of ph.drawOps)if(op.action==='segments')ph.drawing.push(...(op.segs||[]));out.action='undo';out.ops=ph.drawOps.slice();io.to(room.host).emit('draw',out);}
+    else if(d.action==='fill'&&Number.isFinite(d.x)&&Number.isFinite(d.y)&&typeof d.color==='string'){
+      const op={action:'fill',x:Math.max(0,Math.min(1,d.x)),y:Math.max(0,Math.min(1,d.y)),color:d.color};
+      ph.drawOps.push(op);out.action='fill';Object.assign(out,op);io.to(room.host).emit('draw',out);
+    } else if(d.action==='segments'&&Array.isArray(d.segs)){
+      const segs=d.segs.slice(0,250).filter(a=>Array.isArray(a)&&a.length===4&&a.every(x=>Number.isFinite(x)&&x>=0&&x<=1));
+      if(!segs.length)return;
+      const width=Math.max(1,Math.min(60,Number(d.width)||5)), color=typeof d.color==='string'?d.color:'#1d1a3b', tool=d.tool==='eraser'?'eraser':'pen';
+      const op={action:'segments',segs,color,width,tool}; ph.drawOps.push(op); ph.drawing.push(...segs);
+      if(ph.drawOps.length>1000)ph.drawOps.shift(); if(ph.drawing.length>16000)ph.drawing.splice(0,ph.drawing.length-16000);
+      Object.assign(out,op);io.to(room.host).emit('draw',out);
     } else return;
-    // Direct, low-latency stream to the host. The complete snapshot remains on the
-    // phase so a reconnect or a late packet can always be repaired with sync-draw.
-    io.to(room.host).emit('draw', out);
-    if (typeof ack === 'function') ack({ ok: true, seq: out.seq });
+    if(typeof ack==='function')ack({ok:true,seq:out.seq});
   });
 
   socket.on('disconnect', () => {
