@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -13,6 +13,7 @@ s.emit('host:create');
 s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); renderError = null; try { render(); } catch (err) { renderError = err; renderFallback(err); console.error('[host render]', err); } window.partyAudio.update(x); });
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 s.on('closed', () => location.reload());
+s.on('boss', snap => window.BossGame.onSnap(snap)); // Boss Fight : état du combat en temps réel
 function startDrawResync(n) {
   clearInterval(drawSyncTimer);
   drawSyncTimer = setInterval(() => { if (st?.phase?.kind === 'draw' && st.phase.n === n) s.emit('host:sync-draw'); }, 250);
@@ -56,7 +57,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', wario:'Micro-jeux', warioResults:'Résultats', bossPick:'Boss Fight', boss:'Boss Fight', bossOver:'Game over', bossEnding:'Fin', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 // Puce de difficulté de la question en cours (★★☆ Moyen · ×1,25).
 const diffChip = p => { const d = p?.difficulty; return d ? `<span class="chip diff diff-${d.level}" title="Bonus de points : ×${String(d.bonus).replace('.', ',')}">${d.stars} ${esc(d.label)}${d.bonus > 1 ? ` · ×${String(d.bonus).replace('.', ',')}` : ''}</span>` : ''; };
 const DIFF_MODES = [['mix', '🎢 Progressive', 'Du facile au difficile'], ['1', '★☆☆ Facile', 'Pour s’échauffer'], ['2', '★★☆ Moyen', 'Un bon défi'], ['3', '★★★ Difficile', 'Pour les cracks (bonus ×1,5)']];
@@ -279,7 +280,10 @@ function renderWarioResults(p) {
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
   const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm('Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
-  if (p.kind === 'error') {
+  if (!window.BossGame.KINDS.includes(p.kind)) window.BossGame.leave();
+  if (window.BossGame.KINDS.includes(p.kind)) {
+    window.BossGame.host(app, p, { emit: (e, a) => s.emit(e, a), players: pl, timer: timer(p), stopButton: stopGameButton(), bindStop, off });
+  } else if (p.kind === 'error') {
     stopDrawResync();
     app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Erreur</span><h1>${esc(p.title || 'Erreur')}</h1><p>${esc(p.prompt || 'Un problème est survenu.')}</p><p class="muted">${esc(p.error || '')}</p><button id="back">Retour au menu</button></section>`;
     document.getElementById('back').onclick=()=>s.emit('host:lobby');
@@ -307,7 +311,7 @@ function render() {
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['sondage', 'academie', 'wario'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['boss', 'academie', 'wario'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       ${sel && ((st.games || []).find(g => g.id === sel) || {}).difficulty ? `<section class="diff-picker card"><b>Difficulté des questions</b><div class="diff-options">${DIFF_MODES.map(([v, l, h]) => `<button class="${diffMode === v ? 'sel' : ''}" data-diff="${v}"><span>${l}</span><small>${h}</small></button>`).join('')}</div></section>` : ''}
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
