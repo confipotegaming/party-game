@@ -6,13 +6,18 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
-const s = io(); let st = null, off = 0, sel = null, drawSyncN = null;
+const s = io(); let st = null, off = 0, sel = null, drawSyncN = null, lastDrawSeq = 0, drawSyncTimer = null;
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
 s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); render(); window.partyAudio.update(x); });
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 s.on('closed', () => location.reload());
+function startDrawResync(n) {
+  clearInterval(drawSyncTimer);
+  drawSyncTimer = setInterval(() => { if (st?.phase?.kind === 'draw' && st.phase.n === n) s.emit('host:sync-draw'); }, 1000);
+}
+function stopDrawResync() { clearInterval(drawSyncTimer); drawSyncTimer = null; lastDrawSeq = 0; }
 function paintSegments(segs, replace=false) {
   const cv = document.getElementById('cv');
   if (!cv) return;
@@ -25,8 +30,10 @@ function paintSegments(segs, replace=false) {
 }
 s.on('draw', d => {
   const cv = document.getElementById('cv');
-  if (!cv || !st || !st.phase || st.phase.n !== d.n) return;
-  if (d.full) return paintSegments(d.segs, true);
+  if (!cv || !st?.phase || st.phase.kind !== 'draw' || st.phase.n !== d.n) return;
+  if (d.full) { lastDrawSeq = d.seq || lastDrawSeq; return paintSegments(d.segs, true); }
+  if (d.seq && d.seq <= lastDrawSeq) return;
+  lastDrawSeq = d.seq || lastDrawSeq;
   if (d.clear) return paintSegments([], true);
   paintSegments(d.segs, false);
 });
@@ -69,23 +76,29 @@ function render() {
     app.innerHTML = `${head(p)}<div class="prompt">${esc(nameOf(p.data.describer))} prépare un indice…</div>`;
   } else if (p.kind === 'draw') {
     if (app.dataset.dn != p.n) {
+      stopDrawResync();
       app.dataset.dn = p.n;
       drawSyncN = p.n;
       app.innerHTML = `${head(p)}<p class="muted" id="who"></p><canvas id="cv" class="board" width="800" height="600"></canvas><div class="chips" id="fc"></div>`;
-      // Demande une copie complète : le dessin reste visible même si le téléphone a déjà envoyé des traits.
+      // Snapshot immédiat + resynchronisation périodique : le host récupère aussi
+      // le dessin si un paquet temps réel a été perdu.
       s.emit('host:sync-draw');
+      startDrawResync(p.n);
     }
     document.getElementById('who').textContent = `${nameOf(p.data.drawer)} dessine : devinez sur votre téléphone !`;
     document.getElementById('fc').innerHTML = p.answered.map(id => `<span class="chip">${esc(nameOf(id))} a trouvé !</span>`).join('');
   } else if (p.kind === 'vote') {
+    stopDrawResync();
     app.innerHTML = `${head(p)}<div class="prompt">${esc(p.prompt)}</div>
       <div class="stack">${p.options.map(o => `<div class="card opt">${esc(o.text)}</div>`).join('')}</div>${progress(p)}`;
   } else if (p.kind === 'reveal') {
+    stopDrawResync();
     app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>
       <div class="card">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br>${esc(l.sub)}</div><span class="pts">+${l.pts}</span></div>`).join('') || 'Aucun point cette manche.'}</div>
       <div><button id="next">Suivant</button></div>`;
     document.getElementById('next').onclick = () => { window.partyAudio.click(); s.emit('host:skip'); };
   } else if (p.kind === 'scores') {
+    stopDrawResync();
     const r = [...pl].sort((a, b) => b.score - a.score);
     app.innerHTML = `<h1 class="big" style="font-size:4rem">Classement final</h1><p class="muted score-subtitle">Place aux célébrations 🎉</p>${rankBoard(r,true)}
       <div><button id="back">Retour au menu</button></div>`;

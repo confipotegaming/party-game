@@ -158,16 +158,26 @@ function render(p, done) {
       app.innerHTML = `${top}<div class="card stack"><p class="prompt">Dessinez : <b>${esc(pv.word)}</b></p>
         <canvas id="cv" class="board" width="600" height="450"></canvas><button id="clr" class="alt">Effacer</button></div>`;
       const cv = document.getElementById('cv'), c = cv.getContext('2d');
-      c.lineWidth = 5; c.lineCap = 'round'; c.strokeStyle = '#1d1a3b';
-      let last = null, buf = [];
-      const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
+      c.lineWidth = 5; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#1d1a3b';
+      let last = null, buf = [], sending = false;
+      const pos = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), Math.max(0, Math.min(1, (e.clientY - r.top) / r.height))]; };
       const line = (a, b) => { c.beginPath(); c.moveTo(a[0] * cv.width, a[1] * cv.height); c.lineTo(b[0] * cv.width, b[1] * cv.height); c.stroke(); };
-      cv.onpointerdown = e => { cv.setPointerCapture(e.pointerId); last = pos(e); line(last, last); buf.push([...last, ...last]); };
-      cv.onpointermove = e => { if (!last) return; const q = pos(e); line(last, q); buf.push([...last, ...q]); last = q; };
-      const flush = () => { if (buf.length) { s.emit('draw', { segs: buf }); buf = []; } };
-      cv.onpointerup = cv.onpointercancel = () => { last = null; flush(); };
+      const flush = () => {
+        if (!buf.length || sending) return;
+        const segs = buf.splice(0, 80);
+        sending = true;
+        s.emit('draw', { segs }, () => { sending = false; if (buf.length) flush(); });
+      };
+      cv.onpointerdown = e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); last = pos(e); line(last, last); buf.push([...last, ...last]); flush(); };
+      cv.onpointermove = e => {
+        if (!last) return; e.preventDefault();
+        const q = pos(e); line(last, q); buf.push([...last, ...q]); last = q;
+        if (buf.length >= 6) flush();
+      };
+      const endStroke = () => { last = null; flush(); };
+      cv.onpointerup = cv.onpointercancel = cv.onpointerleave = endStroke;
       document.getElementById('clr').onclick = () => { c.clearRect(0, 0, cv.width, cv.height); buf = []; s.emit('draw', { clear: true }); };
-      window._dt = setInterval(flush, 50);
+      window._dt = setInterval(flush, 30);
       return;
     }
     if (done) { app.innerHTML = `${top}${wait('Bien joué ✓<br>Attendez les autres.')}`; return; }

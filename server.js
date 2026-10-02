@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.6';
+const APP_VERSION = '0.1.7';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -32,12 +32,9 @@ const AVATARS = [
   {id:'chat-fauteuil',name:'Chat en fauteuil',animal:'Chat',accessory:'fauteuil'},
   {id:'roux-lunettes',name:'Humain·e roux·se',animal:'Humain',accessory:'lunettes'},
   {id:'chien-hoodie',name:'Chien hoodie',animal:'Chien',accessory:'hoodie'},
-  {id:'loup-panda',name:'Loup panda',animal:'Loup',accessory:'lunettes'},
-  {id:'lapin-doudou',name:'Lapin doudou',animal:'Lapin',accessory:'doudou'},
   {id:'tigre-casquette',name:'Tigre casquette',animal:'Tigre',accessory:'casquette'},
   {id:'licorne-pastel',name:'Licorne pastel',animal:'Licorne',accessory:'paillettes'},
   {id:'pirate-perroquet',name:'Pirate perroquet',animal:'Humain',accessory:'perroquet'},
-  {id:'grenouille-lunettes',name:'Grenouille lunettes',animal:'Grenouille',accessory:'lunettes'},
   {id:'dancer-bat',name:'Chauve-souris danseuse',animal:'Chauve-souris',accessory:'bonnet'},
   {id:'koala-livre',name:'Koala lecteur·rice',animal:'Koala',accessory:'livre'},
   {id:'lapin-gouter',name:'Lapin goûter',animal:'Lapin',accessory:'gâteau'}
@@ -54,7 +51,7 @@ const newCode = () => {
 function setPhase(room, ph) {
   clearTimeout(room.timer);
   room.phase = {
-    n: ++room.pn, answers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [] } : {}), ...ph,
+    n: ++room.pn, answers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [], drawSeq: 0 } : {}), ...ph,
     endsAt: ph.duration ? Date.now() + ph.duration * 1000 : null,
   };
   if (ph.duration) room.timer = setTimeout(() => endPhase(room), ph.duration * 1000);
@@ -103,6 +100,7 @@ function view(room) {
     players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar).id })),
     phase: p && {
       n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
+      ...(p.kind === 'draw' ? { drawingCount: (p.drawing || []).length } : {}),
       round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
       answered: Object.keys(p.answers), expected: p.expected,
@@ -195,21 +193,26 @@ io.on('connection', (socket) => {
   });
 
   // Dessin : le dessinateur envoie des segments, relayés à l'écran de l'hôte
-  socket.on('draw', (d) => {
+  socket.on('draw', (d, ack) => {
     const { room, pid } = ctx();
     const ph = room && room.phase;
-    if (!ph || ph.kind !== 'draw' || ph.drawer !== pid || ph.done || !d) return;
-    const out = { n: ph.n };
+    if (!room || !ph || ph.kind !== 'draw' || ph.drawer !== pid || ph.done || !d) return;
+    const out = { n: ph.n, seq: ++ph.drawSeq };
     if (d.clear) {
       ph.drawing = [];
       out.clear = true;
     } else if (Array.isArray(d.segs)) {
-      out.segs = d.segs.slice(0, 200).filter(a => Array.isArray(a) && a.length === 4 && a.every(x => typeof x === 'number'));
+      // Keep only finite normalized coordinates. This prevents malformed packets
+      // from breaking the host canvas and makes the stream deterministic.
+      out.segs = d.segs.slice(0, 250).filter(a => Array.isArray(a) && a.length === 4 && a.every(x => Number.isFinite(x) && x >= 0 && x <= 1));
       if (!out.segs.length) return;
       ph.drawing.push(...out.segs);
-      if (ph.drawing.length > 12000) ph.drawing.splice(0, ph.drawing.length - 12000);
+      if (ph.drawing.length > 16000) ph.drawing.splice(0, ph.drawing.length - 16000);
     } else return;
+    // Direct, low-latency stream to the host. The complete snapshot remains on the
+    // phase so a reconnect or a late packet can always be repaired with sync-draw.
     io.to(room.host).emit('draw', out);
+    if (typeof ack === 'function') ack({ ok: true, seq: out.seq });
   });
 
   socket.on('disconnect', () => {
