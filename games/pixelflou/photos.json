@@ -17,7 +17,7 @@
   "title": "Mario_and_Luigi.jpg",
   "crop": [
    0.27,
-   0.42,
+   0.15,
    0.68
   ],
   "author": "Chris Favero from USA",
@@ -141,5 +141,83 @@
   "license": "CC BY-SA 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
   "source": "https://commons.wikimedia.org/wiki/File:Space_Invaders_and_spray_can_mosaic_graffiti_in_Paris.jpg"
+ },
+ "steve": {
+  "file": "5bac5206bf42.jpg",
+  "title": "Florida_Supercon_2011_-_Steve_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Bob B. Brown",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Florida_Supercon_2011_-_Steve_Cosplayer.jpg"
+ },
+ "toad": {
+  "file": "f45dd4c15d1b.jpg",
+  "title": "MCM_2013_-_Toad,_Luigi_&_Mario_(8978170431)_(cropped,_Toad).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Roger Murmann from Eppertshausen, Deutschland",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:MCM_2013_-_Toad%2C_Luigi_%26_Mario_%288978170431%29_%28cropped%2C_Toad%29.jpg"
+ },
+ "rondoudou": {
+  "file": "30b7ca4b941e.jpg",
+  "title": "Jigglypuff_cosplay.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "RightCowLeftCoast",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Jigglypuff_cosplay.jpg"
+ },
+ "crewmate": {
+  "file": "0cb803311f62.jpg",
+  "title": "Among_Us_cosplay_at_Insomnia_Gaming_Festival_i70_-_April_2023.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Captain Galaxy",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Among_Us_cosplay_at_Insomnia_Gaming_Festival_i70_-_April_2023.jpg"
+ },
+ "blinky": {
+  "file": "2e3aec76f7ec.jpg",
+  "title": "Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_(4836635185).jpg",
+  "crop": [
+   0.27,
+   0.5,
+   1.0
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_%284836635185%29.jpg"
+ },
+ "creeper": {
+  "file": "21113a3aa347.jpg",
+  "title": "Otakuthon_2014-_Creeper_(15006627906).jpg",
+  "crop": [
+   0.4,
+   0.3,
+   0.9
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Otakuthon_2014-_Creeper_%2815006627906%29.jpg"
  }
 }
