@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -10,7 +10,7 @@ const s = io(); let st = null, off = 0, sel = null;
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
-s.on('state', x => { st = x; off = x.now - Date.now(); render(); window.partyAudio.update(x); });
+s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); render(); window.partyAudio.update(x); });
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 s.on('closed', () => location.reload());
 s.on('draw', d => {
@@ -27,6 +27,9 @@ setInterval(() => {
   const t = document.getElementById('t');
   if (t && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
 }, 250);
+const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
+const antics = ['happy','grimace','sleepy','happy','grimace'];
+const rankBoard = (items, final=false) => `<div class="rank-board">${items.map((x,i)=>{const mood=antics[Math.floor(Math.random()*antics.length)]; return `<div class="rank-row rank-${i+1}"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,70,mood)}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div><div class="rank-bubble">${i===0?'😎':i===1?'😤':i===2?'😂':'🤪'}</div></div>`}).join('')}</div>`;
 const head = p => `<div class="row"><h2>${p.round ? `Manche ${p.round}/${p.rounds}` : ''}</h2>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${p.endsAt ? '<span class="timer" id="t"></span>' : ''}</div>`;
 const nameOf = id => (st.players.find(x => x.id === id) || {}).name || '';
 const progress = p => `<p class="muted">${p.answered.length} / ${p.expected.length} ont répondu</p>`;
@@ -37,7 +40,7 @@ function render() {
     app.innerHTML = `
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
-      <div class="chips">${pl.map(x => `<span class="chip">${esc(x.name)}</span>`).join('') || '<span class="muted">En attente des joueurs…</span>'}</div>
+      <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
       <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span></button>`).join('')}</div>
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${pl.length < st.min ? `Il faut au moins ${st.min} joueurs.` : !sel ? 'Choisissez un jeu.' : ''}</span></div>`;
@@ -75,8 +78,7 @@ function render() {
     document.getElementById('next').onclick = () => { window.partyAudio.click(); s.emit('host:skip'); };
   } else if (p.kind === 'scores') {
     const r = [...pl].sort((a, b) => b.score - a.score);
-    app.innerHTML = `<h1 class="big" style="font-size:4rem">Classement final</h1>
-      <div class="card">${r.map((x, i) => `<div class="line"><b>${i + 1}. ${esc(x.name)}</b><span class="pts">${x.score}</span></div>`).join('')}</div>
+    app.innerHTML = `<h1 class="big" style="font-size:4rem">Classement final</h1><p class="muted score-subtitle">Place aux célébrations 🎉</p>${rankBoard(r,true)}
       <div><button id="back">Retour au menu</button></div>`;
     document.getElementById('back').onclick = () => { window.partyAudio.click(); s.emit('host:lobby'); };
   }

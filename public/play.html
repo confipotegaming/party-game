@@ -2,41 +2,43 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
 const s = io(); const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let joined = null, st = null, off = 0, key = '';
+let joined = null, st = null, off = 0, key = '', chosenAvatar = localStorage.getItem('pg-avatar') || '';
+function avatarMarkup(id,size=62,mood='happy'){ return window.renderAvatar ? window.renderAvatar(id,size,mood) : ''; }
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 const saved = () => { try { return JSON.parse(localStorage.getItem('pg') || 'null'); } catch { return null; } };
 
-function join(code, name, pid) {
-  s.emit('join', { code, name, pid }, r => {
+function join(code, name, pid, avatar) {
+  s.emit('join', { code, name, pid, avatar }, r => {
     if (r.error) { localStorage.removeItem('pg'); joined = null; return form(r.error); }
-    joined = { code: code.toUpperCase(), pid: r.pid, name: r.name };
-    localStorage.setItem('pg', JSON.stringify(joined));
+    joined = { code: code.toUpperCase(), pid: r.pid, name: r.name, avatar: avatar || chosenAvatar };
+    chosenAvatar = joined.avatar; localStorage.setItem('pg', JSON.stringify(joined)); localStorage.setItem('pg-avatar', chosenAvatar);
   });
 }
-s.on('connect', () => { const j = joined || saved(); if (j) join(j.code, j.name, j.pid); else form(); });
+s.on('connect', () => { const j = joined || saved(); if (j) { chosenAvatar=j.avatar||chosenAvatar; join(j.code, j.name, j.pid, chosenAvatar); } else form(); });
 s.on('closed', () => { localStorage.removeItem('pg'); joined = null; form('La partie est terminée.'); });
 
 function form(err = '') {
   key = '';
   app.innerHTML = `<h1 class="big" style="font-size:2.6rem">Rejoindre</h1>
-    <div class="card stack">
-      <input id="c" placeholder="Code (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
-      <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
-      <button id="j">Rejoindre</button>
-      <p id="e" style="color:#c0123f">${esc(err)}</p></div>`;
-  document.getElementById('j').onclick = () => {
-    window.partyAudio.enable();
-    join(document.getElementById('c').value, document.getElementById('n').value);
-  };
+    <div class="card stack"><input id="c" placeholder="Code (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
+    <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
+    <p class="avatar-label">Choisissez votre avatar</p><div id="avatars" class="avatar-grid"></div>
+    <button id="j">Rejoindre</button><p id="e" style="color:#c0123f">${esc(err)}</p></div>`;
+  const grid=document.getElementById('avatars');
+  const list=(window.AVATARS||[]); if(!chosenAvatar && list[0]) chosenAvatar=list[0].id;
+  grid.innerHTML=list.map(a=>`<button type="button" class="avatar-pick ${chosenAvatar===a.id?'selected':''}" data-avatar="${a.id}" title="${esc(a.name)}">${avatarMarkup(a.id,74)}<span>${esc(a.name)}</span></button>`).join('');
+  grid.onclick=e=>{const b=e.target.closest('[data-avatar]');if(!b)return;chosenAvatar=b.dataset.avatar;grid.querySelectorAll('.avatar-pick').forEach(x=>x.classList.toggle('selected',x===b));localStorage.setItem('pg-avatar',chosenAvatar);window.partyAudio.click();};
+  document.getElementById('j').onclick=()=>{ window.partyAudio.enable(); join(document.getElementById('c').value,document.getElementById('n').value,null,chosenAvatar); };
 }
 
 s.on('state', x => {
+  window.AVATARS = x.avatars || window.AVATARS || [];
   st = x; off = x.now - Date.now();
   window.partyAudio.update(x);
   if (!x.me) return;
@@ -53,12 +55,13 @@ setInterval(() => {
 const me = () => st.players.find(x => x.id === st.me.id) || { name: '', score: 0 };
 const wait = msg => `<div class="card stack"><p class="prompt">${msg}</p></div>`;
 const timer = p => p.endsAt ? '<span class="timer" id="t"></span>' : '';
+const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-a.score); const moods=['happy','grimace','sleepy']; return `<section class="home-ranking"><div class="section-title"><span>🏆 Classement</span><small>ça chambre déjà 😈</small></div><div class="rank-board">${r.map((x,i)=>`<div class="rank-row rank-${i+1}"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,moods[i%3])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${x.score} pts</span></div><div class="rank-bubble">${i===0?'😎':i===1?'😤':'😂'}</div></div>`).join('')}</div></section>`; };
 
 function render(p, done) {
   const m = me();
-  const top = `<div class="row"><b class="muted">${esc(m.name)} · ${m.score} pts</b>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${timer(p)}</div>`;
+  const top = `<div class="row player-top"><span class="player-mini">${avatarMarkup(m.avatar,42)}</span><b class="muted">${esc(m.name)} · ${m.score} pts</b>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${timer(p)}</div>`;
   if (p.kind === 'lobby') {
-    app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}`;
+    app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}${lobbyRanking()}`;
   } else if (p.kind === 'text' || p.kind === 'number') {
     if (done) { app.innerHTML = `${top}${wait('Réponse envoyée ✓<br>Attendez les autres.')}`; return; }
     const field = p.kind === 'text'
