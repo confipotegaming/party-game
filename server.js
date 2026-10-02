@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.10';
+const APP_VERSION = '0.1.11';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -39,7 +39,23 @@ const AVATARS = [
   {id:'koala-livre',name:'Koala lecteur·rice',animal:'Koala',accessory:'livre'},
   {id:'lapin-gouter',name:'Lapin goûter',animal:'Lapin',accessory:'gâteau'}
 ];
-const avatarById = id => AVATARS.find(a => a.id === id) || AVATARS[0];
+const avatarById = avatar => {
+  if (avatar && typeof avatar === 'object' && avatar.type === 'pony') {
+    const safe = { type:'pony', version:1, name:'Mon poney',
+      bodyColor:'#f6a6c9', bodyShape:0, mane:0, maneColor:'#fff8f0', tail:0,
+      eyes:0, eyeColor:'#513caa', pupils:0, ears:0, horn:0, wings:0,
+      mark:0, markColor:'#ffffff', clothes:0, hat:0, glasses:0, jewelry:0,
+      accessory:0, accessoryColor:'#ffd43b', pattern:0, effect:0 };
+    const keys = Object.keys(safe);
+    for (const k of keys) if (avatar[k] !== undefined) safe[k] = avatar[k];
+    const hex = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : safe.bodyColor;
+    safe.bodyColor = hex(safe.bodyColor); safe.maneColor = hex(safe.maneColor); safe.eyeColor = hex(safe.eyeColor);
+    safe.markColor = hex(safe.markColor); safe.accessoryColor = hex(safe.accessoryColor);
+    safe.name = String(safe.name || 'Mon poney').slice(0, 24);
+    return safe;
+  }
+  return AVATARS.find(a => a.id === avatar) ? avatar : AVATARS[0].id;
+};
 const newCode = () => {
   const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   let c;
@@ -189,9 +205,9 @@ io.on('connection', (socket) => {
       if (Object.values(room.players).some(p => p.name.toLowerCase() === name.toLowerCase()))
         return ack && ack({ error: 'Ce pseudo est déjà pris.' });
       pid = Math.random().toString(36).slice(2, 10);
-      pl = room.players[pid] = { id: pid, name, score: 0, avatar: avatarById(avatar).id, sid: null, connected: true };
+      pl = room.players[pid] = { id: pid, name, score: 0, avatar: avatarById(avatar), sid: null, connected: true };
     }
-    if (avatar) pl.avatar = avatarById(avatar).id;
+    if (avatar) pl.avatar = avatarById(avatar);
     pl.sid = socket.id;
     pl.connected = true;
     socket.data.code = code;
