@@ -505,5 +505,226 @@
   "license": "CC BY 2.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
   "source": "https://commons.wikimedia.org/wiki/File:Spyro_profile.jpg"
+ },
+ "ness": {
+  "file": "b60df6e4103f.jpg",
+  "title": "EarthBound_Ness_cosplayer_(4846603113).jpg",
+  "crop": [
+   0.5,
+   0.12,
+   1.0
+  ],
+  "author": "ElCapitanBSC from Baltimore, MD, USA",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:EarthBound_Ness_cosplayer_%284846603113%29.jpg"
+ },
+ "sackboy": {
+  "file": "5c541a79b966.jpg",
+  "title": "Sackboy!_(7791287744).jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Tim Bartel from Cologne, Germany",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Sackboy%21_%287791287744%29.jpg"
+ },
+ "chunli": {
+  "file": "346dc608149f.jpg",
+  "title": "Cosplayer_of_Chun-Li,_Street_Fighter_20140216e.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "kxz Chen",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplayer_of_Chun-Li%2C_Street_Fighter_20140216e.jpg"
+ },
+ "kratos": {
+  "file": "6131574f85ea.jpg",
+  "title": "Kratos_cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Mooshuu",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Kratos_cosplayer.jpg"
+ },
+ "cuphead": {
+  "file": "b798f1ec8068.jpg",
+  "title": "CupheadCosplay.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "AnticoMu90",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:CupheadCosplay.jpg"
+ },
+ "shovelknight": {
+  "file": "d8e25d3ad737.jpg",
+  "title": "Katsucon_cosplay_(16366554819).jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "peyj_turner",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Katsucon_cosplay_%2816366554819%29.jpg"
+ },
+ "slime": {
+  "file": "d609d2551adc.jpg",
+  "title": "Fancy_Frontier_23_(12564405895).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   0.8
+  ],
+  "author": "othree",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Fancy_Frontier_23_%2812564405895%29.jpg"
+ },
+ "chocobo": {
+  "file": "c85d694985db.jpg",
+  "title": "Chocobo_-otakon_-otakon2021_-finalfantasy.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "stupid systemus",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Chocobo_-otakon_-otakon2021_-finalfantasy.jpg"
+ },
+ "isabelle": {
+  "file": "8f952e8dce2e.jpg",
+  "title": "WonderCon_2017_-_Isabelle_(Animal_Crossing)_cosplay.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "W10002",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:WonderCon_2017_-_Isabelle_%28Animal_Crossing%29_cosplay.jpg"
+ },
+ "pikmin": {
+  "file": "300d693db07c.jpg",
+  "title": "Otakuthon_2014-_Olimar_and_his_Pikmin_harem_(14843007360).jpg",
+  "crop": [
+   0.4,
+   0.4,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Otakuthon_2014-_Olimar_and_his_Pikmin_harem_%2814843007360%29.jpg"
+ },
+ "frogger": {
+  "file": "3a2d5536ac31.jpg",
+  "title": "Sega_-_Gremlin_-_Frogger_-_December_1st_1981_Play_Meter_advert.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   0.85
+  ],
+  "author": "Sega/Gremlin",
+  "license": "Domaine public",
+  "licenseUrl": "https://commons.wikimedia.org/wiki/Commons:Public_domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Sega_-_Gremlin_-_Frogger_-_December_1st_1981_Play_Meter_advert.jpg"
+ },
+ "gamewatch": {
+  "file": "f44a585f4356.jpg",
+  "title": "FLORIDA_SUPERCON_2009_COSTUME_COMPETITION_-_3620847460.jpg",
+  "crop": [
+   0.5,
+   0.6,
+   1.0
+  ],
+  "author": "Super Festivals",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:FLORIDA_SUPERCON_2009_COSTUME_COMPETITION_-_3620847460.jpg"
+ },
+ "hollowknight": {
+  "file": "b7796e8a520a.jpg",
+  "title": "Polymanga_2024_-_53629048559.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Stéphane Gallay",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Polymanga_2024_-_53629048559.jpg"
+ },
+ "pit": {
+  "file": "ce0411e5c20f.jpg",
+  "title": "Anime_Central_2008_-_Pit_Cosplayer.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Andrew Evans",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Central_2008_-_Pit_Cosplayer.jpg"
+ },
+ "inkling": {
+  "file": "1732cf4bfdaa.jpg",
+  "title": "AnimeNEXT_2015_-_Cosplay_of_Splatoon_1.jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "C. Fountainstand",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:AnimeNEXT_2015_-_Cosplay_of_Splatoon_1.jpg"
+ },
+ "kirby": {
+  "file": "86e381378dc0.jpg",
+  "title": "KirbyCosplay.jpg",
+  "crop": [
+   0.5,
+   0.45,
+   1.0
+  ],
+  "author": "Pikawil",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:KirbyCosplay.jpg"
+ },
+ "lemming": {
+  "file": "a0848e76e1fa.jpg",
+  "title": "Lemmings_Cosplay.jpg",
+  "crop": [
+   0.45,
+   0.4,
+   0.8
+  ],
+  "author": "Luca Mascaro",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Lemmings_Cosplay.jpg"
  }
 }

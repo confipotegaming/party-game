@@ -80,5 +80,5 @@ test('photos : fichier présent, crédit complet, nom de fichier neutre', () => 
     assert.ok(p.author && p.license && p.licenseUrl && p.source.startsWith('https://commons.wikimedia.org/'), `${id} : crédit`);
     assert.ok(!p.file.toLowerCase().includes(id), `${id} : le nom du fichier ne trahit pas la réponse`);
   }
-  for (const q of game.questions) if (photos[q.s]) assert.ok(q.image && q.credit, q.a);
+  for (const q of game.questions) assert.ok(photos[q.s] && q.image && q.credit, `${q.a} : photo`);
 });
