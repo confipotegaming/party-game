@@ -427,5 +427,83 @@
   "license": "CC BY-SA 4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
   "source": "https://commons.wikimedia.org/wiki/File:Mural_de_un_Boo.jpg"
+ },
+ "goomba": {
+  "file": "5ae774e066c4.jpg",
+  "title": "Villaquilambre_-_Navatejera,_Centro_Joven_6_(cropped_Goomba).jpg",
+  "crop": [
+   0.5,
+   0.5,
+   1.0
+  ],
+  "author": "Zarateman",
+  "license": "CC0",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Villaquilambre_-_Navatejera%2C_Centro_Joven_6_%28cropped_Goomba%29.jpg"
+ },
+ "masterchief": {
+  "file": "771e730ed3e6.jpg",
+  "title": "Cosplay_of_Master_Chief_at_Cos-Gen_2022.jpg",
+  "crop": [
+   0.5,
+   0.4,
+   1.0
+  ],
+  "author": "Chongkian",
+  "license": "CC BY-SA 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Master_Chief_at_Cos-Gen_2022.jpg"
+ },
+ "mspacman": {
+  "file": "5dfe6948c270.jpg",
+  "title": "Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_(4836635185).jpg",
+  "crop": [
+   0.82,
+   0.45,
+   0.8
+  ],
+  "author": "The Conmunity - Pop Culture Geek from Los Angeles, CA, USA",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Anime_Expo_2010_-_LA_-_Ms_Pac-Man_and_ghost_%284836635185%29.jpg"
+ },
+ "shyguy": {
+  "file": "c0993892ce4f.jpg",
+  "title": "Montreal_Mini-Comiccon_2014-_Shy_Guy_(15351832943).jpg",
+  "crop": [
+   0.5,
+   0.3,
+   1.0
+  ],
+  "author": "Pikawil from Laval, Canada",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Montreal_Mini-Comiccon_2014-_Shy_Guy_%2815351832943%29.jpg"
+ },
+ "ryu": {
+  "file": "75e0f694bf6b.jpg",
+  "title": "Ryu_cosplay_at_EVO_2011.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "Andy L (Liang)",
+  "license": "CC BY-SA 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Ryu_cosplay_at_EVO_2011.jpg"
+ },
+ "spyro": {
+  "file": "67ff1760f342.jpg",
+  "title": "Spyro_profile.jpg",
+  "crop": [
+   0.5,
+   0.35,
+   1.0
+  ],
+  "author": "vages",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+  "source": "https://commons.wikimedia.org/wiki/File:Spyro_profile.jpg"
  }
 }
