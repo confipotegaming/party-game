@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.23';
+const APP_VERSION = '0.1.24';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss', 'pixelflou',
 ]) games[id] = require('./games/' + id);
 // Mode plateau : tirage des mini-jeux à la roue. Le jeu du boss en est exclu (voir games/_board.js).
 const board = require('./games/_board');

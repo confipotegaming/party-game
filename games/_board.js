@@ -14,7 +14,7 @@ const FAMILIES = {
   leplusprobable: 'social', quiadit: 'social', deuxverites: 'social',
   choixgroupe: 'opinion', classement: 'opinion', survive: 'opinion',
   estimation: 'culture', express: 'culture', intrus: 'culture',
-  emojis: 'devinette', filmresume: 'devinette', quatreimages: 'devinette', quisuisje: 'devinette', motatrous: 'devinette',
+  emojis: 'devinette', filmresume: 'devinette', quatreimages: 'devinette', quisuisje: 'devinette', motatrous: 'devinette', pixelflou: 'devinette',
   dessin: 'creatif', motinterdit: 'creatif',
   cerveau: 'cerveau', academie: 'cerveau',
   wario: 'arcade',
@@ -25,7 +25,7 @@ const ICONS = {
   funny: '😂', finislaphrase: '✍️', leplusprobable: '👉', quiadit: '🗣️', deuxverites: '🤥',
   choixgroupe: '🤝', classement: '📊', survive: '🏝️', estimation: '📏', express: '⚡', intrus: '🔍',
   emojis: '🎬', filmresume: '🎞️', quatreimages: '🖼️', quisuisje: '🕵️', motatrous: '🧩',
-  dessin: '🎨', motinterdit: '🤐', cerveau: '🧠', academie: '🎓', wario: '🕹️', sondage: '📋',
+  dessin: '🎨', motinterdit: '🤐', cerveau: '🧠', academie: '🎓', wario: '🕹️', sondage: '📋', pixelflou: '🟪',
 };
 
 // Points de plateau selon la place obtenue au mini-jeu (le dernier ne marque rien).

@@ -575,6 +575,27 @@ input[type=radio]{width:auto;margin-right:8px}
 .host .diff-options button{background:#fff;display:flex;flex-direction:column;gap:2px;text-align:left;padding:10px 14px}
 .host .diff-options button small{font-weight:600;opacity:.7}
 .host .diff-options button.sel{background:var(--sun)}
+/* ----- Pixel Flou ----- */
+.px-canvas{display:block;width:100%;max-width:512px;aspect-ratio:1;margin:0 auto;border:4px solid var(--ink);border-radius:14px;image-rendering:pixelated;background:#b8c7d9}
+.px-stage{display:grid;gap:12px;justify-items:center}
+.px-host .px-canvas{max-width:min(512px,52vh)}
+.px-play .px-canvas{max-width:min(256px,60vw)}
+.px-meter{width:100%;max-width:512px;display:grid;gap:6px;text-align:center;font-weight:900}
+.px-pot,.px-mine{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.px-pot b{font-family:'Bagel Fat One';color:var(--pink)}
+.px-mine .chip{background:#eee}.px-mine .chip.px-ok{background:var(--mint)}
+.px-players{display:grid;gap:8px}.px-dark{color:var(--ink)}
+.px-player{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;font-size:1.1rem}
+.px-feed{display:grid;gap:4px;border-top:3px dashed var(--ink);padding-top:8px}
+.px-msg.ok{color:#118a5a}.px-msg.ko{color:#c8163b}.px-msg.info{color:#4a3fb0}
+.px-reveal{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:center;margin:12px 0}
+.px-reveal .px-canvas{width:min(256px,60vw);margin:0}
+.px-name{font-family:'Bagel Fat One';font-size:clamp(2rem,5vw,3.4rem);color:var(--sun);text-shadow:3px 3px 0 var(--ink)}
+.px-game{font-weight:900;font-size:clamp(1.2rem,2.6vw,1.8rem);color:#fff}
+.play .px-name{color:var(--ink);text-shadow:none}.play .px-game{color:var(--ink)}
+.px-meter .progress-bar{background:#dcd6ff;margin-top:0}
+.px-credit{margin-top:8px;font-size:.8rem;color:#e9e5ff;max-width:420px}.px-credit a{color:inherit}
+.play .px-credit{color:#555}
 
 /* ===== Boss Fight : pixel art façon Zelda Game Boy ===== */
 .pixel{image-rendering:pixelated;image-rendering:crisp-edges}

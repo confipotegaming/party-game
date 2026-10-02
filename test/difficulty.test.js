@@ -28,7 +28,7 @@ test('bonus de points et mode par défaut', () => {
   assert.strictEqual(diff.modeOf({ options: { difficulty: '2' } }), '2');
 });
 
-const graded = ['estimation', 'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages', 'intrus', 'dessin', 'motinterdit'];
+const graded = ['estimation', 'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages', 'intrus', 'dessin', 'motinterdit', 'pixelflou'];
 for (const id of graded) {
   test(`jeu « ${id} » : la question affiche sa difficulté, quel que soit le mode`, () => {
     const game = require('../games/' + id);
