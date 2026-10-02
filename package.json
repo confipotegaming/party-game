@@ -1,6 +1,6 @@
 {
   "name": "party-game",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Jeux de soirée en français façon Jackbox",
   "main": "server.js",
   "scripts": {

@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -56,7 +56,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', academy:'Examen', academyResults:'Diplômes', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 const head = p => {
   const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
   const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
@@ -151,6 +151,79 @@ function renderBrainResults(p) {
   document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
   document.getElementById('bt-final').onclick = () => s.emit('host:skip');
 }
+// ----- Cérébrale Académie : examen en direct puis diplômes -----
+function academyClock() {
+  const p = st?.phase; if (!p || p.kind !== 'academy') return;
+  const A = window.AcademyGame, tl = A.timeline(p.data.startAt, Date.now() + off), plan = p.data.plan || [];
+  const panel = document.getElementById('ca-host-ep'), tm = document.getElementById('ca-host-t'), bar = document.getElementById('ca-host-bar');
+  if (!panel || !tm) return;
+  const key = tl.stage + tl.i;
+  if (panel.dataset.k !== key) {
+    panel.dataset.k = key;
+    document.querySelectorAll('.ca-host-steps span').forEach((x, j) => { x.className = j < tl.i ? 'done' : j === tl.i ? 'on' : ''; });
+    if (tl.stage === 'wait') panel.innerHTML = `<div class="ca-host-icon">🏛️</div><div><h2>L'examen va commencer…</h2><p>5 épreuves, une par matière. Préparez vos neurones !</p></div>`;
+    else if (tl.stage === 'end') panel.innerHTML = `<div class="ca-host-icon">📝</div><div><h2>Fin de l'examen !</h2><p>Correction des copies…</p></div>`;
+    else {
+      const g = A.GAMES[plan[tl.i]] || {}, c = A.CATS[g.cat] || {};
+      panel.innerHTML = `<div class="ca-host-icon">${g.icon || ''}</div><div><div class="eyebrow">${c.icon || ''} ${esc(c.name || '')} · Épreuve ${tl.i + 1}/${A.EPISODES}</div><h2>${esc(g.name || '')}</h2><p>${esc(g.rule || '')}</p></div><div class="ca-host-state">${tl.stage === 'intro' ? 'Présentation…' : 'À vos téléphones !'}</div>`;
+    }
+    panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in');
+  }
+  const total = tl.stage === 'play' ? A.T.PLAY_MS : tl.stage === 'intro' ? A.T.INTRO_MS : 1;
+  tm.textContent = tl.stage === 'end' ? 0 : Math.max(0, Math.ceil((tl.left || 0) / 1000));
+  bar.style.width = tl.stage === 'play' ? Math.max(0, 100 * tl.left / total) + '%' : '100%';
+  tm.parentElement.classList.toggle('hurry', tl.stage === 'play' && tl.left < 5000);
+  tm.previousElementSibling.textContent = tl.stage === 'intro' ? 'DÉPART DANS' : 'TEMPS';
+}
+setInterval(academyClock, 150);
+function renderAcademyHost(p, bindStop) {
+  const A = window.AcademyGame, plan = p.data.plan || [];
+  if (app.dataset.an != p.n) {
+    app.dataset.an = p.n;
+    app.innerHTML = `<div class="bt-host ca-host">
+      <header class="bt-host-head"><div><div class="eyebrow">Examen · Session ${p.round || 1}</div><h1>🏛️ Cérébrale Académie</h1>
+        <div class="ca-host-steps">${plan.map(id => `<span>${(A.GAMES[id] || {}).icon || '❔'} ${esc((A.GAMES[id] || {}).name || id)}</span>`).join('')}</div></div>
+        <div class="bt-host-clock"><small>TEMPS</small><b id="ca-host-t">0</b></div></header>
+      <div class="bt-host-timebar"><i id="ca-host-bar"></i></div>
+      <section class="ca-host-ep card" id="ca-host-ep"></section>
+      <section class="bt-host-live">${p.expected.map(id => `<div class="bt-live-row" data-id="${esc(id)}"><span class="bt-live-rank"></span><span class="bt-live-avatar">${avatarMarkup(((st.players || []).find(x => x.id === id) || {}).avatar, 54, 'happy')}</span><div class="bt-live-name"><b>${esc(nameOf(id))}</b><small class="bt-live-type">En salle d'examen…</small></div><div class="bt-live-stats"><span class="ca-live-grades"></span><span class="bt-live-solved"></span></div><strong class="bt-live-score">0</strong></div>`).join('')}</section>
+      ${stopGameButton()}</div>`;
+    bindStop();
+  }
+  const live = p.live || {};
+  const rows = p.expected.map(id => ({ id, ...(live[id] || { score: 0, solved: 0, errors: 0, eps: [] }) })).sort((a, b) => b.score - a.score);
+  rows.forEach((r, i) => {
+    const el = app.querySelector(`.bt-live-row[data-id="${CSS.escape(r.id)}"]`); if (!el) return;
+    const finished = (p.answered || []).includes(r.id);
+    el.style.order = i;
+    el.classList.toggle('lead', i === 0 && r.score > 0);
+    el.classList.toggle('finished', finished);
+    el.querySelector('.bt-live-rank').textContent = i + 1;
+    const sc = el.querySelector('.bt-live-score');
+    if (sc.textContent !== String(r.score)) { sc.textContent = r.score; sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
+    el.querySelector('.bt-live-type').textContent = finished ? '✓ Copie rendue !' : `🧠 ${A.grams(r.score)} g de cerveau`;
+    el.querySelector('.ca-live-grades').innerHTML = (r.eps || []).filter(e => e.solved || e.errors).map(e => `<i class="ca-grade g-${A.grade(e.score)}" title="${esc((A.GAMES[e.id] || {}).name || '')}">${(A.GAMES[e.id] || {}).icon || ''}${A.grade(e.score)}</i>`).join('');
+    el.querySelector('.bt-live-solved').textContent = `✅ ${r.solved || 0} · ❌ ${r.errors || 0}`;
+  });
+  academyClock();
+}
+function renderAcademyResults(p) {
+  delete app.dataset.an;
+  const A = window.AcademyGame, rows = p.data?.rows || [], medal = ['🥇', '🥈', '🥉'];
+  app.innerHTML = `<div class="bt-host bt-host-results ca-host">
+    <h1 class="bt-end-title">🎓 REMISE DES DIPLÔMES</h1>
+    <p class="muted score-subtitle">Session ${p.round || 1} · les points sont ajoutés au classement de la soirée</p>
+    <section class="bt-host-podium">${rows.map((r, i) => `<div class="bt-res-row ${i === 0 ? 'first' : ''}" style="animation-delay:${i * 120}ms">
+      <span class="bt-res-place">${medal[i] || i + 1}</span>
+      <span class="bt-res-avatar">${avatarMarkup(((st.players || []).find(x => x.id === r.id) || {}).avatar, 62, i === 0 ? 'smug' : 'happy')}</span>
+      <div class="bt-res-name"><b>${esc(r.name)}</b><span class="bt-res-title">${esc(r.icon)} ${esc(r.title)} · 🧠 ${r.grams} g</span></div>
+      <div class="bt-res-stats">${(r.eps || []).map(e => `<span class="ca-grade g-${A.grade(e.score)}">${(A.GAMES[e.id] || {}).icon || ''} ${A.grade(e.score)}</span>`).join('')}<span>🎯 ${r.accuracy} %</span></div>
+      <strong class="bt-res-score">+${r.score}</strong></div>`).join('') || '<p>Aucun résultat.</p>'}</section>
+    <div class="bt-host-actions"><button id="ca-replay">🔁 Rejouer</button><button class="alt" id="ca-menu">🏠 Retour aux mini-jeux</button><button class="bt-ghost" id="ca-final">🏆 Classement final</button></div></div>`;
+  document.getElementById('ca-replay').onclick = () => s.emit('host:action', 'replay');
+  document.getElementById('ca-menu').onclick = () => s.emit('host:lobby');
+  document.getElementById('ca-final').onclick = () => s.emit('host:skip');
+}
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
   const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm('Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
@@ -162,6 +235,10 @@ function render() {
     renderBrainHost(p, bindStop);
   } else if (p.kind === 'brainResults') {
     renderBrainResults(p);
+  } else if (p.kind === 'academy') {
+    renderAcademyHost(p, bindStop);
+  } else if (p.kind === 'academyResults') {
+    renderAcademyResults(p);
   } else if (p.kind === 'surveySetup' || p.kind === 'survey') {
     const ctx = { emit: (e, a) => s.emit(e, a), head, scoreBoard, stopGameButton, bindStop, avatarMarkup, nameOf,
       avatarOf: id => ((st.players || []).find(x => x.id === id) || {}).avatar };
@@ -174,7 +251,7 @@ function render() {
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'sondage' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['sondage', 'academie'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
