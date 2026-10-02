@@ -750,3 +750,27 @@ body.bf-pad-mode .audio-toggle{display:none}
 @media (max-width:900px){.board-spin-grid{grid-template-columns:1fr}.track-lane{grid-template-columns:1fr}}
 .board-mini .section-title,.board-track .section-title{color:var(--ink)}
 .board-lobby .muted,.wheel-result .muted{color:var(--ink);opacity:.7}
+/* ===== Boss Fight : choix des contrôles et mode clavier + souris ===== */
+.bf-ctrl-btn{grid-template-columns:64px 1fr}
+.bf-ctrl-ico{font-size:2rem;text-align:center}
+.bf-ctrl-now{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0d0a18;color:#f4f4f8;border:3px solid #f4f4f8;padding:6px 10px;font-weight:800;font-size:.85rem}
+.bf-ctrl-now button,.bf-switch{background:#3a2e5a;color:#fff;border:3px solid #f4f4f8;border-radius:0;box-shadow:2px 2px 0 #000;padding:4px 10px;font-size:.75rem;font-weight:800}
+.bf-pad>.bf-switch{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px}
+@media (hover:none){.bf-pad:not(.bf-kb)>.bf-switch{display:none}}
+.bf-kb{grid-template-rows:auto auto 1fr auto;gap:6px;padding:10px 14px;cursor:crosshair}
+.bf-kb button{cursor:pointer}
+.bf-kb-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;background:#0d0a18;border:3px solid #f4f4f8;padding:6px 10px}
+.bf-kb-who{display:grid}
+.bf-kb-who b{font-family:'Press Start 2P';font-size:.7rem}
+.bf-kb-who small{font-size:.8rem;color:#c8c0e8}
+.bf-kb .bf-pad-hearts{grid-column:auto}
+.bf-kb-sp{display:grid;gap:4px;min-width:160px;font-size:.8rem;font-weight:800;margin-left:auto}
+.bf-kb-bar{height:8px;background:#3a2e5a;border:2px solid #000}
+.bf-kb-bar i{display:block;height:100%;width:calc(100% - var(--cd,100) * 1%);background:#c8c0e8}
+.bf-kb-sp.ready{color:#6ff8ff}
+.bf-kb-sp.ready .bf-kb-bar i{background:#6ff8ff;box-shadow:0 0 10px #6ff8ff}
+.bf-kb .bf-pad-msg{min-height:2em;font-size:.7rem}
+.bf-kb-stage{display:grid;place-items:center;min-height:0;overflow:hidden}
+.bf-kb.ko .bf-kb-stage{opacity:.7}
+.bf-kb-keys{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;font-size:.8rem;color:#c8c0e8;font-weight:700}
+.bf-kb-keys kbd{display:inline-block;min-width:1.6em;padding:1px 5px;margin:0 2px;background:#f4f4f8;color:#0d0a18;border:2px solid #000;box-shadow:0 2px 0 #000;font-family:inherit;font-size:.75rem;text-align:center}
