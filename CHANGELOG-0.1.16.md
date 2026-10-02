@@ -1,4 +1,4 @@
-# Version 0.1.14
+# Version 0.1.16
 
 ## Nouveau mini-jeu : 🧠 Cerveau Turbo
 - 60 secondes pour enchaîner un maximum de mini-défis, chacun sur son téléphone, tous en même temps.
@@ -25,4 +25,4 @@
 - Un jeu peut fixer son nombre minimum de joueurs (`minPlayers`).
 - Nouveaux évènements génériques : `progress` (progression en direct relayée à l'hôte) et `host:action`
   (action propre au jeu, ex. « Rejouer »).
-- Version serveur et package : 0.1.14.
+- Version serveur et package : 0.1.16.
