@@ -1,0 +1,1484 @@
+{
+  "version": 1,
+  "next": {
+    "question": 19,
+    "answer": 118
+  },
+  "categories": [
+    "Vie quotidienne",
+    "Nourriture",
+    "Famille",
+    "Travail",
+    "École",
+    "Vacances",
+    "Sport",
+    "Animaux",
+    "Technologie",
+    "Cinéma",
+    "Musique",
+    "Jeux vidéo",
+    "France",
+    "Culture générale",
+    "Relations",
+    "Enfants"
+  ],
+  "synonyms": [
+    [
+      "téléphone",
+      "portable",
+      "smartphone",
+      "mobile",
+      "tel",
+      "iphone"
+    ],
+    [
+      "télévision",
+      "télé",
+      "tv"
+    ],
+    [
+      "ordinateur",
+      "ordi",
+      "pc"
+    ],
+    [
+      "voiture",
+      "auto",
+      "bagnole"
+    ],
+    [
+      "toilettes",
+      "wc",
+      "cabinets"
+    ],
+    [
+      "football",
+      "foot"
+    ]
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "question": "Citez quelque chose que les gens oublient souvent avant de partir en vacances.",
+      "category": "Vacances",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.670Z"
+    },
+    {
+      "id": 2,
+      "question": "Citez quelque chose que les gens font avant de dormir.",
+      "category": "Vie quotidienne",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 3,
+      "question": "Citez un animal que l’on trouve dans une ferme.",
+      "category": "Animaux",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 4,
+      "question": "Citez un plat typiquement français.",
+      "category": "France",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 5,
+      "question": "Citez quelque chose que l’on trouve dans un frigo.",
+      "category": "Nourriture",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 6,
+      "question": "Citez une excuse pour arriver en retard au travail.",
+      "category": "Travail",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 7,
+      "question": "Citez une matière que l’on étudie à l’école.",
+      "category": "École",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 8,
+      "question": "Citez un sport que l’on peut regarder à la télévision.",
+      "category": "Sport",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.671Z"
+    },
+    {
+      "id": 9,
+      "question": "Citez un objet que l’on a toujours dans son sac ou dans ses poches.",
+      "category": "Vie quotidienne",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 10,
+      "question": "Citez quelque chose que les enfants demandent au supermarché.",
+      "category": "Enfants",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 11,
+      "question": "Citez un film d’animation que tout le monde connaît.",
+      "category": "Cinéma",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 12,
+      "question": "Citez un instrument de musique.",
+      "category": "Musique",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 13,
+      "question": "Citez un jeu vidéo ou une série de jeux vidéo célèbre.",
+      "category": "Jeux vidéo",
+      "difficulty": "difficile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 14,
+      "question": "Citez une application que l’on ouvre tous les jours sur son téléphone.",
+      "category": "Technologie",
+      "difficulty": "moyen",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.672Z"
+    },
+    {
+      "id": 15,
+      "question": "Citez une tâche ménagère que personne n’aime faire.",
+      "category": "Famille",
+      "difficulty": "facile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.673Z"
+    },
+    {
+      "id": 16,
+      "question": "Citez quelque chose que l’on fait lors d’un premier rendez-vous amoureux.",
+      "category": "Relations",
+      "difficulty": "difficile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.673Z"
+    },
+    {
+      "id": 17,
+      "question": "Citez une ville française célèbre.",
+      "category": "France",
+      "difficulty": "difficile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.673Z"
+    },
+    {
+      "id": 18,
+      "question": "Citez quelque chose que l’on retrouve dans un anniversaire d’enfant.",
+      "category": "Enfants",
+      "difficulty": "difficile",
+      "language": "fr",
+      "active": true,
+      "created_at": "2026-10-02T10:50:22.673Z"
+    }
+  ],
+  "answers": [
+    {
+      "id": 1,
+      "question_id": 1,
+      "answer": "Chargeur de téléphone",
+      "accepted_variants": [
+        "chargeur",
+        "chargeur téléphone",
+        "chargeur de portable",
+        "câble"
+      ],
+      "votes": 38,
+      "position": 1
+    },
+    {
+      "id": 2,
+      "question_id": 1,
+      "answer": "Brosse à dents",
+      "accepted_variants": [
+        "dentifrice",
+        "trousse de toilette"
+      ],
+      "votes": 24,
+      "position": 2
+    },
+    {
+      "id": 3,
+      "question_id": 1,
+      "answer": "Passeport",
+      "accepted_variants": [
+        "papiers",
+        "carte d'identité",
+        "pièce d'identité",
+        "papiers d'identité"
+      ],
+      "votes": 18,
+      "position": 3
+    },
+    {
+      "id": 4,
+      "question_id": 1,
+      "answer": "Lunettes de soleil",
+      "accepted_variants": [
+        "lunettes",
+        "solaires"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 5,
+      "question_id": 1,
+      "answer": "Médicaments",
+      "accepted_variants": [
+        "médocs",
+        "traitement",
+        "pilules"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 6,
+      "question_id": 2,
+      "answer": "Se brosser les dents",
+      "accepted_variants": [
+        "brosser les dents",
+        "dents",
+        "brosse à dents"
+      ],
+      "votes": 42,
+      "position": 1
+    },
+    {
+      "id": 7,
+      "question_id": 2,
+      "answer": "Regarder son téléphone",
+      "accepted_variants": [
+        "téléphone",
+        "scroller",
+        "réseaux sociaux",
+        "regarder son portable"
+      ],
+      "votes": 31,
+      "position": 2
+    },
+    {
+      "id": 8,
+      "question_id": 2,
+      "answer": "Lire",
+      "accepted_variants": [
+        "lire un livre",
+        "livre",
+        "lecture"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 9,
+      "question_id": 2,
+      "answer": "Mettre son pyjama",
+      "accepted_variants": [
+        "pyjama",
+        "se changer",
+        "se déshabiller"
+      ],
+      "votes": 8,
+      "position": 4
+    },
+    {
+      "id": 10,
+      "question_id": 2,
+      "answer": "Aller aux toilettes",
+      "accepted_variants": [
+        "toilettes",
+        "pipi",
+        "faire pipi",
+        "wc"
+      ],
+      "votes": 4,
+      "position": 5
+    },
+    {
+      "id": 11,
+      "question_id": 3,
+      "answer": "Vache",
+      "accepted_variants": [
+        "veau",
+        "taureau",
+        "bœuf"
+      ],
+      "votes": 35,
+      "position": 1
+    },
+    {
+      "id": 12,
+      "question_id": 3,
+      "answer": "Poule",
+      "accepted_variants": [
+        "coq",
+        "poulet",
+        "poussin"
+      ],
+      "votes": 25,
+      "position": 2
+    },
+    {
+      "id": 13,
+      "question_id": 3,
+      "answer": "Cochon",
+      "accepted_variants": [
+        "porc",
+        "truie",
+        "cochonnet"
+      ],
+      "votes": 18,
+      "position": 3
+    },
+    {
+      "id": 14,
+      "question_id": 3,
+      "answer": "Mouton",
+      "accepted_variants": [
+        "brebis",
+        "agneau"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 15,
+      "question_id": 3,
+      "answer": "Cheval",
+      "accepted_variants": [
+        "jument",
+        "poney",
+        "âne"
+      ],
+      "votes": 6,
+      "position": 5
+    },
+    {
+      "id": 16,
+      "question_id": 3,
+      "answer": "Chèvre",
+      "accepted_variants": [
+        "bouc",
+        "biquette"
+      ],
+      "votes": 4,
+      "position": 6
+    },
+    {
+      "id": 17,
+      "question_id": 4,
+      "answer": "Bœuf bourguignon",
+      "accepted_variants": [
+        "bourguignon"
+      ],
+      "votes": 26,
+      "position": 1
+    },
+    {
+      "id": 18,
+      "question_id": 4,
+      "answer": "Raclette",
+      "accepted_variants": [],
+      "votes": 18,
+      "position": 2
+    },
+    {
+      "id": 19,
+      "question_id": 4,
+      "answer": "Blanquette de veau",
+      "accepted_variants": [
+        "blanquette"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 20,
+      "question_id": 4,
+      "answer": "Pot-au-feu",
+      "accepted_variants": [
+        "pot au feu"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 21,
+      "question_id": 4,
+      "answer": "Croque-monsieur",
+      "accepted_variants": [
+        "croque monsieur",
+        "croque"
+      ],
+      "votes": 10,
+      "position": 5
+    },
+    {
+      "id": 22,
+      "question_id": 4,
+      "answer": "Escargots",
+      "accepted_variants": [
+        "escargot de bourgogne"
+      ],
+      "votes": 9,
+      "position": 6
+    },
+    {
+      "id": 23,
+      "question_id": 4,
+      "answer": "Cassoulet",
+      "accepted_variants": [],
+      "votes": 6,
+      "position": 7
+    },
+    {
+      "id": 24,
+      "question_id": 4,
+      "answer": "Ratatouille",
+      "accepted_variants": [],
+      "votes": 4,
+      "position": 8
+    },
+    {
+      "id": 25,
+      "question_id": 5,
+      "answer": "Lait",
+      "accepted_variants": [
+        "bouteille de lait"
+      ],
+      "votes": 30,
+      "position": 1
+    },
+    {
+      "id": 26,
+      "question_id": 5,
+      "answer": "Beurre",
+      "accepted_variants": [],
+      "votes": 22,
+      "position": 2
+    },
+    {
+      "id": 27,
+      "question_id": 5,
+      "answer": "Fromage",
+      "accepted_variants": [
+        "camembert",
+        "emmental",
+        "gruyère"
+      ],
+      "votes": 20,
+      "position": 3
+    },
+    {
+      "id": 28,
+      "question_id": 5,
+      "answer": "Œufs",
+      "accepted_variants": [
+        "oeuf",
+        "boîte d’œufs"
+      ],
+      "votes": 14,
+      "position": 4
+    },
+    {
+      "id": 29,
+      "question_id": 5,
+      "answer": "Yaourts",
+      "accepted_variants": [
+        "yaourt",
+        "yogourt",
+        "yoghourt"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 30,
+      "question_id": 5,
+      "answer": "Légumes",
+      "accepted_variants": [
+        "salade",
+        "carottes",
+        "tomates"
+      ],
+      "votes": 6,
+      "position": 6
+    },
+    {
+      "id": 31,
+      "question_id": 6,
+      "answer": "Les bouchons",
+      "accepted_variants": [
+        "embouteillages",
+        "trafic",
+        "circulation",
+        "bouchon"
+      ],
+      "votes": 32,
+      "position": 1
+    },
+    {
+      "id": 32,
+      "question_id": 6,
+      "answer": "Le réveil n’a pas sonné",
+      "accepted_variants": [
+        "réveil",
+        "panne de réveil",
+        "pas entendu le réveil"
+      ],
+      "votes": 25,
+      "position": 2
+    },
+    {
+      "id": 33,
+      "question_id": 6,
+      "answer": "Grève des transports",
+      "accepted_variants": [
+        "grève",
+        "train en retard",
+        "bus en retard",
+        "métro",
+        "retard de train"
+      ],
+      "votes": 16,
+      "position": 3
+    },
+    {
+      "id": 34,
+      "question_id": 6,
+      "answer": "Un enfant malade",
+      "accepted_variants": [
+        "enfant malade",
+        "les enfants",
+        "école",
+        "crèche"
+      ],
+      "votes": 11,
+      "position": 4
+    },
+    {
+      "id": 35,
+      "question_id": 6,
+      "answer": "Une panne de voiture",
+      "accepted_variants": [
+        "panne",
+        "voiture en panne",
+        "crevaison",
+        "pneu crevé"
+      ],
+      "votes": 9,
+      "position": 5
+    },
+    {
+      "id": 36,
+      "question_id": 6,
+      "answer": "Un rendez-vous médical",
+      "accepted_variants": [
+        "médecin",
+        "dentiste",
+        "rendez-vous"
+      ],
+      "votes": 7,
+      "position": 6
+    },
+    {
+      "id": 37,
+      "question_id": 7,
+      "answer": "Mathématiques",
+      "accepted_variants": [
+        "maths",
+        "math"
+      ],
+      "votes": 40,
+      "position": 1
+    },
+    {
+      "id": 38,
+      "question_id": 7,
+      "answer": "Français",
+      "accepted_variants": [],
+      "votes": 25,
+      "position": 2
+    },
+    {
+      "id": 39,
+      "question_id": 7,
+      "answer": "Histoire-géographie",
+      "accepted_variants": [
+        "histoire",
+        "géographie",
+        "histoire géo",
+        "géo"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 40,
+      "question_id": 7,
+      "answer": "Anglais",
+      "accepted_variants": [
+        "langues",
+        "langue vivante"
+      ],
+      "votes": 10,
+      "position": 4
+    },
+    {
+      "id": 41,
+      "question_id": 7,
+      "answer": "Sport",
+      "accepted_variants": [
+        "eps",
+        "éducation physique",
+        "gym"
+      ],
+      "votes": 6,
+      "position": 5
+    },
+    {
+      "id": 42,
+      "question_id": 7,
+      "answer": "Sciences",
+      "accepted_variants": [
+        "svt",
+        "physique",
+        "chimie",
+        "physique chimie",
+        "biologie"
+      ],
+      "votes": 4,
+      "position": 6
+    },
+    {
+      "id": 43,
+      "question_id": 8,
+      "answer": "Football",
+      "accepted_variants": [
+        "foot",
+        "soccer"
+      ],
+      "votes": 45,
+      "position": 1
+    },
+    {
+      "id": 44,
+      "question_id": 8,
+      "answer": "Rugby",
+      "accepted_variants": [],
+      "votes": 18,
+      "position": 2
+    },
+    {
+      "id": 45,
+      "question_id": 8,
+      "answer": "Tennis",
+      "accepted_variants": [
+        "roland garros"
+      ],
+      "votes": 14,
+      "position": 3
+    },
+    {
+      "id": 46,
+      "question_id": 8,
+      "answer": "Cyclisme",
+      "accepted_variants": [
+        "vélo",
+        "tour de france"
+      ],
+      "votes": 10,
+      "position": 4
+    },
+    {
+      "id": 47,
+      "question_id": 8,
+      "answer": "Formule 1",
+      "accepted_variants": [
+        "f1",
+        "course automobile",
+        "course de voitures"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 48,
+      "question_id": 8,
+      "answer": "Basket",
+      "accepted_variants": [
+        "basketball",
+        "basket ball",
+        "nba"
+      ],
+      "votes": 5,
+      "position": 6
+    },
+    {
+      "id": 49,
+      "question_id": 9,
+      "answer": "Téléphone",
+      "accepted_variants": [],
+      "votes": 34,
+      "position": 1
+    },
+    {
+      "id": 50,
+      "question_id": 9,
+      "answer": "Clés",
+      "accepted_variants": [
+        "clé",
+        "clefs",
+        "trousseau"
+      ],
+      "votes": 28,
+      "position": 2
+    },
+    {
+      "id": 51,
+      "question_id": 9,
+      "answer": "Portefeuille",
+      "accepted_variants": [
+        "porte monnaie",
+        "carte bleue",
+        "carte bancaire",
+        "argent"
+      ],
+      "votes": 18,
+      "position": 3
+    },
+    {
+      "id": 52,
+      "question_id": 9,
+      "answer": "Mouchoirs",
+      "accepted_variants": [
+        "mouchoir",
+        "kleenex"
+      ],
+      "votes": 9,
+      "position": 4
+    },
+    {
+      "id": 53,
+      "question_id": 9,
+      "answer": "Écouteurs",
+      "accepted_variants": [
+        "casque",
+        "airpods"
+      ],
+      "votes": 6,
+      "position": 5
+    },
+    {
+      "id": 54,
+      "question_id": 9,
+      "answer": "Rouge à lèvres",
+      "accepted_variants": [
+        "baume à lèvres",
+        "maquillage",
+        "stick à lèvres"
+      ],
+      "votes": 5,
+      "position": 6
+    },
+    {
+      "id": 55,
+      "question_id": 10,
+      "answer": "Des bonbons",
+      "accepted_variants": [
+        "bonbon",
+        "friandises",
+        "sucreries"
+      ],
+      "votes": 36,
+      "position": 1
+    },
+    {
+      "id": 56,
+      "question_id": 10,
+      "answer": "Des jouets",
+      "accepted_variants": [
+        "jouet",
+        "un jouet"
+      ],
+      "votes": 22,
+      "position": 2
+    },
+    {
+      "id": 57,
+      "question_id": 10,
+      "answer": "Du chocolat",
+      "accepted_variants": [
+        "kinder",
+        "œuf en chocolat"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 58,
+      "question_id": 10,
+      "answer": "Des gâteaux",
+      "accepted_variants": [
+        "biscuits",
+        "gâteau"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 59,
+      "question_id": 10,
+      "answer": "Des céréales",
+      "accepted_variants": [
+        "céréale"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 60,
+      "question_id": 10,
+      "answer": "Une glace",
+      "accepted_variants": [
+        "glaces"
+      ],
+      "votes": 7,
+      "position": 6
+    },
+    {
+      "id": 61,
+      "question_id": 11,
+      "answer": "Le Roi Lion",
+      "accepted_variants": [
+        "roi lion"
+      ],
+      "votes": 30,
+      "position": 1
+    },
+    {
+      "id": 62,
+      "question_id": 11,
+      "answer": "La Reine des neiges",
+      "accepted_variants": [
+        "reine des neiges",
+        "frozen"
+      ],
+      "votes": 22,
+      "position": 2
+    },
+    {
+      "id": 63,
+      "question_id": 11,
+      "answer": "Toy Story",
+      "accepted_variants": [],
+      "votes": 16,
+      "position": 3
+    },
+    {
+      "id": 64,
+      "question_id": 11,
+      "answer": "Shrek",
+      "accepted_variants": [],
+      "votes": 13,
+      "position": 4
+    },
+    {
+      "id": 65,
+      "question_id": 11,
+      "answer": "Le Monde de Nemo",
+      "accepted_variants": [
+        "nemo",
+        "monde de nemo"
+      ],
+      "votes": 9,
+      "position": 5
+    },
+    {
+      "id": 66,
+      "question_id": 11,
+      "answer": "Ratatouille",
+      "accepted_variants": [],
+      "votes": 6,
+      "position": 6
+    },
+    {
+      "id": 67,
+      "question_id": 11,
+      "answer": "Les Indestructibles",
+      "accepted_variants": [
+        "indestructibles"
+      ],
+      "votes": 4,
+      "position": 7
+    },
+    {
+      "id": 68,
+      "question_id": 12,
+      "answer": "Guitare",
+      "accepted_variants": [
+        "guitare électrique"
+      ],
+      "votes": 34,
+      "position": 1
+    },
+    {
+      "id": 69,
+      "question_id": 12,
+      "answer": "Piano",
+      "accepted_variants": [
+        "clavier",
+        "synthé"
+      ],
+      "votes": 30,
+      "position": 2
+    },
+    {
+      "id": 70,
+      "question_id": 12,
+      "answer": "Batterie",
+      "accepted_variants": [
+        "tambour",
+        "percussions"
+      ],
+      "votes": 14,
+      "position": 3
+    },
+    {
+      "id": 71,
+      "question_id": 12,
+      "answer": "Violon",
+      "accepted_variants": [],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 72,
+      "question_id": 12,
+      "answer": "Flûte",
+      "accepted_variants": [
+        "flûte à bec",
+        "flûte traversière"
+      ],
+      "votes": 6,
+      "position": 5
+    },
+    {
+      "id": 73,
+      "question_id": 12,
+      "answer": "Trompette",
+      "accepted_variants": [],
+      "votes": 4,
+      "position": 6
+    },
+    {
+      "id": 74,
+      "question_id": 13,
+      "answer": "Mario",
+      "accepted_variants": [
+        "super mario",
+        "mario kart",
+        "mario bros"
+      ],
+      "votes": 28,
+      "position": 1
+    },
+    {
+      "id": 75,
+      "question_id": 13,
+      "answer": "Fortnite",
+      "accepted_variants": [],
+      "votes": 17,
+      "position": 2
+    },
+    {
+      "id": 76,
+      "question_id": 13,
+      "answer": "Minecraft",
+      "accepted_variants": [],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 77,
+      "question_id": 13,
+      "answer": "Pokémon",
+      "accepted_variants": [
+        "pokemon"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 78,
+      "question_id": 13,
+      "answer": "FIFA",
+      "accepted_variants": [
+        "ea sports fc",
+        "fc 24",
+        "foot"
+      ],
+      "votes": 9,
+      "position": 5
+    },
+    {
+      "id": 79,
+      "question_id": 13,
+      "answer": "Tetris",
+      "accepted_variants": [],
+      "votes": 7,
+      "position": 6
+    },
+    {
+      "id": 80,
+      "question_id": 13,
+      "answer": "Call of Duty",
+      "accepted_variants": [
+        "cod"
+      ],
+      "votes": 6,
+      "position": 7
+    },
+    {
+      "id": 81,
+      "question_id": 13,
+      "answer": "Zelda",
+      "accepted_variants": [
+        "the legend of zelda",
+        "legend of zelda"
+      ],
+      "votes": 6,
+      "position": 8
+    },
+    {
+      "id": 82,
+      "question_id": 14,
+      "answer": "WhatsApp",
+      "accepted_variants": [
+        "whats app",
+        "whatsapp"
+      ],
+      "votes": 30,
+      "position": 1
+    },
+    {
+      "id": 83,
+      "question_id": 14,
+      "answer": "Instagram",
+      "accepted_variants": [
+        "insta"
+      ],
+      "votes": 20,
+      "position": 2
+    },
+    {
+      "id": 84,
+      "question_id": 14,
+      "answer": "Messages",
+      "accepted_variants": [
+        "sms",
+        "textos"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 85,
+      "question_id": 14,
+      "answer": "YouTube",
+      "accepted_variants": [
+        "you tube"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 86,
+      "question_id": 14,
+      "answer": "TikTok",
+      "accepted_variants": [
+        "tik tok"
+      ],
+      "votes": 10,
+      "position": 5
+    },
+    {
+      "id": 87,
+      "question_id": 14,
+      "answer": "Mails",
+      "accepted_variants": [
+        "mail",
+        "gmail",
+        "email",
+        "e-mail",
+        "courriel"
+      ],
+      "votes": 8,
+      "position": 6
+    },
+    {
+      "id": 88,
+      "question_id": 15,
+      "answer": "La vaisselle",
+      "accepted_variants": [
+        "vaisselle",
+        "faire la vaisselle"
+      ],
+      "votes": 34,
+      "position": 1
+    },
+    {
+      "id": 89,
+      "question_id": 15,
+      "answer": "Le repassage",
+      "accepted_variants": [
+        "repasser",
+        "repassage"
+      ],
+      "votes": 26,
+      "position": 2
+    },
+    {
+      "id": 90,
+      "question_id": 15,
+      "answer": "Le ménage",
+      "accepted_variants": [
+        "nettoyer",
+        "aspirateur",
+        "passer l’aspirateur"
+      ],
+      "votes": 14,
+      "position": 3
+    },
+    {
+      "id": 91,
+      "question_id": 15,
+      "answer": "Nettoyer les toilettes",
+      "accepted_variants": [
+        "toilettes",
+        "wc"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 92,
+      "question_id": 15,
+      "answer": "Sortir les poubelles",
+      "accepted_variants": [
+        "poubelles",
+        "poubelle"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 93,
+      "question_id": 15,
+      "answer": "Étendre le linge",
+      "accepted_variants": [
+        "linge",
+        "lessive",
+        "machine"
+      ],
+      "votes": 6,
+      "position": 6
+    },
+    {
+      "id": 94,
+      "question_id": 16,
+      "answer": "Aller au restaurant",
+      "accepted_variants": [
+        "restaurant",
+        "resto",
+        "dîner"
+      ],
+      "votes": 32,
+      "position": 1
+    },
+    {
+      "id": 95,
+      "question_id": 16,
+      "answer": "Boire un verre",
+      "accepted_variants": [
+        "verre",
+        "bar",
+        "apéro",
+        "café"
+      ],
+      "votes": 22,
+      "position": 2
+    },
+    {
+      "id": 96,
+      "question_id": 16,
+      "answer": "Aller au cinéma",
+      "accepted_variants": [
+        "cinéma",
+        "ciné",
+        "film"
+      ],
+      "votes": 16,
+      "position": 3
+    },
+    {
+      "id": 97,
+      "question_id": 16,
+      "answer": "Se promener",
+      "accepted_variants": [
+        "promenade",
+        "balade",
+        "marcher"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 98,
+      "question_id": 16,
+      "answer": "S’embrasser",
+      "accepted_variants": [
+        "bisou",
+        "baiser",
+        "embrasser"
+      ],
+      "votes": 8,
+      "position": 5
+    },
+    {
+      "id": 99,
+      "question_id": 16,
+      "answer": "Parler",
+      "accepted_variants": [
+        "discuter",
+        "faire connaissance",
+        "discussion"
+      ],
+      "votes": 5,
+      "position": 6
+    },
+    {
+      "id": 100,
+      "question_id": 16,
+      "answer": "Offrir des fleurs",
+      "accepted_variants": [
+        "fleurs",
+        "bouquet",
+        "rose"
+      ],
+      "votes": 3,
+      "position": 7
+    },
+    {
+      "id": 101,
+      "question_id": 16,
+      "answer": "Être en retard",
+      "accepted_variants": [
+        "retard"
+      ],
+      "votes": 2,
+      "position": 8
+    },
+    {
+      "id": 102,
+      "question_id": 17,
+      "answer": "Paris",
+      "accepted_variants": [],
+      "votes": 40,
+      "position": 1
+    },
+    {
+      "id": 103,
+      "question_id": 17,
+      "answer": "Marseille",
+      "accepted_variants": [],
+      "votes": 18,
+      "position": 2
+    },
+    {
+      "id": 104,
+      "question_id": 17,
+      "answer": "Lyon",
+      "accepted_variants": [],
+      "votes": 14,
+      "position": 3
+    },
+    {
+      "id": 105,
+      "question_id": 17,
+      "answer": "Bordeaux",
+      "accepted_variants": [],
+      "votes": 8,
+      "position": 4
+    },
+    {
+      "id": 106,
+      "question_id": 17,
+      "answer": "Nice",
+      "accepted_variants": [],
+      "votes": 7,
+      "position": 5
+    },
+    {
+      "id": 107,
+      "question_id": 17,
+      "answer": "Toulouse",
+      "accepted_variants": [],
+      "votes": 6,
+      "position": 6
+    },
+    {
+      "id": 108,
+      "question_id": 17,
+      "answer": "Lille",
+      "accepted_variants": [],
+      "votes": 4,
+      "position": 7
+    },
+    {
+      "id": 109,
+      "question_id": 17,
+      "answer": "Strasbourg",
+      "accepted_variants": [],
+      "votes": 3,
+      "position": 8
+    },
+    {
+      "id": 110,
+      "question_id": 18,
+      "answer": "Un gâteau",
+      "accepted_variants": [
+        "gâteau d’anniversaire",
+        "gâteau"
+      ],
+      "votes": 35,
+      "position": 1
+    },
+    {
+      "id": 111,
+      "question_id": 18,
+      "answer": "Des bougies",
+      "accepted_variants": [
+        "bougie"
+      ],
+      "votes": 20,
+      "position": 2
+    },
+    {
+      "id": 112,
+      "question_id": 18,
+      "answer": "Des ballons",
+      "accepted_variants": [
+        "ballon",
+        "baudruches"
+      ],
+      "votes": 15,
+      "position": 3
+    },
+    {
+      "id": 113,
+      "question_id": 18,
+      "answer": "Des cadeaux",
+      "accepted_variants": [
+        "cadeau",
+        "présents"
+      ],
+      "votes": 12,
+      "position": 4
+    },
+    {
+      "id": 114,
+      "question_id": 18,
+      "answer": "Des bonbons",
+      "accepted_variants": [
+        "bonbon",
+        "friandises"
+      ],
+      "votes": 7,
+      "position": 5
+    },
+    {
+      "id": 115,
+      "question_id": 18,
+      "answer": "Des chapeaux pointus",
+      "accepted_variants": [
+        "chapeaux",
+        "chapeau",
+        "cotillons"
+      ],
+      "votes": 5,
+      "position": 6
+    },
+    {
+      "id": 116,
+      "question_id": 18,
+      "answer": "Un clown",
+      "accepted_variants": [
+        "magicien",
+        "animateur"
+      ],
+      "votes": 4,
+      "position": 7
+    },
+    {
+      "id": 117,
+      "question_id": 18,
+      "answer": "Des jeux",
+      "accepted_variants": [
+        "jeu",
+        "chasse au trésor"
+      ],
+      "votes": 2,
+      "position": 8
+    }
+  ]
+}

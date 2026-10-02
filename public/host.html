@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -56,7 +56,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ brain:'Défis express', brainResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ survey:'Le Grand Sondage', surveySetup:'Le Grand Sondage', brain:'Défis express', brainResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 const head = p => {
   const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
   const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
@@ -162,6 +162,10 @@ function render() {
     renderBrainHost(p, bindStop);
   } else if (p.kind === 'brainResults') {
     renderBrainResults(p);
+  } else if (p.kind === 'surveySetup' || p.kind === 'survey') {
+    const ctx = { emit: (e, a) => s.emit(e, a), head, scoreBoard, stopGameButton, bindStop, avatarMarkup, nameOf,
+      avatarOf: id => ((st.players || []).find(x => x.id === id) || {}).avatar };
+    p.kind === 'survey' ? window.SurveyGame.host(app, p, ctx) : window.SurveyGame.hostSetup(app, p, ctx);
   } else if (p.kind === 'lobby') {
     const minFor = id => ((st.games || []).find(g => g.id === id) || {}).minPlayers || st.min;
     const need = sel ? minFor(sel) : st.min;
@@ -170,7 +174,7 @@ function render() {
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'cerveau' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'sondage' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
@@ -210,7 +214,7 @@ function render() {
     bindStop();
   } else if (p.kind === 'reveal') {
     stopDrawResync();
-    app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>
+    app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>${p.data?.survey ? `<div class="prompt">${esc(p.prompt)}</div>${window.SurveyGame.reveal(p.data.survey)}` : ''}
       <div class="card">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br>${esc(l.sub)}</div><span class="pts">+${l.pts}</span></div>`).join('') || 'Aucun point cette manche.'}</div>
       <div><button id="next">Suivant</button></div>`;
     document.getElementById('next').onclick = () => { window.partyAudio.click(); s.emit('host:skip'); };
