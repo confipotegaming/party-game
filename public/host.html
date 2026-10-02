@@ -2,7 +2,7 @@
 <title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script><script src="/wario.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -56,7 +56,7 @@ setInterval(() => {
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
 const nameOf = id => { const x = (st?.players || []).find(p => p.id === id); return x ? x.name : 'Joueur'; };
 const timer = p => p?.endsAt ? `<span class="host-timer" id="t">${Math.max(0, Math.ceil((p.endsAt - Date.now() - off) / 1000))}</span>` : '';
-const phaseLabel = p => ({ brain:'Défis express', brainResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
+const phaseLabel = p => ({ brain:'Défis express', brainResults:'Résultats', wario:'Micro-jeux', warioResults:'Résultats', text:'Répondez', number:'Estimation', guess:'Trouvez', rank:'Classement', truths:'2 vérités / 1 mensonge', describe:'Indice', draw:'Dessin en direct', vote:'Vote', reveal:'Résultats', scores:'Classement final' }[p?.kind] || p?.kind || 'Manche');
 const head = p => {
   const round = p?.round && p?.rounds ? `<span class="chip">Manche ${p.round}/${p.rounds}</span>` : '';
   const category = p?.category ? `<span class="chip">${esc(p.category)}</span>` : '';
@@ -96,7 +96,7 @@ setInterval(()=>{ if(st && st.phase && (st.phase.kind==='lobby' || st.phase.kind
 // ----- Cerveau Turbo : suivi en direct puis résultats -----
 const brainTypes = { add:'➕ Addition', sub:'➖ Soustraction', mul:'✖️ Multiplication', missing:'❓ Nombre manquant', chain:'🔗 Calcul en chaîne', sequence:'🔢 Suite logique', odd:'🔍 Intrus', least:'⚖️ Comparaison', pattern:'🔷 Formes', memo:'🧠 Mémoire', shell:'🃏 Bonneteau', simon:'🎨 Séquence', colorTap:'🎯 Couleur', green:'🟢 Feu vert', starOnly:'⭐ Réflexe', compare:'📏 Plus grand', count:'🧮 Comptage', twice:'👯 Doublon' };
 function brainClock() {
-  const p = st?.phase; if (!p || p.kind !== 'brain') return;
+  const p = st?.phase; if (!p || (p.kind !== 'brain' && p.kind !== 'wario')) return;
   const t = Date.now() + off, start = p.data.startAt, left = start + p.data.playMs - t;
   const cd = document.getElementById('bt-host-count'), tm = document.getElementById('bt-host-t'), bar = document.getElementById('bt-host-bar');
   if (!cd || !tm) return;
@@ -151,6 +151,55 @@ function renderBrainResults(p) {
   document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
   document.getElementById('bt-final').onclick = () => s.emit('host:skip');
 }
+// ----- Warioware : suivi en direct puis résultats -----
+const warioHearts = (n, max) => Array.from({ length: max }, (_, i) => i < n ? '❤️' : '🖤').join('');
+function renderWarioHost(p, bindStop) {
+  const W = window.WarioGame || {}, max = p.data.lives || 4;
+  if (app.dataset.wn != p.n) {
+    app.dataset.wn = p.n;
+    app.innerHTML = `<div class="bt-host wa-host">
+      <header class="bt-host-head"><div><div class="eyebrow">Micro-jeux · Partie ${p.round || 1}</div><h1>🕹️ Warioware</h1><p class="muted">Attrape ! Évite ! Saute ! Lisez la consigne et agissez sur votre téléphone… de plus en plus vite !</p></div>
+        <div class="bt-host-clock"><small>TEMPS MAX</small><b id="bt-host-t">${Math.round(p.data.playMs / 1000)}</b></div></header>
+      <div class="bt-host-timebar"><i id="bt-host-bar"></i></div>
+      <div class="bt-host-count" id="bt-host-count"></div>
+      <section class="bt-host-live">${p.expected.map(id => `<div class="bt-live-row" data-id="${esc(id)}"><span class="bt-live-rank"></span><span class="bt-live-avatar">${avatarMarkup(((st.players || []).find(x => x.id === id) || {}).avatar, 54, 'happy')}</span><div class="bt-live-name"><b>${esc(nameOf(id))}</b><small class="bt-live-type">Prêt·e…</small></div><div class="bt-live-stats"><span class="wa-live-lives"></span><span class="bt-live-solved"></span></div><strong class="bt-live-score">0</strong></div>`).join('')}</section>
+      ${stopGameButton()}</div>`;
+    bindStop();
+  }
+  const live = p.live || {};
+  const rows = p.expected.map(id => ({ id, ...(live[id] || { score: 0, cleared: 0, lives: max, speed: 10, streak: 0 }) })).sort((a, b) => b.score - a.score);
+  rows.forEach((r, i) => {
+    const el = app.querySelector(`.bt-live-row[data-id="${CSS.escape(r.id)}"]`); if (!el) return;
+    const out = (p.answered || []).includes(r.id) || r.lives <= 0;
+    el.style.order = i;
+    el.classList.toggle('lead', i === 0 && r.score > 0);
+    el.classList.toggle('finished', out);
+    el.querySelector('.bt-live-rank').textContent = i + 1;
+    const sc = el.querySelector('.bt-live-score');
+    if (sc.textContent !== String(r.score)) { sc.textContent = r.score; sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump'); }
+    el.querySelector('.bt-live-type').textContent = out ? '💀 Game over' : `${(W.LABELS || {})[r.type] || 'Prêt·e…'} · ⚡ ×${((r.speed || 10) / 10).toFixed(1).replace('.', ',')}`;
+    el.querySelector('.wa-live-lives').textContent = warioHearts(r.lives, max);
+    el.querySelector('.bt-live-solved').textContent = `✅ ${r.cleared || 0}${r.streak >= 3 ? ` · 🔥 ${r.streak}` : ''}`;
+  });
+  brainClock();
+}
+function renderWarioResults(p) {
+  delete app.dataset.wn;
+  const rows = p.data?.rows || [], medal = ['🥇', '🥈', '🥉'];
+  app.innerHTML = `<div class="bt-host bt-host-results">
+    <h1 class="bt-end-title">GAME OVER !</h1>
+    <p class="muted score-subtitle">Partie ${p.round || 1} · les points sont ajoutés au classement de la soirée</p>
+    <section class="bt-host-podium">${rows.map((r, i) => `<div class="bt-res-row ${i === 0 ? 'first' : ''}" style="animation-delay:${i * 120}ms">
+      <span class="bt-res-place">${medal[i] || i + 1}</span>
+      <span class="bt-res-avatar">${avatarMarkup(((st.players || []).find(x => x.id === r.id) || {}).avatar, 62, i === 0 ? 'smug' : 'happy')}</span>
+      <div class="bt-res-name"><b>${esc(r.name)}</b><span class="bt-res-title">${esc(r.icon)} ${esc(r.title)}</span></div>
+      <div class="bt-res-stats"><span>✅ ${r.cleared} réussis</span><span>💔 ${r.failed}</span><span>⚡ ×${(r.speed / 10).toFixed(1).replace('.', ',')}</span><span>🔥 ${r.maxStreak}</span></div>
+      <strong class="bt-res-score">+${r.score}</strong></div>`).join('') || '<p>Aucun résultat.</p>'}</section>
+    <div class="bt-host-actions"><button id="bt-replay">🔁 Rejouer</button><button class="alt" id="bt-menu">🏠 Retour aux mini-jeux</button><button class="bt-ghost" id="bt-final">🏆 Classement final</button></div></div>`;
+  document.getElementById('bt-replay').onclick = () => s.emit('host:action', 'replay');
+  document.getElementById('bt-menu').onclick = () => s.emit('host:lobby');
+  document.getElementById('bt-final').onclick = () => s.emit('host:skip');
+}
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
   const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm('Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
@@ -162,6 +211,10 @@ function render() {
     renderBrainHost(p, bindStop);
   } else if (p.kind === 'brainResults') {
     renderBrainResults(p);
+  } else if (p.kind === 'wario') {
+    renderWarioHost(p, bindStop);
+  } else if (p.kind === 'warioResults') {
+    renderWarioResults(p);
   } else if (p.kind === 'lobby') {
     const minFor = id => ((st.games || []).find(g => g.id === id) || {}).minPlayers || st.min;
     const need = sel ? minFor(sel) : st.min;
@@ -170,7 +223,7 @@ function render() {
       <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
       <div class="code">${st.code}</div>
       <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'cerveau' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${g.id === 'wario' ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
       <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
       <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
     app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });

@@ -311,3 +311,81 @@ input[type=radio]{width:auto;margin-right:8px}
 @keyframes btWiggle{0%,100%{transform:rotate(0)}30%{transform:rotate(-2deg)}70%{transform:rotate(2deg)}}
 @keyframes btBump{50%{transform:scale(1.25);color:var(--pink)}}
 @media(prefers-reduced-motion:reduce){.bt *,.bt-host *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+/* ===== Warioware ===== */
+.wa{position:relative;display:grid;gap:8px;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.wa-hud{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
+.wa-hud .bt-stat b{font-family:'Bagel Fat One';font-weight:400;font-size:1.5rem;line-height:1.1}
+.wa-lives{display:flex;align-items:center;justify-content:center;gap:2px;font-size:1.45rem;background:#fff;border:4px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink)}
+.wa-lives span{display:inline-block;transition:transform .2s}
+.wa-lives .off{opacity:.45;transform:scale(.8)}
+.wa-lives.big{background:none;border:0;box-shadow:none;font-size:2.6rem;gap:8px}
+.wa-lives .lost{animation:waLost .7s ease both}
+.wa-stage{position:relative;height:min(60vh,500px);min-height:300px;overflow:hidden;touch-action:none;border:5px solid var(--ink);border-radius:24px;box-shadow:6px 6px 0 var(--ink);
+  background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.75),transparent 60%),var(--bg,#ffd23f);transition:filter .15s}
+.wa-stage.wa-win{animation:waWin .4s ease}
+.wa-stage.wa-lose{animation:btShake .4s ease;filter:grayscale(.6) brightness(.85)}
+.wa-stage.wa-flash{background:radial-gradient(circle,#fff 0,#fff6c9 40%,var(--bg,#ffd23f) 75%)}
+.wa-sp{position:absolute;left:0;top:0;line-height:1;pointer-events:none;will-change:transform;filter:drop-shadow(3px 3px 0 rgba(29,26,59,.35))}
+.wa-sp.hit{pointer-events:auto;cursor:pointer}
+.wa-sp.wa-wrong{filter:drop-shadow(0 0 8px #ff4d6d);opacity:.6}
+.wa-miss{font-size:22px;animation:waFade .4s ease forwards}
+.wa-label{position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;font-weight:900;text-align:center}
+.wa-ask{background:#fff;border:3px solid var(--ink);border-radius:999px;padding:4px 14px;font-size:1.1rem;box-shadow:3px 3px 0 var(--ink)}
+.wa-target{font-size:1.8rem;vertical-align:middle}
+.wa-big{font-family:'Bagel Fat One';font-size:3rem;color:#fff;-webkit-text-stroke:2px var(--ink)}
+.wa-signal{font-family:'Bagel Fat One';font-weight:400;font-size:2.4rem;color:#fff;-webkit-text-stroke:2px var(--ink)}
+.wa-signal.on{color:#ff4d6d;font-size:3.2rem;animation:btPop .15s ease both}
+.wa-word{font-family:'Bagel Fat One';font-weight:400;font-size:clamp(2.6rem,14vw,4rem);-webkit-text-stroke:2px var(--ink);background:#fff;border:4px solid var(--ink);border-radius:20px;padding:4px 18px}
+.wa-verb{position:absolute;inset:0;z-index:4;display:grid;place-content:center;text-align:center;pointer-events:none;font-family:'Bagel Fat One','Nunito',sans-serif;font-size:clamp(2.4rem,13vw,4.2rem);line-height:1;color:var(--sun);-webkit-text-stroke:2px var(--ink);text-shadow:5px 5px 0 var(--ink);animation:waVerb .35s cubic-bezier(.2,1.6,.5,1) both}
+.wa-verb small{display:block;margin:10px auto 0;font-family:'Nunito';font-weight:900;font-size:1rem;-webkit-text-stroke:0;text-shadow:none;color:var(--ink);background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 12px}
+.wa-verb.out{animation:waOut .22s ease-in forwards}
+.wa-fuse{position:relative;height:16px;border:4px solid var(--ink);border-radius:999px;background:#2a2270;overflow:visible;margin-right:30px}
+.wa-fuse i{display:block;height:100%;width:100%;border-radius:999px;background:linear-gradient(90deg,#ffb36b,#ff5d8f)}
+.wa-fuse span{position:absolute;right:-34px;top:50%;transform:translateY(-50%);font-size:1.8rem}
+.wa-fuse.hurry span{animation:btPulse .18s ease-in-out infinite alternate}
+.wa-fuse.hurry i{background:#ff4d6d}
+.wa-inter{position:absolute;inset:0;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;border-radius:24px;border:5px solid var(--ink);
+  background:repeating-conic-gradient(from 0deg at 50% 55%,var(--bg,#ffd23f) 0 15deg,rgba(255,255,255,.55) 15deg 30deg),var(--bg,#ffd23f);color:var(--ink)}
+.wa-inter.on{display:flex}
+.wa-inter p{font-weight:900;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 14px}
+.wa-count{font-family:'Bagel Fat One';font-size:clamp(4rem,26vw,8rem);line-height:1;color:#fff;-webkit-text-stroke:3px var(--ink);text-shadow:7px 7px 0 var(--ink);animation:waVerb .35s cubic-bezier(.2,1.6,.5,1) both}
+.wa-count.speed{font-size:clamp(2rem,10vw,3.4rem);color:var(--sun);animation:waVerb .35s cubic-bezier(.2,1.6,.5,1) both,btPulse .2s .35s ease-in-out infinite alternate}
+.wa-count.end{font-size:clamp(2.6rem,14vw,4.4rem);color:var(--pink)}
+.wa-inter.go .wa-count{color:var(--mint)}
+.wa-res{font-family:'Bagel Fat One';font-size:clamp(1.8rem,9vw,2.8rem);background:#fff;border:4px solid var(--ink);border-radius:18px;padding:2px 16px;box-shadow:4px 4px 0 var(--ink);animation:btPop .25s ease both}
+.wa-res.ok{color:#1f9e4a}.wa-res.ko{color:#e8304f}
+/* Éléments des micro-jeux */
+.wa-ground{position:absolute;left:0;right:0;bottom:0;background:#7bc96f;border-top:5px solid var(--ink)}
+.wa-bar{position:absolute;left:8%;right:8%;top:45%;height:54px;background:#fff;border:5px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink)}
+.wa-zone{position:absolute;top:0;bottom:0;background:#2fbf5b}
+.wa-needle{position:absolute;top:-14px;bottom:-14px;width:8px;margin-left:-4px;background:var(--ink);border-radius:4px}
+.wa-bar.ok{background:#c9ffd9}.wa-bar.ko{background:#ffc9d3}
+.wa-nums,.wa-dots,.wa-choices{position:absolute;left:4%;right:4%;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px}
+.wa-nums{top:18%;bottom:8%}
+.wa-num{min-width:38%;min-height:30%;font-family:'Bagel Fat One';font-weight:400;background:#fff;line-height:1}
+.wa-dots{top:52%}
+.wa-dot{width:70px;height:70px;border-radius:50%;padding:0}
+.wa-choices{bottom:10%}
+.wa-choice{min-width:76px;font-size:2rem;padding:8px 18px;background:#fff}
+.wa-nums .ok,.wa-dots .ok,.wa-choices .ok{outline:6px solid #2fbf5b;transform:scale(1.08)}
+.wa-nums .ko,.wa-dots .ko,.wa-choices .ko{outline:6px solid #ff4d6d;animation:btShake .35s ease}
+.wa-tempt{position:absolute;margin:-75px 0 0 -75px;font-family:'Bagel Fat One';font-weight:400;font-size:1.8rem;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9db0,#ff2d55);color:#fff;-webkit-text-stroke:1px var(--ink);box-shadow:0 10px 0 #a3122f,0 0 0 6px var(--ink);animation:btPulse .5s ease-in-out infinite alternate}
+.wa-tempt.pressed{box-shadow:0 2px 0 #a3122f,0 0 0 6px var(--ink);animation:none;transform:translateY(8px)}
+.wa-seq{position:absolute;top:8%;left:0;right:0;display:flex;justify-content:center;gap:6px;font-size:2rem}
+.wa-seq span{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:2px 4px;transition:opacity .15s}
+.wa-seq .ok{opacity:.35}.wa-seq .ko{background:#ff8fa8}
+.wa-pad{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);display:grid;grid-template-columns:repeat(3,72px);gap:8px}
+.wa-arrow{width:72px;height:72px;padding:0;font-size:2.2rem;background:#fff}
+.wa-arrow.empty{visibility:hidden}
+.wa-glass{position:absolute;left:50%;top:14%;bottom:8%;width:110px;transform:translateX(-50%);border:6px solid var(--ink);border-top:0;border-radius:0 0 26px 26px;background:rgba(255,255,255,.55);overflow:hidden}
+.wa-band{position:absolute;left:0;right:0;background:rgba(47,191,91,.4);border-top:3px dashed var(--ink);border-bottom:3px dashed var(--ink);z-index:2}
+.wa-milk{position:absolute;left:0;right:0;bottom:0;height:0;background:#fffdf5;border-top:4px solid #e9e4d0}
+.wa-glass.ok{box-shadow:0 0 0 6px #2fbf5b}.wa-glass.ko{box-shadow:0 0 0 6px #ff4d6d}
+.wa-glass.over .wa-milk{background:#fff;border-top-color:#fff}
+.wa-stage .bt-particle{z-index:3}
+.wa-live-lives{font-size:1.05rem;letter-spacing:1px}
+@keyframes waVerb{from{opacity:0;transform:scale(2.4) rotate(-6deg)}to{opacity:1;transform:scale(1) rotate(-3deg)}}
+@keyframes waOut{to{opacity:0;transform:scale(.5) translateY(-60%)}}
+@keyframes waWin{50%{transform:scale(1.03)}}
+@keyframes waLost{0%{transform:scale(1.6)}30%{transform:scale(1.6) rotate(-15deg)}60%{transform:scale(1.2) rotate(12deg)}100%{transform:scale(.8)}}
+@keyframes waFade{to{opacity:0}}
