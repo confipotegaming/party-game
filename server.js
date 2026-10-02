@@ -118,7 +118,7 @@ function view(room, forHost = false) {
       id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'],
     })),
     min: MIN_PLAYERS,
-    players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar).id })),
+    players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar) })),
     phase: p && {
       n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
       ...(p.kind === 'draw' ? { drawingCount: (p.drawing || []).length } : {}),
