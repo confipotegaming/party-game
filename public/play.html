@@ -2,7 +2,7 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -125,7 +125,7 @@ setInterval(() => {
 const me = () => st.players.find(x => x.id === st.me.id) || { name: '', score: 0 };
 const wait = msg => `<div class="card stack"><p class="prompt">${msg}</p></div>`;
 const timer = p => p.endsAt ? '<span class="timer" id="t"></span>' : '';
-const socialScene = (r, final=false) => { const lines=['Le premier parade et fait sa star !','Deuxième place : petit duel de regards !','Ça se chamaille pour la prochaine place !','Quelqu’un fait une grimace au champion !','Tout le monde prépare sa revanche !','Le groupe célèbre déjà !']; const text=lines[Math.floor(Math.random()*lines.length)]; const cls=['winner','p2','p3','p4','p5']; return `<div class="rank-scene"><div class="scene-prop">${text}</div><div class="scene-floor"></div>${r.slice(0,5).map((x,i)=>`<div class="scene-player ${cls[i]}"><div>${avatarMarkup(x.avatar,76,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}</span></div>`).join('')}</div>`; };
+const socialScene = (r, final=false) => { const text=window.partyBanter.pick(r,Math.floor(Date.now()/6500)); const cls=['winner','p2','p3','p4','p5']; return `<div class="rank-scene has-banter"><div class="scene-prop banter">${esc(text)}</div><div class="scene-floor"></div>${r.slice(0,5).map((x,i)=>`<div class="scene-player ${cls[i]}"><div>${avatarMarkup(x.avatar,76,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}</span></div>`).join('')}</div>`; };
 const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-a.score); return `<section class="home-ranking"><div class="section-title"><span>🏆 Classement</span><small>la partie commence déjà à chambrer</small></div>${r.length?socialScene(r):'<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}<div class="rank-board">${r.map((x,i)=>`<div class="rank-row rank-${i+1}"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${x.score} pts</span></div></div>`).join('')}</div></section>`; };
 
 function render(p, done) {
