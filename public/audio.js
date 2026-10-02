@@ -41,6 +41,8 @@
     spy:{kick:'x.....x.x.......',snare:'....x.......x...',hat:'x.xxx.xxx.xxx.xx',bass:'R..R..O.R..R..5.',bassType:'square',pad:'organ',lead:'twang',delay:.35,fill:'snare'},
     lofi:{kick:'x.....x...x.....',snare:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R-----5---R-----',bassType:'sub',pad:'rhodes',lead:'soft',swing:.18,delay:.3,fill:'snare'},
     gospel:{kick:'x..x..x.x..x....',clap:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R.R.R.R.5.5.O.O.',bassType:'square',pad:'organ',chop:'..x...x...x...x.',chopType:'piano',lead:'square',delay:.2,fill:'snare'},
+    classical:{kick:'x.......x.......',snare:'....g.......g...',bass:'R.5.R.5.R.5.R.5.',bassType:'pizz',pad:'strings',arp:'0121012101210121',arpType:'clav',lead:'flute',delay:.25,fill:'snare'},
+    wario:{kick:'x...x...x...x...',snare:'....x.......x...',hat:'xxxxxxxxxxxxxxxx',perc:'..x...x...x...x.',percType:'tick',bass:'R.O.5.O.R.O.5.O.',bassType:'slap',chop:'..x...x...x...x.',chopType:'organ',lead:'square',delay:.15,fill:'snare',crash:true},
     gameshow:{kick:'x...x...x...x...',snare:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R.O.5.O.R.O.5.O.',bassType:'upright',chop:'x.....x...x.....',chopType:'brass',pad:'strings',lead:'brass',swing:.12,delay:.2,fill:'snare',crash:true},
     march:{kick:'x...x...x...x...',snare:'x.xxx.x.x.xxx.x.',tom:'x.......x.......',bass:'R...5...R...5...',bassType:'upright',pad:'brass',arp:'0.1.2.3.2.1.2.3.',arpType:'pluck',lead:'brass',delay:.2,fill:'snare',crash:true}
   };
@@ -90,6 +92,10 @@
       'D E C#m E','A5:2 D6:2 F#6:2 A6:2 F#6:2 D6:2 A5:4 B5:2 E6:2 G#6:2 B6:2 G#6:2 E6:2 B5:4 C#6:2 E6:2 G#6:4 E6:2 C#6:2 G#5:4 B5:4 G#5:4 E5:4 r:4'),
     sondage:T(126,'gameshow','Eb Cm Ab Bb','G5:2 Bb5:2 Eb6:2 r:2 Eb6:2 D6:2 Eb6:4 Eb6:2 C6:2 G5:2 r:2 G5:2 Ab5:2 G5:4 Ab5:2 C6:2 Eb6:2 r:2 F6:2 Eb6:2 C6:4 D6:4 Bb5:2 F5:2 D6:4 F6:4',
       'Ab Bb Gm Bb','Eb6:3 C6:3 Ab5:2 Bb5:2 C6:2 Eb6:4 F6:3 D6:3 Bb5:2 C6:2 D6:2 F6:4 G6:3 D6:3 Bb5:2 C6:2 D6:2 G6:4 F6:4 D6:4 Bb5:4 r:4'),
+    academie:T(112,'classical','G C D G','D5:2 G5:2 B5:2 D6:2 C6:2 B5:2 A5:2 G5:2 E5:2 G5:2 C6:2 E6:2 D6:2 C6:2 B5:2 A5:2 F#5:2 A5:2 D6:2 F#6:2 E6:2 D6:2 C6:2 A5:2 B5:4 G5:4 D5:4 r:4',
+      'Em Am D7 D','G5:4 B5:4 E6:4 D6:2 B5:2 C6:4 A5:4 E5:4 G5:2 A5:2 F#5:2 A5:2 C6:2 D6:2 E6:2 D6:2 C6:2 A5:2 F#5:8 A5:4 r:4'),
+    wario:T(156,'wario','C Eb F G','G5:1 G5:1 C6:2 G5:2 E6:2 D6:2 C6:2 Bb5:4 G5:1 G5:1 Eb6:2 G5:2 Bb5:2 G5:2 Eb5:2 F5:4 A5:1 A5:1 F6:2 C6:2 A5:2 C6:2 D6:2 Eb6:4 D6:2 B5:2 G5:2 D5:2 G5:4 r:4',
+      'Ab Bb C C','C6:2 Eb6:2 Ab6:4 G6:2 Eb6:2 C6:4 D6:2 F6:2 Bb6:4 Ab6:2 F6:2 D6:4 E6:2 G6:2 C7:4 Bb6:2 G6:2 E6:4 C6:2 r:2 C6:2 r:2 C5:4 r:4'),
     // Boucle triomphale jouée juste après la fanfare de victoire
     victoryLoop:T(138,'march','C Ab Bb C','G5:2 C6:2 E6:4 D6:2 C6:2 G5:4 Ab5:2 C6:2 Eb6:4 D6:2 C6:2 Ab5:4 Bb5:2 D6:2 F6:4 Eb6:2 D6:2 Bb5:4 C6:4 E6:4 G6:8',
       'F Em Dm G','A5:4 C6:2 F6:2 E6:4 C6:4 G5:4 B5:2 E6:2 D6:4 B5:4 F5:4 A5:2 D6:2 C6:4 A5:4 B5:4 D6:4 G6:4 F6:4',{form:['A','B','A','B']})
@@ -261,7 +267,7 @@
     startSong(THEMES[name]?name:'lobby',ctx.currentTime+.08);
   };
   const themeFor=state=>{const k=state?.phase?.kind;if(!k||k==='lobby')return'lobby';if(k==='scores')return'victory';if(state.game&&THEMES[state.game])return state.game;return'lobby'};
-  const setEnergy=state=>{const k=state?.phase?.kind;const e=(k==='reveal'||k==='brainResults')?.5:1;if(e!==energy){energy=e;applyEnergy(false)}};
+  const setEnergy=state=>{const k=state?.phase?.kind;const e=(k==='reveal'||k==='brainResults'||k==='academyResults'||k==='warioResults')?.5:1;if(e!==energy){energy=e;applyEnergy(false)}};
 
   // ---------- Effets sonores ----------
   const tone=(f,d=.12,type='sine',gain=.08,dest=sfxGain,when=0)=>{if(!ctx)return;const now=ctx.currentTime+when,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(gain,now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+d);o.connect(g);g.connect(dest);o.start(now);o.stop(now+d+.03)};

@@ -1,18 +1,26 @@
 # Version 0.1.18
 
-## 🎵 Musique entièrement refaite
-- **Beaucoup plus forte** : volume général relevé (l'ancienne musique était quasi inaudible), avec un compresseur
-  et un limiteur pour éviter la saturation. Les effets sonores restent audibles par-dessus la musique.
-- **Un vrai morceau par mini-jeu** : chacun a son tempo, sa tonalité, ses accords, sa mélodie et son style :
-  - Réponse la plus drôle : funk · Finis la phrase : pop · Estimation : quiz réfléchi (marimba, tic-tac)
-  - Le plus probable : disco · Qui a dit ça ? : jazz « film noir » · 2 vérités, 1 mensonge : tango
-  - Devine en emojis et Cerveau Turbo : chiptune (deux morceaux différents) · Film résumé : épique façon bande-annonce
-  - Qui suis-je ? : boîte à musique mystérieuse · Mot à trous : sautillant · Réponse express : course effrénée
-  - 4 images 1 mot : tropical · L'intrus : suspense · Survivrais-tu ? : tribal / aventure
-  - Le choix du groupe : gospel-pop · Classement impossible : ska · Le mot interdit : surf / espion
-  - Dessine-moi ça : lo-fi · Le Grand Sondage : plateau télé cuivré · Accueil : house détendue
-- Morceaux structurés (couplet, refrain, pont sans mélodie avec arpèges, roulements de batterie en fin de partie)
-  pour éviter la répétition : batterie, basse, nappes, accords piqués, arpèges et mélodie synthétisés en direct.
-- Pendant les écrans de résultats, la musique du jeu continue mais s'adoucit (batterie et mélodie en retrait).
-- **Fanfare de victoire** au classement final, façon fin de combat de RPG : triolet d'appel, montée héroïque
-  aux cuivres, timbales et cymbale, puis une boucle triomphale en marche.
+## Nouveau mini-jeu : 🏛️ Cérébrale Académie
+- Un examen de réflexe et de logique : 5 épreuves chronométrées de 22 secondes, une par matière, enchaînées
+  automatiquement. Tous les joueurs passent les mêmes épreuves en même temps sur leur téléphone.
+- Chaque épreuve est présentée (icône, matière, règle, 3… 2… 1…) avec le bilan de la précédente.
+- 15 épreuves, 3 par matière (tirées au hasard, sans reprendre celles de la partie précédente) :
+  - 👁️ Perception : 🎈 Ballons (éclater ou compter les ballons d'une couleur), 🐹 Taupes (taper celles qui portent
+    l'accessoire demandé), 🪙 Pièces (pièce identique ou vue en miroir, malgré la rotation).
+  - 🧩 Analyse : 🚂 Rails (suivre les voies et leurs traverses), 🧱 Bouche-trou (la pièce qui comble le mur),
+    🧊 Cubes (compter les cubes d'une construction en 3D, cachés compris).
+  - 🔢 Maths : ➕ Calcul, ⚖️ Balance (poids affichés ou relations entre objets), 🔢 Compte (objets qui se chevauchent).
+  - 🧠 Mémoire : ☎️ Allô, oui ? (qui a appelé, dans quel ordre, pour commander quoi), 🃏 Mémo (où était l'objet,
+    lequel a disparu), 🔢 Ordre (reproduire une séquence, parfois à l'envers).
+  - 🔎 Identification : 🧸 Objets (l'identique parmi les sosies), 👤 Silhouettes (ombre ↔ objet),
+    🔍 Différences (la case qui change entre deux tableaux).
+- Difficulté adaptative dans chaque épreuve (niveau 1 à 10) : plus d'éléments, sosies, rotations, moins de temps.
+- Score : 100 pts + bonus de rapidité + bonus de niveau, pondéré selon l'épreuve. Une erreur fait perdre du temps.
+- Fin d'examen : diplôme avec masse cérébrale (en grammes), titre (🎒 Nouvel·le élève → 🏛️ Génie de l'Académie),
+  bulletin avec une note par épreuve (E à S), statistiques et records personnels.
+- Écran hôte : épreuve en cours, programme de l'examen, chrono, classement en direct avec les notes, puis remise des
+  diplômes avec 🔁 Rejouer, 🏠 Retour aux mini-jeux et 🏆 Classement final.
+- Jouable dès 1 joueur.
+
+## Moteur
+- Version serveur et package : 0.1.18.
