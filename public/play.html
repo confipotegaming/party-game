@@ -2,7 +2,7 @@
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/brain.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -101,7 +101,10 @@ const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-
 function render(p, done) {
   const m = me();
   const top = `<div class="row player-top"><span class="player-mini">${avatarMarkup(m.avatar,42)}</span><b class="muted">${esc(m.name)} · ${m.score} pts</b>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${timer(p)}</div>`;
-  if (p.kind === 'lobby') {
+  if (p.kind === 'brain' || p.kind === 'brainResults') {
+    window.BrainGame.render(app, p, { me: st.me.id, code: st.code, off, done,
+      send: v => s.emit('answer', v), progress: v => s.emit('progress', v) });
+  } else if (p.kind === 'lobby') {
     app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}${lobbyRanking()}`;
   } else if (p.kind === 'text' || p.kind === 'number') {
     if (done) { app.innerHTML = `${top}${wait('Réponse envoyée ✓<br>Attendez les autres.')}`; return; }
