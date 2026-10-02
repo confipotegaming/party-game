@@ -23,7 +23,8 @@ test('le jeu du boss ne sort jamais à la roue', () => {
     'boss-final': { id: 'bossfinal', name: 'Boss final', minPlayers: 1 }, autre: { id: 'secret', name: 'Secret', boss: true } };
   const pool = B.eligible(withBoss, 4);
   assert.ok(!pool.some(g => /boss/i.test(g.id) || g.boss));
-  assert.strictEqual(pool.length, ids.length);
+  assert.strictEqual(pool.length, ids.filter(id => id !== 'boss').length); // le vrai jeu « boss » est enregistré mais exclu
+  assert.ok(ids.includes('boss') && B.isBoss(games.boss));
   for (let s = 1; s <= 20; s++) assert.ok(!draw(pool, 30, { rng: seeded(s) }).some(id => /boss/i.test(id)));
   const w = B.wheel(pool, pool[0], seeded());
   assert.ok(!w.segments.some(x => /boss/i.test(x.id)));

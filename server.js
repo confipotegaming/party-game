@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.22';
+const APP_VERSION = '0.1.23';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -12,7 +12,7 @@ const games = {};
 for (const id of [
   'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
   'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
-  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin', 'cerveau', 'sondage', 'academie', 'wario', 'boss',
 ]) games[id] = require('./games/' + id);
 // Mode plateau : tirage des mini-jeux à la roue. Le jeu du boss en est exclu (voir games/_board.js).
 const board = require('./games/_board');
@@ -106,6 +106,9 @@ function apiFor(room) {
     end: () => endPhase(room), // termine la phase en cours avant la fin du chrono
     // En mode plateau, la fin d'un mini-jeu renvoie au plateau au lieu du classement final.
     finish: () => (room.board && room.game ? boardAfterGame(room) : setPhase(room, { kind: 'scores' })),
+    // Jeux en temps réel : diffusion d'un évènement à toute la salle (hôte + joueurs), sans l'état complet
+    emit: (event, data) => io.to(room.code).emit(event, data),
+    alive: () => rooms[room.code] === room, // faux une fois la salle fermée (l'hôte est parti)
   };
 }
 
@@ -399,6 +402,14 @@ io.on('connection', (socket) => {
     try { reply(room.game.playerAction(room, pid, value, apiFor(room)) || { status: 'ignored' }); }
     catch (err) { console.error('[game:playerAction]', room.game.id, err); return reply({ status: 'error' }); }
     broadcast(room);
+  });
+
+  // Commandes en continu d'un joueur (jeux en temps réel, ex. manette du Boss Fight) : pas de rediffusion
+  socket.on('input', (value) => {
+    const { room, pid } = ctx();
+    if (!room || !pid || !room.game || !room.game.input) return;
+    try { room.game.input(room, pid, value, apiFor(room)); }
+    catch (err) { console.error('[game:input]', room.game.id, err); }
   });
 
   // Progression en direct d'un joueur (jeux qui la gèrent), relayée seulement à l'écran de l'hôte

@@ -44,6 +44,10 @@
     classical:{kick:'x.......x.......',snare:'....g.......g...',bass:'R.5.R.5.R.5.R.5.',bassType:'pizz',pad:'strings',arp:'0121012101210121',arpType:'clav',lead:'flute',delay:.25,fill:'snare'},
     wario:{kick:'x...x...x...x...',snare:'....x.......x...',hat:'xxxxxxxxxxxxxxxx',perc:'..x...x...x...x.',percType:'tick',bass:'R.O.5.O.R.O.5.O.',bassType:'slap',chop:'..x...x...x...x.',chopType:'organ',lead:'square',delay:.15,fill:'snare',crash:true},
     gameshow:{kick:'x...x...x...x...',snare:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R.O.5.O.R.O.5.O.',bassType:'upright',chop:'x.....x...x.....',chopType:'brass',pad:'strings',lead:'brass',swing:.12,delay:.2,fill:'snare',crash:true},
+    dungeon:{kick:'x..x..x.x..x..x.',snare:'....x.......x..x',hat:'x.x.x.x.x.x.x.x.',bass:'RRORRRORRRORR5O.',bassType:'chip',arp:'0123012301230123',arpType:'chip',lead:'chip',delay:.12,fill:'snare',crash:true},
+    heroic:{kick:'x.......x.......',snare:'....x.......x...',hat:'x.x.x.x.x.x.x.x.',bass:'R...R.5.R...R.O.',bassType:'chip',arp:'0.1.2.1.0.1.2.1.',arpType:'chip',lead:'chip',delay:.2,fill:'snare'},
+    // Fin du Boss Fight : pas de batterie, nappes douces, boîte à musique et vent
+    pastoral:{bass:'R-------5-------',bassType:'sub',pad:'strings',arp:'0...2...1...2...',arpType:'musicbox',lead:'flute',delay:.4,wind:true},
     march:{kick:'x...x...x...x...',snare:'x.xxx.x.x.xxx.x.',tom:'x.......x.......',bass:'R...5...R...5...',bassType:'upright',pad:'brass',arp:'0.1.2.3.2.1.2.3.',arpType:'pluck',lead:'brass',delay:.2,fill:'snare',crash:true}
   };
 
@@ -96,6 +100,13 @@
       'Em Am D7 D','G5:4 B5:4 E6:4 D6:2 B5:2 C6:4 A5:4 E5:4 G5:2 A5:2 F#5:2 A5:2 C6:2 D6:2 E6:2 D6:2 C6:2 A5:2 F#5:8 A5:4 r:4'),
     wario:T(156,'wario','C Eb F G','G5:1 G5:1 C6:2 G5:2 E6:2 D6:2 C6:2 Bb5:4 G5:1 G5:1 Eb6:2 G5:2 Bb5:2 G5:2 Eb5:2 F5:4 A5:1 A5:1 F6:2 C6:2 A5:2 C6:2 D6:2 Eb6:4 D6:2 B5:2 G5:2 D5:2 G5:4 r:4',
       'Ab Bb C C','C6:2 Eb6:2 Ab6:4 G6:2 Eb6:2 C6:4 D6:2 F6:2 Bb6:4 Ab6:2 F6:2 D6:4 E6:2 G6:2 C7:4 Bb6:2 G6:2 E6:4 C6:2 r:2 C6:2 r:2 C5:4 r:4'),
+    // Boss Fight : choix des héros, combat dans le donjon, cinématique de fin
+    bossSelect:T(120,'heroic','C G Am F','E5:2 G5:2 C6:4 B5:2 G5:2 D5:4 E5:2 C5:2 A5:4 G5:2 E5:2 F5:4 A5:2 C6:2 F6:4 E6:2 C6:2 G5:8 r:12',
+      'F G Em Am','A5:2 C6:2 F6:4 E6:2 D6:2 G5:4 B5:2 D6:2 G6:4 F6:2 E6:2 B5:4 C6:2 E6:2 A5:4 B5:2 C6:2 E6:4 D6:4 C6:8 r:4'),
+    boss:T(152,'dungeon','Am F G E','A5:2 C6:2 E6:2 A6:2 G6:2 E6:2 C6:2 E6:2 F6:4 C6:2 A5:2 F5:4 r:4 G5:2 B5:2 D6:2 G6:2 F6:2 D6:2 B5:2 D6:2 E6:4 G#5:4 B5:4 E6:4',
+      'Dm Am Bb E','D6:3 F6:3 A6:2 G6:2 F6:2 E6:4 C6:3 E6:3 A6:2 E6:2 C6:2 A5:4 Bb5:2 D6:2 F6:2 Bb6:2 A6:2 F6:2 D6:4 E6:2 G#6:2 B6:4 G#6:2 E6:2 B5:4'),
+    bossEnding:T(70,'pastoral','C Am F G','E5:6 G5:2 C6:8 A5:6 G5:2 E5:8 F5:4 A5:4 C6:4 F5:4 G5:8 r:8',
+      'F G Em Am','A5:6 G5:2 F5:8 G5:6 F5:2 E5:8 E5:4 G5:4 B5:4 G5:4 A5:12 r:4',{form:['A','B','A','B']}),
     // Boucle triomphale jouée juste après la fanfare de victoire
     victoryLoop:T(138,'march','C Ab Bb C','G5:2 C6:2 E6:4 D6:2 C6:2 G5:4 Ab5:2 C6:2 Eb6:4 D6:2 C6:2 Ab5:4 Bb5:2 D6:2 F6:4 Eb6:2 D6:2 Bb5:4 C6:4 E6:4 G6:8',
       'F Em Dm G','A5:4 C6:2 F6:2 E6:4 C6:4 G5:4 B5:2 E6:2 D6:4 B5:4 F5:4 A5:2 D6:2 C6:4 A5:4 B5:4 D6:4 G6:4 F6:4',{form:['A','B','A','B']})
@@ -227,10 +238,20 @@
       seq.next+=seq.stepDur;seq.step++;
     }
   };
-  const fadeOutBus=bus=>{if(!bus)return;const t=ctx.currentTime;bus.out.gain.cancelScheduledValues(t);bus.out.gain.setValueAtTime(bus.out.gain.value,t);bus.out.gain.linearRampToValueAtTime(0,t+.45);setTimeout(()=>{try{bus.out.disconnect()}catch(e){}},2500)};
+  const fadeOutBus=(bus,sec=.45)=>{if(!bus)return;const t=ctx.currentTime;bus.out.gain.cancelScheduledValues(t);bus.out.gain.setValueAtTime(bus.out.gain.value,t);bus.out.gain.linearRampToValueAtTime(0,t+sec);setTimeout(()=>{try{bus.out.disconnect();(bus.extra||[]).forEach(n=>n.stop())}catch(e){}},sec*1000+2000)};
+  const addWind=(bus,t)=>{
+    const src=ctx.createBufferSource();src.buffer=noiseBuf;src.loop=true;
+    const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=520;bp.Q.value=.9;
+    const g=ctx.createGain();g.gain.value=.0001;g.gain.linearRampToValueAtTime(.16,t+3);
+    const l1=ctx.createOscillator(),l1g=ctx.createGain();l1.frequency.value=.09;l1g.gain.value=.1;l1.connect(l1g);l1g.connect(g.gain);
+    const l2=ctx.createOscillator(),l2g=ctx.createGain();l2.frequency.value=.13;l2g.gain.value=260;l2.connect(l2g);l2g.connect(bp.frequency);
+    src.connect(bp);bp.connect(g);g.connect(bus.out);[src,l1,l2].forEach(n=>n.start(t));
+    bus.extra=[src,l1,l2];
+  };
   const startSong=(name,when)=>{
     const song=compile(name);const stepDur=60/song.bpm/4;
     seq={song,stepDur,step:0,next:when,bus:makeBus(stepDur*3)};applyEnergy(true);
+    if(song.st.wind)addWind(seq.bus,when);
     if(!schedTimer)schedTimer=setInterval(runScheduler,25);
     runScheduler();
   };
@@ -259,17 +280,21 @@
   };
 
   const applyEnergy=(instant)=>{if(!seq||!ctx)return;const t=ctx.currentTime,B=seq.bus,dg=energy<1?.4:1,lg=energy<1?.55:1;[[B.drums,dg],[B.lead,lg]].forEach(([n,v])=>{n.gain.cancelScheduledValues(t);if(instant)n.gain.setValueAtTime(v,t);else{n.gain.setValueAtTime(n.gain.value,t);n.gain.linearRampToValueAtTime(v,t+.6)}})};
+  let endedTheme=null;
   const play=name=>{
     if(!enabled)return;ensure();if(ctx.state==='suspended')ctx.resume();
+    if(name===endedTheme)return;endedTheme=null;
     if(currentTheme===name&&seq)return;
     stop();currentTheme=name;
     if(name==='victory'){playVictory();return}
     startSong(THEMES[name]?name:'lobby',ctx.currentTime+.08);
   };
-  const themeFor=state=>{const k=state?.phase?.kind;if(!k||k==='lobby')return'lobby';if(k==='scores')return'victory';if(state.game&&THEMES[state.game])return state.game;return'lobby'};
+  const KIND_THEMES={bossPick:'bossSelect',boss:'boss',bossOver:'bossSelect',bossEnding:'bossEnding'};
+  const themeFor=state=>{const k=state?.phase?.kind;if(!k||k==='lobby')return'lobby';if(k==='scores')return'victory';if(KIND_THEMES[k])return KIND_THEMES[k];if(state.game&&THEMES[state.game])return state.game;return'lobby'};
   const setEnergy=state=>{const k=state?.phase?.kind;const e=(k==='reveal'||k==='brainResults'||k==='academyResults'||k==='warioResults')?.5:1;if(e!==energy){energy=e;applyEnergy(false)}};
 
   // ---------- Effets sonores ----------
+  const bossSfxAt={},SFX_GAP={hit:45,pew:70,shoot:90,boom:80,swing:60};
   const tone=(f,d=.12,type='sine',gain=.08,dest=sfxGain,when=0)=>{if(!ctx)return;const now=ctx.currentTime+when,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,now);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(gain,now+.012);g.gain.exponentialRampToValueAtTime(.0001,now+d);o.connect(g);g.connect(dest);o.start(now);o.stop(now+d+.03)};
 
   window.partyAudio={enable(){ensure();enabled=true;ctx.resume();play(currentTheme||'lobby');this.updateButton()},disable(){enabled=false;stop();this.updateButton()},toggle(){enabled?this.disable():this.enable()},
@@ -284,6 +309,33 @@
     note(i=0){if(!enabled)return;tone([392,523.25,659.25,783.99,880,1046.5][i%6],.16,'sine',.09)},
     timeUp(){if(!enabled)return;[783.99,659.25,523.25,392].forEach((f,i)=>tone(f,.14,'triangle',.08,sfxGain,i*.11))},
     record(){if(!enabled)return;[523.25,659.25,783.99,1046.5,783.99,1046.5].forEach((f,i)=>tone(f,.16,'triangle',.08,sfxGain,i*.1))},
+    // Fin de morceau en fondu (cinématique du Boss Fight) : la musique ne repart pas toute seule
+    fadeOut(sec=5){if(!enabled||!seq||!ctx)return;endedTheme=currentTheme;const bus=seq.bus;seq=null;currentTheme=null;if(schedTimer){clearInterval(schedTimer);schedTimer=null}fadeOutBus(bus,sec)},
+    // Bruitages du Boss Fight (écran de l'hôte surtout)
+    boss(name,arg){if(!enabled||!ctx)return;const now=performance.now();const last=bossSfxAt[name]||0;if(now-last<(SFX_GAP[name]||40))return;bossSfxAt[name]=now;
+      const nz=(dur,f,q,gain,type='bandpass',when=0)=>{const t=ctx.currentTime+when,s=ctx.createBufferSource();s.buffer=noiseBuf;const b=ctx.createBiquadFilter();b.type=type;b.frequency.setValueAtTime(f,t);b.Q.value=q;const g=ctx.createGain();g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(b);b.connect(g);g.connect(sfxGain);s.start(t,Math.random()*.5);s.stop(t+dur+.05);return b};
+      const sweep=(f0,f1,dur,type='square',gain=.06,when=0)=>{const t=ctx.currentTime+when,o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(gain,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(sfxGain);o.start(t);o.stop(t+dur+.02)};
+      switch(name){
+        case'hit':sweep(900,300,.06,'square',.035);break;
+        case'pew':arg==='fireball'?sweep(300,120,.18,'sawtooth',.03):sweep(1200,600,.06,'square',.02);break;
+        case'swing':nz(.09,2400,1.5,.12,'bandpass');break;
+        case'hurt':sweep(440,110,.25,'square',.08);break;
+        case'block':tone(1568,.05,'square',.05);tone(2093,.08,'square',.04,sfxGain,.04);break;
+        case'boom':{const b=nz(.5,900,.6,.5,'lowpass');b.frequency.exponentialRampToValueAtTime(80,ctx.currentTime+.45);sweep(160,40,.35,'sine',.18);break}
+        case'shoot':sweep(700,350,.07,'triangle',.03);break;
+        case'thud':sweep(120,35,.3,'sine',.25);nz(.2,300,.8,.2,'lowpass');break;
+        case'dash':nz(.35,1200,1,.18,'bandpass');break;
+        case'zap':sweep(2000,200,.3,'sawtooth',.06);nz(.3,4000,.5,.15,'highpass');break;
+        case'tele':sweep(300,1800,.25,'sine',.06);break;
+        case'throw':sweep(500,900,.12,'triangle',.05);break;
+        case'reflect':[1046.5,1568,2093].forEach((f,i)=>tone(f,.08,'square',.05,sfxGain,i*.05));break;
+        case'special':[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,.12,'square',.05,sfxGain,i*.06));break;
+        case'revive':[783.99,1046.5,1318.5,1568].forEach((f,i)=>tone(f,.16,'triangle',.07,sfxGain,i*.09));break;
+        case'ko':[392,330,262,196].forEach((f,i)=>tone(f,.18,'square',.06,sfxGain,i*.12));break;
+        case'morph':{sweep(80,600,1.4,'sawtooth',.08);nz(1.6,600,.5,.3,'bandpass');for(let i=0;i<6;i++)tone(220*Math.pow(2,i/3),.12,'square',.04,sfxGain,i*.18);break}
+        case'intro':[220,233.08,220,174.61].forEach((f,i)=>tone(f,.28,'sawtooth',.07,sfxGain,i*.22));break;
+        case'wiped':[392,370,349.2,329.6,311.1,293.7].forEach((f,i)=>tone(f,.25,'triangle',.08,sfxGain,i*.22));break;
+      }},
     updateButton(){document.querySelectorAll('[data-audio-toggle]').forEach(b=>{b.textContent=enabled?'🔊 Son activé':'🔇 Activer le son';b.classList.toggle('audio-on',enabled)})},
     // Pour les tests / le débogage
     _themes:THEMES,_compile:compile,_parseLead:parseLead};
