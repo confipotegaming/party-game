@@ -1,8 +1,8 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"></head>
-<body><main class="host stack" id="app"></main>
+<title>Soirée jeux – Hôte</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="showtv.css"></head>
+<body><div class="studio-beams"><i></i><i></i><i></i><i></i></div><main class="host stack" id="app"></main>
 <button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
-<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/pixel.js"></script>
+<script src="/audio.js"></script><script src="/avatars.js"></script><script src="/banter.js"></script><script src="/brain.js"></script><script src="/sondage.js"></script><script src="/academy.js"></script><script src="/wario.js"></script><script src="/boss.js"></script><script src="/pixel.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
@@ -10,7 +10,13 @@ const s = io(); let st = null, off = 0, sel = null, diffMode = 'mix', boardTurns
 const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 s.emit('host:create');
-s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; st = x; off = x.now - Date.now(); renderError = null; try { render(); } catch (err) { renderError = err; renderFallback(err); console.error('[host render]', err); } window.partyAudio.update(x); });
+window.ShowTV.watch({ role: 'host' });
+// Présentateur « sur le plateau » (lobby et finale) : un seul, déplacé d'un écran à l'autre pour garder son humeur.
+const stageHost = window.Mascot.mount(document.createElement('div'), { size: 250 });
+window.Mascot.setStage(stageHost);
+const placeStageHost = id => { const slot = document.getElementById(id); if (slot && stageHost.el.parentNode !== slot) slot.appendChild(stageHost.el); };
+const wantedGame = new URLSearchParams(location.search).get('game');
+s.on('state', x => { window.AVATARS=x.avatars||window.AVATARS||[]; if (!st && wantedGame && (x.games || []).some(g => g.id === wantedGame)) sel = wantedGame; st = x; off = x.now - Date.now(); renderError = null; try { render(); } catch (err) { renderError = err; renderFallback(err); console.error('[host render]', err); } window.partyAudio.update(x); try { window.ShowTV.onState(x); window.ShowTV.decorate(app); } catch (err) { console.error('[show]', err); } });
 document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 s.on('closed', () => location.reload());
 s.on('boss', snap => window.BossGame.onSnap(snap)); // Boss Fight : état du combat en temps réel
@@ -67,11 +73,12 @@ const head = p => {
   const answered = Array.isArray(p?.answered) ? p.answered.length : 0;
   const expected = Array.isArray(p?.expected) ? p.expected.length : 0;
   const progress = expected ? `<span class="chip">${answered}/${expected} réponses</span>` : '';
-  return `<header class="game-head"><div><div class="eyebrow">${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${boardChip()}${category}${diffChip(p)}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
+  const ep = st?.game ? window.ShowTV.episodeOf(st.games, st.game) : null;
+  return `<header class="game-head"><div><div class="tv-episode">${ep ? `Épreuve <b>${ep.num}</b>` : ''}${esc(phaseLabel(p))}</div><h1>${esc(p?.title || 'La partie continue !')}</h1><div class="host-chips">${boardChip()}${category}${diffChip(p)}${round}${progress}</div></div><div>${timer(p)}</div></header>`;
 };
 const scoreBoard = () => {
   const rows = [...(st?.players || [])].sort((a,b)=>b.score-a.score);
-  return `<aside class="live-scores card"><div class="section-title"><span>🏆 Scores en direct</span><small>${rows.length} joueur${rows.length>1?'s':''}</small></div>${rows.map((x,i)=>`<div class="live-score-row"><span>${i+1}</span><span class="live-score-avatar">${avatarMarkup(x.avatar,38,'happy')}</span><b>${esc(x.name)}</b><strong>${x.score}</strong></div>`).join('')}</aside>`;
+  return `<aside class="live-scores card"><div class="section-title"><span>🏆 Scores en direct</span><small>${rows.length} joueur${rows.length>1?'s':''}</small></div>${rows.map((x,i)=>`<div class="live-score-row"><span>${i+1}</span><span class="live-score-avatar">${avatarMarkup(x.avatar,38,'happy')}</span><b>${esc(x.name)}</b><strong data-score-for="${x.id}" data-score="${x.score}">${x.score}</strong></div>`).join('')}</aside>`;
 };
 const liveAnswers = p => {
   const rows = Array.isArray(p?.answers) ? p.answers : [];
@@ -103,16 +110,70 @@ function renderFallback(err) {
   app.innerHTML = `<section class="card stack host-error"><span class="chip bad">Écran hôte</span><h1>${esc(p.title || 'La manche est en cours')}</h1><p>La partie a bien changé de phase, mais cet écran n’a pas encore de vue dédiée. Le jeu continue.</p><p class="muted">Phase reçue : ${esc(p.kind || 'inconnue')}</p><button id="retry-render">Réafficher</button></section>`;
   const b=document.getElementById('retry-render'); if(b) b.onclick=()=>{ renderError=null; try{render();}catch(e){renderFallback(e);} };
 }
+const seenContestants = new Set();
 const antics=['Le champion parade !','Deux joueurs se chamaillent pour la 2e place !','Quelqu’un tente une pose de victoire…','Ça rigole au fond !','Un duel de regards est lancé !','Tout le monde félicite le leader !','Le dernier prépare sa revanche !'];
 let anticIndex=Math.floor(Math.random()*antics.length);
 const rankBoard = (items, final=false) => { const names=['winner','p2','p3','p4','p5']; const scene=window.partyBanter.pick(items,anticIndex)||antics[anticIndex%antics.length]; return `<div class="rank-scene has-banter"><div class="scene-prop banter">${esc(scene)}</div><div class="scene-floor"></div>${items.slice(0,5).map((x,i)=>`<div class="scene-player ${names[i]}"><div>${avatarMarkup(x.avatar,82,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}${final?' · '+x.score+' pts':''}</span></div>`).join('')}</div><div class="rank-list">${items.map((x,i)=>`<div class="rank-row"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div></div>`).join('')}</div>`; };
-setInterval(()=>{ if(st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores')) { anticIndex++; render(); } }, 6500);
+setInterval(()=>{ if(st && st.phase && st.phase.kind==='lobby' && window.ShowTV.quietFor > 9000) { anticIndex++; const pl=[...(st.players||[])].sort((a,b)=>b.score-a.score); window.ShowTV.say(pl.length>1?'idle':'encourage', pl.length>1 ? (window.partyBanter.pick(pl,anticIndex)||antics[anticIndex%antics.length]) : (pl.length ? `${pl[0].name} est seul·e sur le plateau. Il manque des victimes… euh, des candidats !` : 'Le plateau est vide. Sortez vos téléphones, je ne mords pas. Presque.'), 6000); } }, 6500);
+// ----- Grande finale : podium révélé marche par marche -----
+let finaleTimers = [];
+function renderFinale(p, r, bd) {
+  if (app.dataset.finale == p.n) return;
+  app.dataset.finale = p.n;
+  finaleTimers.forEach(clearTimeout); finaleTimers = [];
+  const TV = window.ShowTV, top = r.slice(0, 3), rest = r.slice(3);
+  const tie = r.length > 1 && r[0].score === r[1].score;
+  const crush = !tie && r.length > 1 && r[0].score > 0 && r[0].score >= Math.max(1, r[1].score) * 1.5;
+  const slot = i => { const x = top[i]; if (!x) return '<div></div>'; return `<div class="pod pod-${i + 1}" id="pod-${i}"><div class="pod-player">${i === 0 ? '<span class="pod-crown">👑</span>' : ''}${avatarMarkup(x.avatar, i === 0 ? 150 : 110, i === 0 ? 'smug' : 'happy')}<span class="pod-name">${esc(x.name)}</span></div><div class="pod-block"><span class="pod-rank">${i + 1}</span><strong class="pod-score" id="pod-score-${i}">0</strong><span class="pod-label">${i === 0 ? (tie ? 'Ex æquo' : 'Champion') : (i + 1) + 'e place'}</span></div></div>`; };
+  app.innerHTML = `<div class="finale">
+    <div class="finale-top"><div class="tv-episode">${bd ? 'Grande finale · Mode plateau' : 'Résultats de l’épreuve'}</div><h1 class="finale-title" id="fin-title">Le moment de vérité</h1>${bd ? `<p class="muted score-subtitle">${bd.log.length} mini-jeu${bd.log.length > 1 ? 'x' : ''} joué${bd.log.length > 1 ? 's' : ''} · égalité départagée au nombre de victoires</p>` : ''}</div>
+    <div class="finale-stage"><div class="podium">${[1, 0, 2].map(slot).join('')}</div><div id="fin-host"></div></div>
+    ${rest.length ? `<div class="finale-rest" id="fin-rest">${rest.map((x, i) => `<div class="rest-row" style="transition-delay:${i * 90}ms"><span class="rest-place">${i + 4}</span>${avatarMarkup(x.avatar, 52, 'sleepy')}<b>${esc(x.name)}</b><strong>${x.score.toLocaleString('fr-FR')}</strong></div>`).join('')}</div>` : ''}
+    <div class="awards" id="fin-awards"></div>
+    ${bd ? boardTrack(bd) + boardLog(bd) : ''}
+    <div class="finale-actions"><button class="bt-ghost" id="fin-skip">⏩ Tout révéler</button><button id="back">Retour au menu</button></div></div>`;
+  placeStageHost('fin-host');
+  document.getElementById('back').onclick = () => { window.partyAudio.click(); s.emit('host:lobby'); };
+  const title = document.getElementById('fin-title');
+  const setTitle = (t, cls = '') => { title.textContent = t; title.className = 'finale-title'; void title.offsetWidth; title.className = 'finale-title ' + cls; };
+  const reveal = (i, ms = 1100) => { const el = document.getElementById('pod-' + i); if (!el || el.classList.contains('shown') && !el.classList.contains('mystery')) return; el.classList.remove('mystery'); el.classList.add('shown'); TV.countUp(document.getElementById('pod-score-' + i), 0, top[i].score, ms); };
+  let done = false;
+  const steps = [
+    [0, () => TV.say('suspense', 'Mesdames et messieurs… le moment que vous attendiez tous.', 2600)],
+    [1500, () => { if (!top[2]) return; setTitle('3e place'); reveal(2); window.partyAudio.note(1); TV.say('hype', `Sur la troisième marche : ${top[2].name} ! Le bronze, c’est presque de l’or. Presque.`, 2600); }],
+    [3600, () => { if (!top[1]) return; setTitle('2e place'); reveal(1); window.partyAudio.note(3); TV.say('encourage', `Deuxième : ${top[1].name}. Si près… et pourtant si loin.`, 2600); }],
+    [5800, () => { const el = document.getElementById('pod-0'); el.classList.add('shown', 'mystery'); setTitle(tie ? 'Et en tête…' : 'Et le champion est…'); TV.say('suspense', 'Roulement de tambour… Régie, envoyez la lumière !', 2400); for (let k = 0; k < 8; k++) finaleTimers.push(setTimeout(() => window.partyAudio.tick(), k * 260)); }],
+    [8200, () => finish()],
+  ];
+  function finish() {
+    if (done) return; done = true;
+    finaleTimers.forEach(clearTimeout); finaleTimers = [];
+    [2, 1, 0].forEach(i => reveal(i, 900));
+    const restEl = document.getElementById('fin-rest'); if (restEl) restEl.classList.add('shown');
+    if (r.length === 0) { setTitle('Plateau vide'); return; }
+    if (tie) { setTitle('Égalité !', 'tie'); TV.say('tie', TV.line('tie'), 7000); TV.confetti(140); TV.flash('#8b5cff'); }
+    else if (crush) { setTitle('Écrasement total !', 'crush'); TV.say('crush', TV.line('crush', { name: r[0].name }), 7000); TV.confetti(320); TV.flash('#ff2fb3'); TV.shake(); }
+    else { setTitle('Champion !'); TV.say('finale', TV.line('finale', { name: r[0].name }), 7000); TV.confetti(260); TV.flash('#ffd60a'); }
+    window.partyAudio.record();
+    const broken = TV.records(r);
+    const awards = TV.awards(r);
+    broken.slice(0, 2).forEach(b => { awards.unshift({ icon: '🏅', title: 'Record personnel', name: b.name, detail: `${b.score.toLocaleString('fr-FR')} pts (ancien : ${b.before.toLocaleString('fr-FR')})` }); TV.banner('Nouveau record !', b.name.toUpperCase(), 'cyan', 1600); });
+    finaleTimers.push(setTimeout(() => {
+      const box = document.getElementById('fin-awards'); if (!box) return;
+      box.innerHTML = awards.map(a => `<div class="award"><div class="award-icon">${a.icon}</div><div class="award-title">${esc(a.title)}</div><div class="award-name">${esc(a.name)}</div><div class="award-detail">${esc(a.detail)}</div></div>`).join('');
+    }, 1400));
+    const sk = document.getElementById('fin-skip'); if (sk) sk.remove();
+  }
+  document.getElementById('fin-skip').onclick = finish;
+  if (r.length <= 1) { finaleTimers.push(setTimeout(() => { if (st?.phase?.n === p.n) finish(); }, 1200)); return; }
+  steps.forEach(([ms, f]) => finaleTimers.push(setTimeout(() => { if (st?.phase?.n === p.n && !done) f(); }, ms)));
+}
 // ----- Mode plateau : lobby, roue des mini-jeux et plateau de course -----
 const WHEEL_COLORS = ['#ffd23f', '#ff5d8f', '#35d0ba', '#8c7bff', '#ff9f43', '#4dabf7', '#a9e34b', '#f783ac'];
 function boardLobby(pl) {
   const wheelGames = (st.games || []).filter(g => g.wheel && pl.length >= (g.minPlayers || st.min));
   const ok = pl.length >= st.min && wheelGames.length;
-  return `<section class="board-lobby card"><div class="board-lobby-head"><div class="board-lobby-icon">🎡</div><div><span class="game-new chip">Nouveau</span><h2>Mode plateau</h2>
+  return `<section class="board-lobby card"><div class="board-lobby-head"><div class="board-lobby-icon">🎡</div><div><span class="tv-episode">Émission spéciale</span><h2>Mode plateau</h2>
     <p>La roue désigne les mini-jeux les uns après les autres. Chaque mini-jeu rapporte des points selon votre place (🥇 10 · 🥈 6 · 🥉 4…) et le <b>dernier tour compte double</b>. Le plus gros total gagne !</p></div></div>
     <div class="board-lobby-opts"><div><b>Nombre de tours</b><div class="board-turns">${(st.boardTurns || [3, 5, 8, 10]).map(t => `<button class="${boardTurns === t ? 'sel' : ''}" data-turns="${t}">${t}</button>`).join('')}</div></div>
     <div><b>Difficulté des questions</b><div class="board-turns">${DIFF_MODES.map(([v, l]) => `<button class="${diffMode === v ? 'sel' : ''}" data-bdiff="${v}">${l}</button>`).join('')}</div></div></div>
@@ -378,6 +439,7 @@ function renderWarioResults(p) {
 }
 function render() {
   const p = st.phase || { kind:'lobby' }, pl = st.players || [];
+  if (p.kind !== 'scores' && app.dataset.finale) { delete app.dataset.finale; finaleTimers.forEach(clearTimeout); finaleTimers = []; }
   const bindStop = () => { const b=document.getElementById('stop-game'); if(b) b.onclick=()=>{ if(confirm(st.board ? 'Passer ce mini-jeu ? Personne ne marque de points et la roue tourne à nouveau.' : 'Arrêter ce mini-jeu et revenir à la sélection ?')) s.emit('host:stop-game'); }; };
   if (!window.BossGame.KINDS.includes(p.kind)) window.BossGame.leave();
   if (window.BossGame.KINDS.includes(p.kind)) {
@@ -415,17 +477,29 @@ function render() {
     const minFor = id => ((st.games || []).find(g => g.id === id) || {}).minPlayers || st.min;
     const need = sel ? minFor(sel) : st.min;
     const ok = pl.length >= need && sel;
+    const eps = window.ShowTV.episodes(st.games), cur = sel ? eps.find(e => e.id === sel) : null;
+    const ranked = [...pl].sort((a, b) => b.score - a.score);
+    const contestants = ranked.map((x, i) => { const fresh = !seenContestants.has(x.id); seenContestants.add(x.id); return `<div class="tv-contestant ${fresh ? 'fresh' : ''} ${i === 0 && x.score > 0 ? 'lead' : ''} ${x.connected === false ? 'off' : ''}">${avatarMarkup(x.avatar, 76, i === 0 && x.score > 0 ? 'smug' : 'happy')}<div class="tv-plate"><b>${esc(x.name)}</b><strong data-score-for="${x.id}" data-score="${x.score}">${x.score}</strong></div></div>`; }).join('');
+    const hint = !sel ? 'Touchez une épreuve pour la sélectionner.' : pl.length < need ? `Il faut au moins ${need} candidat${need > 1 ? 's' : ''} sur le plateau.` : `${pl.length} candidat${pl.length > 1 ? 's' : ''} prêt${pl.length > 1 ? 's' : ''}. On n’attend plus que vous.`;
     app.innerHTML = `
-      <div class="muted">Sur votre téléphone, ouvrez <b>${location.host}/play.html</b> et entrez le code :</div>
-      <div class="code">${st.code}</div>
-      <section class="home-ranking"><div class="section-title"><span>🏆 Classement de la soirée</span><small>Les joueurs peuvent encore arriver…</small></div>${pl.length ? rankBoard([...pl].sort((a,b)=>b.score-a.score)) : '<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}</section>
+      <header class="tv-topbar"><div class="tv-logo-mini">Les Confipotes <span>Le Show</span></div><span class="tv-live">En direct · Plateau ${esc(st.code)}</span></header>
+      <section class="tv-hero">
+        <div class="tv-ledwall"><div class="eyebrow">Candidats, rejoignez le plateau !</div><div class="tv-url">Sur votre téléphone : <b>${esc(location.host)}/play.html</b> puis le code</div>
+          <div class="code">${esc(st.code)}</div>
+          <div class="tv-contestants">${contestants || '<div class="tv-empty">Les podiums attendent leurs candidats… 👀</div>'}</div></div>
+        <div class="tv-host-spot" id="stage-slot"></div>
+      </section>
       ${boardLobby(pl)}
-      <div class="section-title games-title"><span>🎮 Ou choisissez un mini-jeu</span></div>
-      <div class="games">${st.games.map(g => `<button class="card ${sel === g.id ? 'sel' : ''}" data-g="${g.id}"><span class="game-cat chip">${esc(g.category || 'Général')}</span><span class="game-title">${esc(g.name)}</span><span class="game-desc">${esc(g.desc)}</span>${['pixelflou', 'boss', 'academie', 'wario'].includes(g.id) ? '<span class="game-new chip">Nouveau</span>' : ''}</button>`).join('')}</div>
+      <div class="tv-section-head"><h2>Les <em>épreuves</em> du soir</h2><p>Choisissez, puis lancez depuis le pupitre</p></div>
+      <div class="games">${eps.map(e => `<button class="tv-ep tone-${e.tone} ${sel === e.id ? 'sel' : ''}" data-g="${e.id}">
+        <span class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['pixelflou', 'boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></span>
+        <span class="tv-ep-body"><span class="tv-ep-title">${esc(e.name)}</span><span class="tv-ep-quote">« ${esc(e.tagline)} »</span>
+        <span class="tv-ep-meta"><span class="tag">${esc(e.category)}</span>${window.ShowTV.intensityBars(e.intensity)} ${window.ShowTV.INTENSITY_LABEL[e.intensity]} · ${e.solo ? 'Solo OK' : (e.minPlayers || st.min) + '+ joueurs'}</span></span></button>`).join('')}</div>
       ${sel && ((st.games || []).find(g => g.id === sel) || {}).difficulty ? `<section class="diff-picker card"><b>Difficulté des questions</b><div class="diff-options">${DIFF_MODES.map(([v, l, h]) => `<button class="${diffMode === v ? 'sel' : ''}" data-diff="${v}"><span>${l}</span><small>${h}</small></button>`).join('')}</div></section>` : ''}
-      <div><button class="alt" id="go" ${ok ? '' : 'disabled'}>Lancer la partie</button>
-      <span class="muted"> ${!sel ? 'Choisissez un jeu.' : pl.length < need ? `Il faut au moins ${need} joueur${need > 1 ? 's' : ''}.` : ''}</span></div>`;
-    app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); });
+      <div class="tv-desk"><div class="tv-desk-info"><span class="eyebrow">${cur ? `Épreuve ${cur.num} · ${esc(cur.category)}` : 'Pupitre de lancement'}</span><strong>${cur ? esc(cur.name) : 'Aucune épreuve choisie'}</strong><span>${hint}</span></div>
+        <button id="go" ${ok ? '' : 'disabled'}>▶ Lancer l’épreuve</button></div>`;
+    placeStageHost('stage-slot');
+    app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { window.partyAudio.click(); sel = b.dataset.g; render(); const e = window.ShowTV.episodeOf(st.games, sel); if (e) window.ShowTV.say('hype', `Épreuve ${e.num} : ${e.name} ! ${e.tagline}`, 4800); });
     app.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => { window.partyAudio.click(); diffMode = b.dataset.diff; render(); });
     document.getElementById('go').onclick = () => { window.partyAudio.enable(); s.emit('host:start', sel, { difficulty: diffMode }); };
     app.querySelectorAll('[data-turns]').forEach(b => b.onclick = () => { window.partyAudio.click(); boardTurns = +b.dataset.turns; render(); });
@@ -466,18 +540,16 @@ function render() {
     bindStop();
   } else if (p.kind === 'reveal') {
     stopDrawResync();
-    app.innerHTML = `${head(p)}<h1>${esc(p.title)}</h1>${p.data?.survey ? `<div class="prompt">${esc(p.prompt)}</div>${window.SurveyGame.reveal(p.data.survey)}` : ''}${p.data?.pixel ? window.PixelGame.reveal(p.data.pixel) : ''}
-      <div class="card">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br>${esc(l.sub)}</div><span class="pts">+${l.pts}</span></div>`).join('') || 'Aucun point cette manche.'}</div>
-      <div><button id="next">Suivant</button></div>`;
+    app.innerHTML = `${head(p)}${p.data?.survey ? `<div class="prompt">${esc(p.prompt)}</div>${window.SurveyGame.reveal(p.data.survey)}` : ''}${p.data?.pixel ? window.PixelGame.reveal(p.data.pixel) : ''}
+      <div class="tv-reveal">${p.lines.map(l => `<div class="line"><div><b>${esc(l.main)}</b><br><span class="muted">${esc(l.sub)}</span></div><span class="pts" data-count="${Number(l.pts) || 0}" data-prefix="+">+${esc(l.pts)}</span></div>`).join('') || '<div class="line"><b>Aucun point cette manche.</b></div>'}</div>
+      <div><button id="next">Suivant ▶</button></div>`;
     document.getElementById('next').onclick = () => { window.partyAudio.click(); s.emit('host:skip'); };
   } else if (p.kind === 'scores') {
     stopDrawResync();
     const r = [...pl].sort((a, b) => b.score - a.score);
     const bd = p.data && p.data.standings ? p.data : null;
     if (bd) { const rk = Object.fromEntries(bd.standings.map((x, i) => [x.id, i])); r.sort((a, b) => (rk[a.id] ?? 99) - (rk[b.id] ?? 99)); }
-    app.innerHTML = `<h1 class="big" style="font-size:4rem">${bd ? '🎲 Vainqueur du plateau' : 'Classement final'}</h1><p class="muted score-subtitle">${bd ? `${bd.log.length} mini-jeu${bd.log.length > 1 ? 'x' : ''} joué${bd.log.length > 1 ? 's' : ''} · égalité départagée au nombre de victoires` : 'Place aux célébrations 🎉'}</p>${rankBoard(r,true)}${bd ? boardTrack(bd) + boardLog(bd) : ''}
-      <div><button id="back">Retour au menu</button></div>`;
-    document.getElementById('back').onclick = () => { window.partyAudio.click(); s.emit('host:lobby'); };
+    renderFinale(p, r, bd);
   }
 }
 </script></body></html>

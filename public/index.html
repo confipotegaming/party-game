@@ -1,10 +1,101 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
-<body><main class="play stack" style="padding-top:10vh;text-align:center">
-<h1 class="big menu-title">Soirée jeux <small class="version-tag">v0.1.5</small></h1>
-<p class="muted menu-subtitle">Des mini-jeux rapides, drôles et compétitifs. Un écran pour l’hôte, un téléphone pour chaque joueur.</p>
-<div class="card stack" style="margin-top:18px">
-<a href="play.html"><button style="width:100%;font-size:1.15rem">🎮 Rejoindre une partie</button></a>
-<a href="host.html"><button class="alt" style="width:100%;font-size:1.15rem">✨ Créer une partie</button></a>
-</div>
-<section class="feature-strip"><div><b>🏆 Classement vivant</b><span>Les scores s’animent et les avatars réagissent.</span></div><div><b>🎭 Avatars kawaii</b><span>Des personnages inclusifs à personnaliser.</span></div><div><b>🎵 Ambiances musicales</b><span>Une identité sonore pour chaque jeu.</span></div></section><button class="audio-toggle" data-audio-toggle type="button">🔇 Activer la musique</button><script src="/audio.js"></script><script>document.querySelector("[data-audio-toggle]").onclick=()=>window.partyAudio.toggle(); document.querySelectorAll("a button").forEach(b=>b.addEventListener("click",()=>window.partyAudio.enable()));</script></main></body></html>
+<title>Les Confipotes · Le Show</title>
+<meta name="description" content="Le party game en direct : un écran pour le plateau, un téléphone par candidat.">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="showtv.css"></head>
+<body>
+<div class="studio-beams"><i></i><i></i><i></i><i></i></div>
+<main class="home stack">
+  <header class="home-top">
+    <span class="tv-live">En direct</span>
+    <button class="audio-toggle" data-audio-toggle type="button" style="position:static">🔇 Activer le son</button>
+  </header>
+
+  <section class="home-hero">
+    <div class="home-cam left" aria-hidden="true"></div>
+    <div class="home-center">
+      <div class="home-screen">
+        <div class="home-bulbs"></div>
+        <h1 class="logo"><span class="logo-kicker">Ce soir, en prime time</span><span class="logo-les">Les</span><span class="logo-main">Confipotes</span><span class="logo-show">Le Show</span></h1>
+      </div>
+      <p class="home-tagline">Ce n’est pas juste un mini-jeu. <em>C’est l’événement de la soirée.</em></p>
+      <div class="home-cta">
+        <a class="tv-btn tv-btn-main" id="cta-main" href="host.html">Jouer maintenant<small id="cta-hint">Lancez le plateau sur la télé</small></a>
+        <div class="home-cta-row">
+          <a class="tv-btn tv-btn-sub tone-magenta" href="host.html">Créer une partie</a>
+          <a class="tv-btn tv-btn-sub tone-cyan" href="play.html">Rejoindre une partie</a>
+          <a class="tv-btn tv-btn-sub tone-violet" href="#epreuves">Découvrir les mini-jeux</a>
+        </div>
+      </div>
+    </div>
+    <div class="home-hero-mascot"><div id="host-mascot"></div></div>
+  </section>
+  <div class="home-crowd" aria-hidden="true"></div>
+
+  <div class="ticker" aria-hidden="true"><div id="ticker"></div></div>
+
+  <section>
+    <div class="tv-section-head"><h2>Comment ça <em>marche</em></h2><p>Trois étapes. Zéro pitié.</p></div>
+    <div class="home-steps">
+      <div class="home-step tone-yellow"><span class="n">01</span><b><i>L’hôte</i> lance le plateau</b><p>Ouvrez le site sur la télé ou l’ordi : un code de partie s’affiche en géant.</p></div>
+      <div class="home-step tone-cyan"><span class="n">02</span><b>Les <i>candidats</i> se branchent</b><p>Chacun rejoint avec son téléphone, choisit son avatar et monte sur son podium.</p></div>
+      <div class="home-step tone-magenta"><span class="n">03</span><b>Que le <i>meilleur</i> gagne</b><p>Les épreuves s’enchaînent, les scores s’envolent, le présentateur ne vous épargne rien.</p></div>
+    </div>
+  </section>
+
+  <section id="epreuves">
+    <div class="tv-section-head"><h2>Les <em>épreuves</em> du programme</h2><p id="ep-count">Chargement du programme…</p></div>
+    <div class="home-eps" id="eps"></div>
+  </section>
+
+  <p class="home-foot">Enregistré en public · Aucun candidat n’a été ménagé · <span id="ver"></span></p>
+</main>
+<script src="/audio.js"></script><script src="/mascot.js"></script><script src="/showfx.js"></script>
+<script>
+(function () {
+  const esc = window.ShowTV.esc;
+  // Caméras de plateau
+  const cam = `<svg viewBox="0 0 240 300"><defs><linearGradient id="cb" x1="0" x2="1"><stop offset="0" stop-color="#2a3570"/><stop offset="1" stop-color="#0c1238"/></linearGradient></defs>
+    <rect x="40" y="70" width="150" height="90" rx="14" fill="url(#cb)" stroke="#3b4a9a" stroke-width="2"/><rect x="170" y="88" width="62" height="54" rx="8" fill="#0a0f30" stroke="#3b4a9a" stroke-width="2"/>
+    <circle cx="214" cy="115" r="18" fill="#05081a" stroke="#21e6ff" stroke-width="3"/><circle cx="214" cy="115" r="8" fill="#2f7bff"/><circle cx="208" cy="109" r="3" fill="#fff" opacity=".8"/>
+    <rect x="60" y="52" width="70" height="22" rx="5" fill="#141c50"/><circle cx="58" cy="90" r="6" fill="#ff2f6d" class="mx-rec"/><text x="70" y="95" fill="#ff2f6d" font-family="Barlow Condensed" font-weight="900" font-size="16">REC</text>
+    <rect x="104" y="160" width="20" height="70" fill="#1b2460"/><path d="M114 228 L50 296 M114 228 L178 296 M114 228 L114 296" stroke="#2a3570" stroke-width="10" stroke-linecap="round"/></svg>`;
+  document.querySelectorAll('.home-cam').forEach(c => c.innerHTML = cam);
+
+  // Présentateur
+  const host = window.Mascot.mount(document.getElementById('host-mascot'), { size: 250 });
+  const lines = [
+    ['intro', 'Bonsoir et bienvenue dans LE show ! Vous êtes prêts à perdre devant vos amis ?'],
+    ['hype', 'Un écran pour le plateau, un téléphone par candidat. Et moi pour vous juger.'],
+    ['encourage', 'Allez, cliquez. Je sais que vous en mourez d’envie.'],
+    ['crush', 'Ce soir, quelqu’un va gagner. Et quelqu’un va être humilié. En direct !'],
+    ['tie', 'Vous hésitez encore ?! Le public commence à s’impatienter.'],
+    ['win', '25 épreuves. Des amitiés brisées. Des légendes nées.'],
+  ];
+  let li = 0;
+  const talk = () => { const [m, t] = lines[li++ % lines.length]; host.say(t, m, 5200); };
+  setTimeout(talk, 900); setInterval(talk, 6500);
+
+  // CTA principal : sur téléphone on rejoint, sur grand écran on crée le plateau
+  const phone = matchMedia('(max-width:700px), (pointer:coarse)').matches;
+  if (phone) { const m = document.getElementById('cta-main'); m.href = 'play.html'; document.getElementById('cta-hint').textContent = 'Entrez le code affiché sur la télé'; }
+  document.querySelectorAll('.tv-btn').forEach(a => a.addEventListener('click', () => { try { window.partyAudio.enable(); } catch {} }));
+  document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
+  document.getElementById('cta-main').addEventListener('mouseenter', () => host.say('hype', 'OUI ! Ce bouton-là ! Appuyez dessus !', 2600));
+
+  // Programme des épreuves
+  fetch('/api/catalog').then(r => r.json()).then(({ games, version }) => {
+    const eps = window.ShowTV.episodes(games);
+    document.getElementById('ver').textContent = 'v' + version;
+    document.getElementById('ep-count').textContent = `${eps.length} épreuves au programme`;
+    const words = ['Fous rires garantis', 'Amitiés en danger', '1 écran · des téléphones', 'Scores en direct', 'Égos fragiles s’abstenir', ...eps.map(e => e.name)];
+    const strip = words.map(w => `${esc(w)}<span>★</span>`).join('');
+    document.getElementById('ticker').innerHTML = strip + strip;
+    document.getElementById('eps').innerHTML = eps.map(e => `<article class="tv-ep tone-${e.tone}">
+      <div class="tv-ep-stage"><span class="tv-ep-num">Épreuve<b>${e.num}</b></span>${['pixelflou', 'boss', 'academie', 'wario'].includes(e.id) ? '<span class="tv-ep-new">Nouveau</span>' : ''}<span class="tv-ep-icon">${e.icon || '🎲'}</span></div>
+      <div class="tv-ep-body"><span class="tv-ep-title">${esc(e.name)}</span><span class="tv-ep-quote">« ${esc(e.tagline)} »</span>
+        <span class="tv-ep-meta"><span class="tag">${esc(e.category)}</span>${window.ShowTV.intensityBars(e.intensity)} ${window.ShowTV.INTENSITY_LABEL[e.intensity]} · ${e.solo ? 'Solo OK' : (e.minPlayers || 2) + '+ joueurs'}</span>
+        <a class="tv-ep-launch" href="host.html?game=${encodeURIComponent(e.id)}">Lancer l’épreuve</a></div></article>`).join('');
+  }).catch(() => { document.getElementById('ep-count').textContent = 'Programme indisponible pour le moment.'; });
+})();
+</script>
+</body></html>
