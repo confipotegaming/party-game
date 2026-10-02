@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.19';
+const APP_VERSION = '0.1.20';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
