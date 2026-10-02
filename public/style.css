@@ -69,3 +69,20 @@ input[type=radio]{width:auto;margin-right:8px}
 .rank-scene{position:relative;min-height:210px;background:#fff;border:4px solid var(--ink);border-radius:22px;box-shadow:6px 6px 0 var(--ink);overflow:hidden;padding:18px}.rank-scene .scene-floor{position:absolute;left:0;right:0;bottom:0;height:30px;background:#e8e4ff;border-top:3px solid var(--ink)}.scene-player{position:absolute;bottom:22px;display:grid;justify-items:center;gap:2px;z-index:2;transform-origin:bottom center}.scene-player .scene-name{font-weight:800;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 8px;font-size:.72rem}.scene-player.winner{left:50%;transform:translateX(-50%);animation:celebrate 1.6s ease-in-out infinite}.scene-player.p2{left:10%;animation:shakeHead 2.2s ease-in-out infinite}.scene-player.p3{right:10%;animation:argue 2.8s ease-in-out infinite}.scene-player.p4{left:30%;animation:wave 2.1s ease-in-out infinite}.scene-player.p5{right:29%;animation:hop 2.4s ease-in-out infinite}.scene-prop{position:absolute;left:50%;top:18px;transform:translateX(-50%);font-family:'Bagel Fat One';font-size:1.05rem;color:var(--ink);background:var(--sun);border:3px solid var(--ink);border-radius:999px;padding:5px 12px;z-index:3;animation:popIn .5s ease both}.scene-player.winner .scene-name{background:var(--sun)}
 @keyframes avatarFloat{50%{transform:translateY(-7px) rotate(1deg)}}@keyframes celebrate{0%,100%{transform:translateX(-50%) rotate(-3deg) translateY(0)}50%{transform:translateX(-50%) rotate(3deg) translateY(-10px)}}@keyframes shakeHead{0%,100%{transform:rotate(0)}25%{transform:rotate(-7deg)}50%{transform:rotate(5deg)}75%{transform:rotate(-4deg)}}@keyframes argue{0%,100%{transform:translateX(0) rotate(0)}30%{transform:translateX(-9px) rotate(-3deg)}60%{transform:translateX(8px) rotate(3deg)}}@keyframes wave{0%,100%{transform:rotate(0)}40%{transform:rotate(6deg) translateY(-5px)}70%{transform:rotate(-5deg)}}@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes popIn{from{opacity:0;transform:translateX(-50%) scale(.7)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media(max-width:420px){.avatar-carousel{grid-template-columns:48px 1fr 48px}.avatar-halo{width:205px;height:205px}.avatar-actions{grid-template-columns:1fr}.rank-row{grid-template-columns:34px 64px 1fr}.rank-bubble{display:none}}
+
+/* v0.1.6 — illustrated avatar roster */
+.avatar-art{display:inline-grid;place-items:end;width:var(--avatar-size);height:calc(var(--avatar-size) * 1.18);vertical-align:middle;transform-origin:50% 90%;position:relative;isolation:isolate;filter:drop-shadow(0 5px 5px rgba(29,26,59,.14));}
+.avatar-art img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;-webkit-user-drag:none;pointer-events:none;transition:filter .2s ease;}
+.avatar-art.mood-smug{animation:avatarSmug 1.9s ease-in-out infinite;}
+.avatar-art.mood-grimace{animation:avatarArgue 1.25s ease-in-out infinite;}
+.avatar-art.mood-sleepy{animation:avatarSleepy 2.8s ease-in-out infinite;}
+.avatar-art.mood-happy{animation:avatarHappy 2.4s ease-in-out infinite;}
+.avatar-showcase .avatar-art{width:190px;height:215px;}
+.scene-player .avatar-art{width:82px;height:96px;}
+.rank-avatar .avatar-art{width:58px;height:68px;}
+.player-mini .avatar-art{width:42px;height:50px;}
+@keyframes avatarSmug{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+@keyframes avatarArgue{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-7px) rotate(-4deg)}75%{transform:translateX(7px) rotate(4deg)}}
+@keyframes avatarSleepy{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(3px) scale(.98)}}
+@keyframes avatarHappy{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.avatar-stage-card .avatar-showcase p{margin:0;font-weight:800;}

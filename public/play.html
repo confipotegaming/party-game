@@ -164,9 +164,10 @@ function render(p, done) {
       const line = (a, b) => { c.beginPath(); c.moveTo(a[0] * cv.width, a[1] * cv.height); c.lineTo(b[0] * cv.width, b[1] * cv.height); c.stroke(); };
       cv.onpointerdown = e => { cv.setPointerCapture(e.pointerId); last = pos(e); line(last, last); buf.push([...last, ...last]); };
       cv.onpointermove = e => { if (!last) return; const q = pos(e); line(last, q); buf.push([...last, ...q]); last = q; };
-      cv.onpointerup = cv.onpointercancel = () => { last = null; };
+      const flush = () => { if (buf.length) { s.emit('draw', { segs: buf }); buf = []; } };
+      cv.onpointerup = cv.onpointercancel = () => { last = null; flush(); };
       document.getElementById('clr').onclick = () => { c.clearRect(0, 0, cv.width, cv.height); buf = []; s.emit('draw', { clear: true }); };
-      window._dt = setInterval(() => { if (buf.length) { s.emit('draw', { segs: buf }); buf = []; } }, 60);
+      window._dt = setInterval(flush, 50);
       return;
     }
     if (done) { app.innerHTML = `${top}${wait('Bien joué ✓<br>Attendez les autres.')}`; return; }

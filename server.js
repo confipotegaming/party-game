@@ -3,7 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
-const APP_VERSION = '0.1.5';
+const APP_VERSION = '0.1.6';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -23,7 +23,24 @@ app.use(express.static('public'));
 const rooms = {};
 
 const AVATARS = [
-{id:'fox-chef',name:'Renard chef',animal:'renard',accessory:'chef'},{id:'cat-hoodie',name:'Chat hoodie',animal:'chat',accessory:'headphones'},{id:'bunny-glasses',name:'Lapin lunettes',animal:'lapin',accessory:'glasses'},{id:'fox-freckles',name:'Renard roux',animal:'renard',accessory:'cap'},{id:'ram-dark',name:'Bélier solaire',animal:'belier',accessory:'drink'},{id:'dragon-blue',name:'Dragon bleu',animal:'dragon',accessory:'scarf'},{id:'bunny-wheel',name:'Lapin fauteuil',animal:'lapin',accessory:'wheelchair'},{id:'poodle-prosthetic',name:'Caniche prothèse',animal:'caniche',accessory:'prosthetic'},{id:'cat-vitiligo',name:'Chat vitiligo',animal:'chat',accessory:'vitiligo'},{id:'wolf-cane',name:'Loup canne',animal:'loup',accessory:'cane'},{id:'deer-hearing',name:'Biche appareil auditif',animal:'cerf',accessory:'hearing'},{id:'tiger-neutral',name:'Tigre street',animal:'tigre',accessory:'sunglasses'},{id:'frog-curls',name:'Grenouille boucles',animal:'grenouille',accessory:'backpack'},{id:'panda-dress',name:'Panda pastel',animal:'panda',accessory:'heartbag'},{id:'otter-camera',name:'Loutre photo',animal:'loutre',accessory:'camera'},{id:'bunny-red',name:'Lapin roux',animal:'lapin',accessory:'flower'},{id:'bear-cap',name:'Ours cool',animal:'ours',accessory:'cap'},{id:'koala-book',name:'Koala lecteur',animal:'koala',accessory:'book'},{id:'penguin-overall',name:'Pingouin jardinier',animal:'pingouin',accessory:'plant'},{id:'unicorn-magic',name:'Licorne magique',animal:'licorne',accessory:'wand'}
+  {id:'chef-renarde',name:'Chef Renarde',animal:'Renard',accessory:'toque'},
+  {id:'skateur-renard',name:'Renard skateur',animal:'Renard',accessory:'bonnet'},
+  {id:'lapin-lunettes',name:'Lapin lunettes',animal:'Lapin',accessory:'lunettes'},
+  {id:'renard-jardinier',name:'Renard jardinier',animal:'Renard',accessory:'salopette'},
+  {id:'ours-cafe',name:'Ours café',animal:'Ours',accessory:'casque'},
+  {id:'dragon-casque',name:'Dragon casqué',animal:'Dragon',accessory:'casque'},
+  {id:'chat-fauteuil',name:'Chat en fauteuil',animal:'Chat',accessory:'fauteuil'},
+  {id:'roux-lunettes',name:'Humain·e roux·se',animal:'Humain',accessory:'lunettes'},
+  {id:'chien-hoodie',name:'Chien hoodie',animal:'Chien',accessory:'hoodie'},
+  {id:'loup-panda',name:'Loup panda',animal:'Loup',accessory:'lunettes'},
+  {id:'lapin-doudou',name:'Lapin doudou',animal:'Lapin',accessory:'doudou'},
+  {id:'tigre-casquette',name:'Tigre casquette',animal:'Tigre',accessory:'casquette'},
+  {id:'licorne-pastel',name:'Licorne pastel',animal:'Licorne',accessory:'paillettes'},
+  {id:'pirate-perroquet',name:'Pirate perroquet',animal:'Humain',accessory:'perroquet'},
+  {id:'grenouille-lunettes',name:'Grenouille lunettes',animal:'Grenouille',accessory:'lunettes'},
+  {id:'dancer-bat',name:'Chauve-souris danseuse',animal:'Chauve-souris',accessory:'bonnet'},
+  {id:'koala-livre',name:'Koala lecteur·rice',animal:'Koala',accessory:'livre'},
+  {id:'lapin-gouter',name:'Lapin goûter',animal:'Lapin',accessory:'gâteau'}
 ];
 const avatarById = id => AVATARS.find(a => a.id === id) || AVATARS[0];
 const newCode = () => {
@@ -37,7 +54,7 @@ const newCode = () => {
 function setPhase(room, ph) {
   clearTimeout(room.timer);
   room.phase = {
-    n: ++room.pn, answers: {}, expected: [], done: false, ...ph,
+    n: ++room.pn, answers: {}, expected: [], done: false, ...(ph.kind === 'draw' ? { drawing: [] } : {}), ...ph,
     endsAt: ph.duration ? Date.now() + ph.duration * 1000 : null,
   };
   if (ph.duration) room.timer = setTimeout(() => endPhase(room), ph.duration * 1000);
@@ -132,6 +149,12 @@ io.on('connection', (socket) => {
 
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
   socket.on('host:lobby', () => { const { room } = ctx(); if (room && socket.data.isHost) toLobby(room); });
+  socket.on('host:sync-draw', () => {
+    const { room } = ctx();
+    const ph = room && room.phase;
+    if (!room || !socket.data.isHost || !ph || ph.kind !== 'draw') return;
+    socket.emit('draw', { n: ph.n, full: true, segs: ph.drawing || [] });
+  });
 
   socket.on('join', ({ code, name, pid, avatar }, ack) => {
     code = String(code || '').toUpperCase().trim();
@@ -177,10 +200,15 @@ io.on('connection', (socket) => {
     const ph = room && room.phase;
     if (!ph || ph.kind !== 'draw' || ph.drawer !== pid || ph.done || !d) return;
     const out = { n: ph.n };
-    if (d.clear) out.clear = true;
-    else if (Array.isArray(d.segs))
+    if (d.clear) {
+      ph.drawing = [];
+      out.clear = true;
+    } else if (Array.isArray(d.segs)) {
       out.segs = d.segs.slice(0, 200).filter(a => Array.isArray(a) && a.length === 4 && a.every(x => typeof x === 'number'));
-    else return;
+      if (!out.segs.length) return;
+      ph.drawing.push(...out.segs);
+      if (ph.drawing.length > 12000) ph.drawing.splice(0, ph.drawing.length - 12000);
+    } else return;
     io.to(room.host).emit('draw', out);
   });
 
