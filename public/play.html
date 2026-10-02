@@ -156,31 +156,60 @@ function render(p, done) {
     const pv = st.me.priv;
     if (pv) {
       app.innerHTML = `${top}<div class="card stack"><p class="prompt">Dessinez : <b>${esc(pv.word)}</b></p>
-        <canvas id="cv" class="board" width="600" height="450"></canvas><button id="clr" class="alt">Effacer</button></div>`;
-      const cv = document.getElementById('cv'), c = cv.getContext('2d');
-      c.lineWidth = 5; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = '#1d1a3b';
-      let last = null, buf = [], sending = false;
-      const pos = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), Math.max(0, Math.min(1, (e.clientY - r.top) / r.height))]; };
-      const line = (a, b) => { c.beginPath(); c.moveTo(a[0] * cv.width, a[1] * cv.height); c.lineTo(b[0] * cv.width, b[1] * cv.height); c.stroke(); };
-      const flush = () => {
-        if (!buf.length || sending) return;
-        const segs = buf.splice(0, 80);
-        sending = true;
-        s.emit('draw', { segs }, () => { sending = false; if (buf.length) flush(); });
+        <div class="draw-toolbar">
+          <div class="draw-tools">
+            <button type="button" class="draw-tool active" data-tool="pen">✏️ Crayon</button>
+            <button type="button" class="draw-tool" data-tool="eraser">🧽 Gomme</button>
+            <button type="button" class="draw-tool" data-tool="fill">🪣 Remplir</button>
+          </div>
+          <div class="draw-colors">
+            ${['#1d1a3b','#e74c3c','#f39c12','#f1c40f','#2ecc71','#3498db','#9b59b6','#ff69b4','#ffffff'].map(color => `<button type="button" class="draw-color ${color==='#1d1a3b'?'active':''}" data-color="${color}" style="background:${color}" aria-label="Couleur ${color}"></button>`).join('')}
+          </div>
+          <div class="draw-widths">
+            <button type="button" class="draw-width active" data-width="5">●</button>
+            <button type="button" class="draw-width" data-width="12">●</button>
+            <button type="button" class="draw-width" data-width="24">●</button>
+            <button type="button" class="draw-width" data-width="42">●</button>
+          </div>
+        </div>
+        <canvas id="cv" class="board" width="600" height="450"></canvas>
+        <div class="row"><button id="undo" class="alt">↶ Annuler</button><button id="clr" class="alt">Effacer</button></div>
+        <p class="msg" id="draw-msg">Choisissez un outil, une couleur et une épaisseur.</p>
+      </div>`;
+      const cv = document.getElementById('cv'), c = cv.getContext('2d', { willReadFrequently:true });
+      c.lineCap = 'round'; c.lineJoin = 'round';
+      let last = null, buf = [], sending = false, tool = 'pen', color = '#1d1a3b', width = 5;
+      const pos = e => { const r = cv.getBoundingClientRect(); return [Math.max(0, Math.min(1, (e.clientX-r.left)/r.width)), Math.max(0, Math.min(1, (e.clientY-r.top)/r.height))]; };
+      const styleNow = () => { c.strokeStyle = tool === 'eraser' ? '#ffffff' : color; c.lineWidth = width; };
+      const line = (a,b) => { styleNow(); c.beginPath(); c.moveTo(a[0]*cv.width,a[1]*cv.height); c.lineTo(b[0]*cv.width,b[1]*cv.height); c.stroke(); };
+      const floodFill = (x,y,fillColor) => {
+        const w=cv.width,h=cv.height, px=Math.floor(x*w), py=Math.floor(y*h), img=c.getImageData(0,0,w,h), d=img.data;
+        const at=(xx,yy)=> (yy*w+xx)*4, idx=at(px,py), target=[d[idx],d[idx+1],d[idx+2],d[idx+3]];
+        const fc=fillColor==='#ffffff'?[255,255,255,255]:((n)=>[n>>16,(n>>8)&255,n&255,255])(parseInt(fillColor.slice(1),16));
+        if(target[0]===fc[0]&&target[1]===fc[1]&&target[2]===fc[2]&&target[3]===fc[3]) return;
+        const same=(i)=>d[i]===target[0]&&d[i+1]===target[1]&&d[i+2]===target[2]&&d[i+3]===target[3];
+        const stack=[[px,py]], seen=new Uint8Array(w*h);
+        while(stack.length){ const [cx,cy]=stack.pop(); if(cx<0||cy<0||cx>=w||cy>=h) continue; const si=cy*w+cx; if(seen[si]) continue; const i=si*4; if(!same(i)) continue; seen[si]=1; d[i]=fc[0];d[i+1]=fc[1];d[i+2]=fc[2];d[i+3]=fc[3]; stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]); }
+        c.putImageData(img,0,0);
       };
-      cv.onpointerdown = e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); last = pos(e); line(last, last); buf.push([...last, ...last]); flush(); };
-      cv.onpointermove = e => {
-        if (!last) return; e.preventDefault();
-        const q = pos(e); line(last, q); buf.push([...last, ...q]); last = q;
-        if (buf.length >= 6) flush();
+      const flush = () => { if(!buf.length||sending)return; const segs=buf.splice(0,80); sending=true; s.emit('draw',{action:'segments',segs,color,width,tool},()=>{sending=false;if(buf.length)flush();}); };
+      const sendAction = action => { s.emit('draw', action); };
+      cv.onpointerdown=e=>{
+        e.preventDefault(); cv.setPointerCapture(e.pointerId); const q=pos(e);
+        if(tool==='fill'){ floodFill(q[0],q[1],color); sendAction({action:'fill',x:q[0],y:q[1],color}); return; }
+        last=q; line(last,last); buf.push([...last,...last]); flush();
       };
-      const endStroke = () => { last = null; flush(); };
-      cv.onpointerup = cv.onpointercancel = cv.onpointerleave = endStroke;
-      document.getElementById('clr').onclick = () => { c.clearRect(0, 0, cv.width, cv.height); buf = []; s.emit('draw', { clear: true }); };
-      window._dt = setInterval(flush, 30);
+      cv.onpointermove=e=>{ if(!last||tool==='fill')return; e.preventDefault(); const q=pos(e); line(last,q); buf.push([...last,...q]); last=q; if(buf.length>=6)flush(); };
+      const endStroke=()=>{last=null;flush();}; cv.onpointerup=cv.onpointercancel=cv.onpointerleave=endStroke;
+      document.querySelectorAll('.draw-tool').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('.draw-tool').forEach(x=>x.classList.toggle('active',x===b));});
+      document.querySelectorAll('.draw-color').forEach(b=>b.onclick=()=>{color=b.dataset.color;document.querySelectorAll('.draw-color').forEach(x=>x.classList.toggle('active',x===b));});
+      document.querySelectorAll('.draw-width').forEach(b=>b.onclick=()=>{width=+b.dataset.width;document.querySelectorAll('.draw-width').forEach(x=>x.classList.toggle('active',x===b));});
+      document.getElementById('clr').onclick=()=>{c.clearRect(0,0,cv.width,cv.height);buf=[];last=null;sendAction({action:'clear'});};
+      document.getElementById('undo').onclick=()=>sendAction({action:'undo'});
+      window._dt=setInterval(flush,30);
       return;
     }
-    if (done) { app.innerHTML = `${top}${wait('Bien joué ✓<br>Attendez les autres.')}`; return; }
+    if(done){ app.innerHTML=`${top}${wait('Bien joué ✓<br>Attendez les autres.')}`; return; }
     app.innerHTML = `${top}<div class="card stack"><p class="prompt">Regardez l'écran et devinez le dessin !</p>
       <input id="a" placeholder="Votre réponse" autocomplete="off" autocapitalize="off">
       <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
