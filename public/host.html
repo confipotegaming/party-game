@@ -28,7 +28,6 @@ setInterval(() => {
   if (t && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
 }, 250);
 const avatarMarkup = (id,size=64,mood='happy') => window.renderAvatar ? window.renderAvatar(id,size,mood) : '';
-const antics = ['happy','grimace','sleepy','happy','grimace'];
 const antics=['Le champion parade !','Deux joueurs se chamaillent pour la 2e place !','Quelqu’un tente une pose de victoire…','Ça rigole au fond !','Un duel de regards est lancé !','Tout le monde félicite le leader !','Le dernier prépare sa revanche !'];
 let anticIndex=Math.floor(Math.random()*antics.length);
 const rankBoard = (items, final=false) => { const names=['winner','p2','p3','p4','p5']; const scene=final?antics[anticIndex%antics.length]:'La partie commence déjà à chambrer…'; return `<div class="rank-scene"><div class="scene-prop">${esc(scene)}</div><div class="scene-floor"></div>${items.slice(0,5).map((x,i)=>`<div class="scene-player ${names[i]}"><div>${avatarMarkup(x.avatar,82,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}${final?' · '+x.score+' pts':''}</span></div>`).join('')}</div><div class="rank-list">${items.map((x,i)=>`<div class="rank-row"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${final?x.score+' pts':'prêt à jouer'}</span></div></div>`).join('')}</div>`; };

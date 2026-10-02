@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 
+const APP_VERSION = '0.1.5';
 const MIN_PLAYERS = 2; // mettez 1 pour tester seul
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +21,11 @@ const io = new Server(server);
 app.use(express.static('public'));
 
 const rooms = {};
+
+const AVATARS = [
+{id:'fox-chef',name:'Renard chef',animal:'renard',accessory:'chef'},{id:'cat-hoodie',name:'Chat hoodie',animal:'chat',accessory:'headphones'},{id:'bunny-glasses',name:'Lapin lunettes',animal:'lapin',accessory:'glasses'},{id:'fox-freckles',name:'Renard roux',animal:'renard',accessory:'cap'},{id:'ram-dark',name:'Bélier solaire',animal:'belier',accessory:'drink'},{id:'dragon-blue',name:'Dragon bleu',animal:'dragon',accessory:'scarf'},{id:'bunny-wheel',name:'Lapin fauteuil',animal:'lapin',accessory:'wheelchair'},{id:'poodle-prosthetic',name:'Caniche prothèse',animal:'caniche',accessory:'prosthetic'},{id:'cat-vitiligo',name:'Chat vitiligo',animal:'chat',accessory:'vitiligo'},{id:'wolf-cane',name:'Loup canne',animal:'loup',accessory:'cane'},{id:'deer-hearing',name:'Biche appareil auditif',animal:'cerf',accessory:'hearing'},{id:'tiger-neutral',name:'Tigre street',animal:'tigre',accessory:'sunglasses'},{id:'frog-curls',name:'Grenouille boucles',animal:'grenouille',accessory:'backpack'},{id:'panda-dress',name:'Panda pastel',animal:'panda',accessory:'heartbag'},{id:'otter-camera',name:'Loutre photo',animal:'loutre',accessory:'camera'},{id:'bunny-red',name:'Lapin roux',animal:'lapin',accessory:'flower'},{id:'bear-cap',name:'Ours cool',animal:'ours',accessory:'cap'},{id:'koala-book',name:'Koala lecteur',animal:'koala',accessory:'book'},{id:'penguin-overall',name:'Pingouin jardinier',animal:'pingouin',accessory:'plant'},{id:'unicorn-magic',name:'Licorne magique',animal:'licorne',accessory:'wand'}
+];
+const avatarById = id => AVATARS.find(a => a.id === id) || AVATARS[0];
 const newCode = () => {
   const L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   let c;
@@ -71,11 +77,13 @@ function view(room) {
     code: room.code,
     now: Date.now(),
     game: room.game && room.game.id,
+    avatars: AVATARS,
+    version: APP_VERSION,
     games: Object.values(games).map(({ id, name, desc, category, categories }) => ({
       id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'],
     })),
     min: MIN_PLAYERS,
-    players: Object.values(room.players).map(({ id, name, score, connected }) => ({ id, name, score, connected })),
+    players: Object.values(room.players).map(({ id, name, score, connected, avatar }) => ({ id, name, score, connected, avatar: avatarById(avatar).id })),
     phase: p && {
       n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
       round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
@@ -125,7 +133,7 @@ io.on('connection', (socket) => {
   socket.on('host:skip', () => { const { room } = ctx(); if (room && socket.data.isHost) endPhase(room); });
   socket.on('host:lobby', () => { const { room } = ctx(); if (room && socket.data.isHost) toLobby(room); });
 
-  socket.on('join', ({ code, name, pid }, ack) => {
+  socket.on('join', ({ code, name, pid, avatar }, ack) => {
     code = String(code || '').toUpperCase().trim();
     name = String(name || '').trim().slice(0, 14);
     const room = rooms[code];
@@ -137,8 +145,9 @@ io.on('connection', (socket) => {
       if (Object.values(room.players).some(p => p.name.toLowerCase() === name.toLowerCase()))
         return ack && ack({ error: 'Ce pseudo est déjà pris.' });
       pid = Math.random().toString(36).slice(2, 10);
-      pl = room.players[pid] = { id: pid, name, score: 0, sid: null, connected: true };
+      pl = room.players[pid] = { id: pid, name, score: 0, avatar: avatarById(avatar).id, sid: null, connected: true };
     }
+    if (avatar) pl.avatar = avatarById(avatar).id;
     pl.sid = socket.id;
     pl.connected = true;
     socket.data.code = code;
