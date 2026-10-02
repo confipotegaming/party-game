@@ -1,7 +1,7 @@
 const mk = require('./_choice');
 const Q = (p, ...opts) => ({ p, options: opts.map(t => ({ t })) });
 module.exports = mk({
-  id: 'choixgroupe', name: 'Le choix du groupe', rounds: 5, points: 200, mode: 'majority', title: 'Votre choix',
+  id: 'choixgroupe', category: 'Humour', name: 'Le choix du groupe', rounds: 5, points: 200, mode: 'majority', title: 'Votre choix', categories: ['Humour', 'Vie quotidienne', 'Absurde'],
   desc: 'Des options absurdes : gagnez des points en votant comme la majorité.',
   questions: [
     Q('Vous devez adopter un nouvel animal de compagnie :', 'Un pigeon qui juge tout le monde', 'Un hamster géant', 'Un perroquet qui répète vos secrets', 'Un escargot ultra rapide'),

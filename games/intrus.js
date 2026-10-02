@@ -1,7 +1,7 @@
 const mk = require('./_choice');
 const Q = (items, r) => ({ p: 'Quel est l\'intrus ?', options: items.map((t, i) => (i === 0 ? { t, ok: true, r } : { t })) });
 module.exports = mk({
-  id: 'intrus', name: 'L\'intrus', rounds: 6, points: 500, mode: 'correct', title: 'Trouvez l\'intrus', seconds: 20, revealSeconds: 8,
+  id: 'intrus', category: 'Culture générale', name: 'L\'intrus', rounds: 6, points: 500, mode: 'correct', title: 'Trouvez l\'intrus', seconds: 20, revealSeconds: 8, categories: ['Culture générale', 'Géographie', 'Sciences', 'Sport'],
   desc: 'Quatre propositions, une seule ne va pas avec les autres.',
   revealTitle: (q) => `L'intrus : ${q.options.find(o => o.ok).t}`,
   questions: [

@@ -1,7 +1,7 @@
 const mk = require('./_textquiz');
 const Q = (q, a, ...alias) => ({ clues: [q], a, alias });
 module.exports = mk({
-  id: 'reponseexpress', name: 'Réponse express', rounds: 8, clueSeconds: 8, prompt: 'Vite !',
+  id: 'reponseexpress', category: 'Culture générale', name: 'Réponse express', rounds: 8, clueSeconds: 8, prompt: 'Vite !', categories: ['Culture générale', 'Géographie', 'Sciences', 'Sport', 'Vie quotidienne'],
   desc: 'Des questions toutes simples, mais seulement 8 secondes pour répondre.',
   questions: [
     Q('Capitale de l\'Italie ?', 'Rome'), Q('Combien de côtés a un hexagone ?', '6', 'six'),

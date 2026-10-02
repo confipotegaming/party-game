@@ -1,6 +1,6 @@
 const mk = require('./_textquiz');
 module.exports = mk({
-  id: 'quisuisje', name: 'Qui suis-je ?', rounds: 4, clueSeconds: 15, prompt: 'Qui suis-je ?',
+  id: 'quisuisje', category: 'Personnalités', name: 'Qui suis-je ?', rounds: 4, clueSeconds: 15, prompt: 'Qui suis-je ?', categories: ['Personnalités', 'Histoire', 'Sciences', 'Sport', 'Arts'],
   desc: 'Un personnage célèbre, quatre indices de plus en plus faciles.',
   questions: [
     { a: 'Napoléon Bonaparte', alias: ['Napoléon', 'Napoléon 1er', 'Napoléon Ier'], clues: [

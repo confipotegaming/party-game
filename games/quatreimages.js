@@ -2,7 +2,7 @@ const mk = require('./_textquiz');
 const Q = (e, a, ...alias) => ({ e: e.join('   '), a, alias });
 const letters = (w) => [...w].filter(c => /\p{L}/u.test(c)).length;
 module.exports = mk({
-  id: 'quatreimages', name: '4 images 1 mot', rounds: 5, clueSeconds: 20, prompt: 'Quel mot relie ces 4 images ?',
+  id: 'quatreimages', category: 'Culture pop', name: '4 images 1 mot', rounds: 5, clueSeconds: 20, prompt: 'Quel mot relie ces 4 images ?', categories: ['Culture pop', 'Voyage & lieux', 'Gastronomie', 'Sport', 'Vie quotidienne'],
   desc: 'Quatre emojis, un seul mot en commun. Un indice arrive si ça traîne.',
   clues: (q) => [q.e, `Indice : ${letters(q.a)} lettres`],
   questions: [

@@ -1,7 +1,7 @@
 const mk = require('./_textquiz');
 const Q = (p, e, h, a, ...alias) => ({ p, clues: [e, h], a, alias });
 module.exports = mk({
-  id: 'emojis', name: 'Devine en emojis', rounds: 5, clueSeconds: 20,
+  id: 'emojis', category: 'Cinéma & séries', name: 'Devine en emojis', rounds: 5, clueSeconds: 20, categories: ['Cinéma & séries', 'Expressions', 'Personnages'],
   desc: 'Films, dessins animés et expressions racontés en emojis.',
   questions: [
     Q('Quel film ?', '🦁👑', 'Un dessin animé Disney de 1994', 'Le Roi Lion'),

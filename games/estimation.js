@@ -25,7 +25,7 @@ function ask(room, api) {
 }
 
 module.exports = {
-  id: 'estimation',
+  id: 'estimation', category: 'Culture générale', categories: ['Culture générale', 'Histoire', 'Géographie', 'Sciences', 'Sport'],
   name: 'Estimation',
   desc: 'Une question chiffrée : le plus proche de la bonne réponse gagne.',
 

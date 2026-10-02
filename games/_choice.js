@@ -8,13 +8,13 @@ module.exports = function makeChoice(cfg) {
   const ask = (room, api) => {
     const g = room.g, q = g.qs[g.i];
     api.setPhase({
-      kind: 'vote', step: 'vote', title: cfg.title || 'Votre choix', prompt: q.p, q,
+      kind: 'vote', step: 'vote', title: cfg.title || 'Votre choix', prompt: q.p, category: q.category || cfg.category || 'Général', q,
       options: shuffle(q.options.map((o, i) => ({ id: 'o' + i, text: o.t }))),
       round: g.i + 1, rounds, duration: cfg.seconds || 25, expected: api.ids(),
     });
   };
   return {
-    id: cfg.id, name: cfg.name, desc: cfg.desc,
+    id: cfg.id, name: cfg.name, desc: cfg.desc, category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'],
     start(room, api) { room.g = { qs: shuffle(cfg.questions).slice(0, rounds), i: 0 }; ask(room, api); },
     validate(ph, pid, v) { return ph.step === 'vote' && ph.options.some(o => o.id === v) ? v : undefined; },
     onEnd(room, ph, api) {

@@ -23,14 +23,15 @@ module.exports = function makeTextQuiz(cfg) {
   const rounds = cfg.rounds || 5;
   const clueSeconds = cfg.clueSeconds || 20;
   const cluesOf = cfg.clues || ((q) => q.clues);
+  const categoryOf = typeof cfg.category === 'function' ? cfg.category : ((q) => q.category || cfg.category || 'Général');
 
   function askClue(room, api) {
     const g = room.g, q = g.qs[g.i], clues = cluesOf(q);
     api.setPhase({
-      kind: 'guess', step: 'clue', title: 'Trouvez la réponse', prompt: q.p || cfg.prompt,
-      data: { clues: clues.slice(0, g.clue + 1), found: g.found.map(f => f.pid) },
+      kind: 'guess', step: 'clue', title: 'Trouvez la réponse', prompt: q.p || cfg.prompt, category: categoryOf(q),
+      data: { clues: cfg.lastOnly ? [clues[g.clue]] : clues.slice(0, g.clue + 1), found: g.found.map(f => f.pid) },
       round: g.i + 1, rounds, duration: clueSeconds, clueIdx: g.clue, nClues: clues.length,
-      accepted: [q.a, ...(q.alias || [])].map(norm),
+      accepted: [q.a, ...(q.alias || []), ...(q.accepted || [])].filter(Boolean).map(norm),
       expected: api.ids().filter(id => !g.found.some(f => f.pid === id)),
     });
   }
@@ -40,7 +41,7 @@ module.exports = function makeTextQuiz(cfg) {
   }
 
   return {
-    id: cfg.id, name: cfg.name, desc: cfg.desc, questions: cfg.questions,
+    id: cfg.id, name: cfg.name, desc: cfg.desc, category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'], category: cfg.category || 'Général', categories: cfg.categories || [cfg.category || 'Général'], questions: cfg.questions,
 
     start(room, api) {
       room.g = { qs: shuffle(cfg.questions).slice(0, rounds), i: 0, found: [], clue: 0 };
@@ -67,7 +68,7 @@ module.exports = function makeTextQuiz(cfg) {
         const someoneLeft = api.ids().some(id => !g.found.some(f => f.pid === id));
         if (someoneLeft && g.clue + 1 < ph.nClues) { g.clue++; return askClue(room, api); }
         return api.setPhase({
-          kind: 'reveal', step: 'reveal', title: `Réponse : ${q.a}`, prompt: q.p || cfg.prompt,
+          kind: 'reveal', step: 'reveal', title: `Réponse : ${q.a}`, prompt: q.p || cfg.prompt, category: categoryOf(q),
           lines: g.found.map(f => ({
             main: api.name(f.pid), sub: ph.nClues > 1 ? `trouvé à l'indice ${f.clue + 1}` : 'trouvé !', pts: f.pts,
           })),
@@ -79,3 +80,7 @@ module.exports = function makeTextQuiz(cfg) {
     },
   };
 };
+
+module.exports.norm = norm;
+module.exports.matches = matches;
+module.exports.shuffle = shuffle;

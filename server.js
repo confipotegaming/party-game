@@ -8,7 +8,11 @@ const PORT = process.env.PORT || 3000;
 
 // Pour ajouter un jeu : créez games/monjeu.js et ajoutez-le ici.
 const games = {};
-for (const id of ['funny', 'estimation', 'leplusprobable', 'emojis', 'filmresume', 'quisuisje', 'motatrous']) games[id] = require('./games/' + id);
+for (const id of [
+  'funny', 'finislaphrase', 'estimation', 'leplusprobable', 'quiadit', 'deuxverites',
+  'emojis', 'filmresume', 'quisuisje', 'motatrous', 'express', 'quatreimages',
+  'intrus', 'survive', 'choixgroupe', 'classement', 'motinterdit', 'dessin',
+]) games[id] = require('./games/' + id);
 
 const app = express();
 const server = http.createServer(app);
@@ -55,8 +59,9 @@ function apiFor(room) {
 function toLobby(room) {
   clearTimeout(room.timer);
   room.game = null;
+  room.gameCategory = null;
   room.g = null;
-  setPhase(room, { kind: 'lobby' });
+  setPhase(room, { kind: 'lobby', category: null });
 }
 
 // ----- Diffusion de l'état -----
@@ -66,11 +71,13 @@ function view(room) {
     code: room.code,
     now: Date.now(),
     game: room.game && room.game.id,
-    games: Object.values(games).map(({ id, name, desc }) => ({ id, name, desc })),
+    games: Object.values(games).map(({ id, name, desc, category, categories }) => ({
+      id, name, desc, category: category || 'Général', categories: categories || [category || 'Général'],
+    })),
     min: MIN_PLAYERS,
     players: Object.values(room.players).map(({ id, name, score, connected }) => ({ id, name, score, connected })),
     phase: p && {
-      n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit,
+      n: p.n, kind: p.kind, step: p.step, title: p.title, prompt: p.prompt, unit: p.unit, category: p.category || (room.game && room.game.category) || 'Général',
       round: p.round, rounds: p.rounds, lines: p.lines, endsAt: p.endsAt, data: p.data,
       options: p.options && p.options.map(({ id, text }) => ({ id, text })),
       answered: Object.keys(p.answers), expected: p.expected,
@@ -84,7 +91,8 @@ function broadcast(room) {
   for (const pl of Object.values(room.players)) {
     if (!pl.sid) continue;
     const mine = ((room.phase && room.phase.options) || []).filter(o => o.by === pl.id).map(o => o.id);
-    io.to(pl.sid).emit('state', { ...v, me: { id: pl.id, mine } });
+    const priv = ((room.phase && room.phase.private) || {})[pl.id]; // infos secrètes (mot à dessiner…)
+    io.to(pl.sid).emit('state', { ...v, me: { id: pl.id, mine, priv } });
   }
 }
 
@@ -101,7 +109,7 @@ io.on('connection', (socket) => {
     socket.data.code = room.code;
     socket.data.isHost = true;
     socket.join(room.code);
-    setPhase(room, { kind: 'lobby' });
+    setPhase(room, { kind: 'lobby', category: null });
   });
 
   socket.on('host:start', (gameId) => {
@@ -110,6 +118,7 @@ io.on('connection', (socket) => {
     if (Object.values(room.players).filter(p => p.connected).length < MIN_PLAYERS) return;
     Object.values(room.players).forEach(p => (p.score = 0));
     room.game = games[gameId];
+    room.gameCategory = room.game.category || 'Général';
     room.game.start(room, apiFor(room));
   });
 
@@ -151,6 +160,19 @@ io.on('connection', (socket) => {
     reply('ok');
     broadcast(room);
     if (ph.expected.every(id => id in ph.answers)) endPhase(room);
+  });
+
+  // Dessin : le dessinateur envoie des segments, relayés à l'écran de l'hôte
+  socket.on('draw', (d) => {
+    const { room, pid } = ctx();
+    const ph = room && room.phase;
+    if (!ph || ph.kind !== 'draw' || ph.drawer !== pid || ph.done || !d) return;
+    const out = { n: ph.n };
+    if (d.clear) out.clear = true;
+    else if (Array.isArray(d.segs))
+      out.segs = d.segs.slice(0, 200).filter(a => Array.isArray(a) && a.length === 4 && a.every(x => typeof x === 'number'));
+    else return;
+    io.to(room.host).emit('draw', out);
   });
 
   socket.on('disconnect', () => {

@@ -36,5 +36,23 @@ button.alt{background:var(--pink)}
 .host .clue{font-size:clamp(1.3rem,2.8vw,2.2rem);color:#fff}
 .host .clue.emoji{font-size:clamp(4rem,12vw,8rem)}
 .msg{color:#c0123f;min-height:1.4em}
+.board{display:block;width:100%;max-width:800px;background:#fff;border:4px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 var(--ink);touch-action:none}
+input[type=radio]{width:auto;margin-right:8px}
+.chip.bad{background:var(--pink)}
+.rk{display:flex;align-items:center;gap:8px;font-weight:800}
+.rk span{flex:1}.rk button{padding:8px 14px}
+.host .items{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .play{max-width:480px;margin:0 auto}
 .play .prompt{font-size:1.25rem;font-weight:800}
+
+/* Menu des jeux */
+.host .games button{min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:20px;text-align:left;transition:transform .12s ease,box-shadow .12s ease}
+.host .games button:hover{transform:translateY(-3px);box-shadow:8px 8px 0 var(--ink)}
+.host .games .game-title{font-family:'Bagel Fat One','Nunito',sans-serif;font-size:clamp(1.55rem,3vw,2.25rem);line-height:1;color:var(--ink)}
+.host .games .game-desc{font-size:.96rem;line-height:1.3;font-weight:600;opacity:.72}
+.host .games .game-cat{align-self:flex-start;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.audio-toggle{position:fixed;right:16px;top:16px;z-index:10;padding:9px 13px;font-size:.85rem;background:#fff}
+.audio-toggle.audio-on{background:var(--mint)}
+.menu-title{font-size:clamp(2.5rem,7vw,5rem)}
+.menu-subtitle{font-size:clamp(1rem,2.2vw,1.25rem);max-width:720px}
+@media(max-width:600px){.host .games{grid-template-columns:1fr}.host .games button{min-height:130px}.audio-toggle{position:static;justify-self:end}}

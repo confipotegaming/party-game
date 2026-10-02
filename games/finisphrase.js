@@ -1,6 +1,6 @@
 const mk = require('./_writevote');
 module.exports = mk({
-  id: 'finisphrase', name: 'Finis la phrase', rounds: 4, title: 'Complétez la phrase',
+  id: 'finisphrase', category: 'Humour', name: 'Finis la phrase', rounds: 4, title: 'Complétez la phrase', categories: ['Humour', 'Vie quotidienne', 'Famille'],
   desc: 'Une phrase commence, vous la finissez de la façon la plus drôle. On vote.',
   prompts: [
     'Ma grand-mère m\'a toujours dit que le secret du bonheur, c\'est…',

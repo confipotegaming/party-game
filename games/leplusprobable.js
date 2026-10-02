@@ -33,7 +33,7 @@ function ask(room, api) {
 }
 
 module.exports = {
-  id: 'leplusprobable',
+  id: 'leplusprobable', category: 'Vie quotidienne', categories: ['Vie quotidienne', 'Humour', 'Amitié'],
   name: 'Le plus probable',
   desc: 'Qui est le plus susceptible de… ? Votez pour un joueur.',
 

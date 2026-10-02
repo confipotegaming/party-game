@@ -1,7 +1,7 @@
 const mk = require('./_choice');
 const O = (t, ok, r) => ({ t, ok, r });
 module.exports = mk({
-  id: 'survivrais', name: 'Survivrais-tu ?', rounds: 5, points: 500, mode: 'correct', title: 'Que faites-vous ?',
+  id: 'survivrais', category: 'Survie & aventure', name: 'Survivrais-tu ?', rounds: 5, points: 500, mode: 'correct', title: 'Que faites-vous ?', categories: ['Survie & aventure', 'Nature', 'Humour'],
   desc: 'Une situation absurde, trois décisions. Les survivants marquent des points.',
   questions: [
     { p: 'Vous êtes coincé dans un ascenseur avec un clown qui ne parle pas. Vous…', options: [

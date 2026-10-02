@@ -12,7 +12,7 @@ function mask(word, step) {
 }
 const Q = (cat, a, ...alias) => ({ p: `Mot à retrouver (${cat})`, a, alias });
 module.exports = mk({
-  id: 'motatrous', name: 'Mot à trous', rounds: 5, clueSeconds: 12,
+  id: 'motatrous', category: 'Culture générale', name: 'Mot à trous', rounds: 5, clueSeconds: 12, categories: ['Culture générale', 'Géographie', 'Sciences', 'Gastronomie', 'Sport'],
   desc: 'Des lettres se dévoilent peu à peu : trouvez le mot avant les autres.',
   clues: (q) => [0, 1, 2].map(s => mask(q.a, s)),
   questions: [

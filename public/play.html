@@ -1,11 +1,15 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Soirée jeux</title><link rel="stylesheet" href="style.css"></head>
 <body><main class="play stack" id="app"></main>
+<button class="audio-toggle" data-audio-toggle type="button">🔇 Activer le son</button>
+<script src="/audio.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script>document.addEventListener('click', e => { if (e.target.closest('button') && !e.target.closest('[data-audio-toggle]')) window.partyAudio.click(); }, true);</script>
 <script>
 const s = io(); const app = document.getElementById('app');
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let joined = null, st = null, off = 0, key = '';
+document.querySelector('[data-audio-toggle]').onclick = () => window.partyAudio.toggle();
 const saved = () => { try { return JSON.parse(localStorage.getItem('pg') || 'null'); } catch { return null; } };
 
 function join(code, name, pid) {
@@ -26,12 +30,15 @@ function form(err = '') {
       <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
       <button id="j">Rejoindre</button>
       <p id="e" style="color:#c0123f">${esc(err)}</p></div>`;
-  document.getElementById('j').onclick = () =>
+  document.getElementById('j').onclick = () => {
+    window.partyAudio.enable();
     join(document.getElementById('c').value, document.getElementById('n').value);
+  };
 }
 
 s.on('state', x => {
   st = x; off = x.now - Date.now();
+  window.partyAudio.update(x);
   if (!x.me) return;
   const p = x.phase, done = p.answered.includes(x.me.id);
   const k = p.n + ':' + done;
@@ -49,7 +56,7 @@ const timer = p => p.endsAt ? '<span class="timer" id="t"></span>' : '';
 
 function render(p, done) {
   const m = me();
-  const top = `<div class="row"><b class="muted">${esc(m.name)} · ${m.score} pts</b>${timer(p)}</div>`;
+  const top = `<div class="row"><b class="muted">${esc(m.name)} · ${m.score} pts</b>${p.category ? `<span class="chip">${esc(p.category)}</span>` : ''}${timer(p)}</div>`;
   if (p.kind === 'lobby') {
     app.innerHTML = `${top}${wait(`Vous êtes dans la partie ${st.code}. L'hôte va lancer un jeu.`)}`;
   } else if (p.kind === 'text' || p.kind === 'number') {
@@ -60,15 +67,82 @@ function render(p, done) {
     app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p>${field}<button id="ok">Envoyer</button></div>`;
     document.getElementById('ok').onclick = () => s.emit('answer', document.getElementById('a').value);
   } else if (p.kind === 'guess') {
+    if (!done && !p.expected.includes(st.me.id)) {
+      app.innerHTML = `${top}${wait(p.data.found.includes(st.me.id) ? 'Bonne réponse ✓<br>Attendez les autres.' : 'Vos amis cherchent… 🤞')}`; return;
+    }
     if (done) { app.innerHTML = `${top}${wait('Bonne réponse ✓<br>Attendez les autres.')}`; return; }
     const cl = c => `<div class="clue ${/^[^\p{L}]+$/u.test(c) ? 'emoji' : ''}">${esc(c)}</div>`;
     app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p>${p.data.clues.map(cl).join('')}
       <input id="a" placeholder="Votre réponse" autocomplete="off" autocapitalize="off">
       <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
     const el = document.getElementById('a');
-    const send = () => s.emit('answer', el.value, r => {
-      if (r === 'invalid') { document.getElementById('msg').textContent = 'Ce n\'est pas ça, réessayez !'; el.value = ''; el.focus(); }
-    });
+    const send = () => { window.partyAudio.click(); s.emit('answer', el.value, r => {
+      if (r === 'invalid') { window.partyAudio.error(); document.getElementById('msg').textContent = 'Ce n\'est pas ça, réessayez !'; el.value = ''; el.focus(); }
+    }); };
+    document.getElementById('ok').onclick = send;
+    el.onkeydown = e => { if (e.key === 'Enter') send(); };
+  } else if (p.kind === 'rank') {
+    if (done) { app.innerHTML = `${top}${wait('Classement envoyé ✓<br>Attendez les autres.')}`; return; }
+    const order = p.data.items.map(x => x.id);
+    const txt = Object.fromEntries(p.data.items.map(x => [x.id, x.text]));
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">${esc(p.prompt)}</p><div id="rk" class="stack"></div><button id="ok">Valider mon classement</button></div>`;
+    const list = document.getElementById('rk');
+    const draw = () => { list.innerHTML = order.map((id, i) => `<div class="rk"><b>${i + 1}</b><span>${esc(txt[id])}</span><button data-i="${i}" data-d="-1">▲</button><button data-i="${i}" data-d="1">▼</button></div>`).join(''); };
+    list.onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const i = +b.dataset.i, j = i + +b.dataset.d;
+      if (j < 0 || j >= order.length) return;
+      [order[i], order[j]] = [order[j], order[i]]; draw();
+    };
+    draw();
+    document.getElementById('ok').onclick = () => s.emit('answer', order);
+  } else if (p.kind === 'truths') {
+    if (done) { app.innerHTML = `${top}${wait('Envoyé ✓<br>Attendez les autres.')}`; return; }
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">Écrivez 2 vérités et 1 mensonge sur vous, puis cochez le mensonge.</p>
+      ${[0, 1, 2].map(i => `<input id="s${i}" maxlength="100" placeholder="Affirmation ${i + 1}" autocomplete="off"><label><input type="radio" name="lie" value="${i}">C'est le mensonge</label>`).join('')}
+      <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
+    document.getElementById('ok').onclick = () => {
+      const lie = document.querySelector('input[name=lie]:checked');
+      s.emit('answer', { s: [0, 1, 2].map(i => document.getElementById('s' + i).value), lie: lie ? +lie.value : -1 },
+        r => { if (r === 'invalid') document.getElementById('msg').textContent = 'Remplissez les 3 affirmations et cochez le mensonge.'; });
+    };
+  } else if (p.kind === 'describe') {
+    const pv = st.me.priv;
+    if (!pv) { app.innerHTML = `${top}${wait('Un joueur prépare un indice… 🤫')}`; return; }
+    if (done) { app.innerHTML = `${top}${wait('Indice envoyé ✓<br>Vos amis cherchent !')}`; return; }
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">Faites deviner :</p><div class="clue" style="font-size:2rem">${esc(pv.word)}</div>
+      <div class="chips">${pv.forbidden.map(w => `<span class="chip bad">${esc(w)}</span>`).join('')}</div>
+      <p>Interdit : ce mot et ceux en rose !</p>
+      <textarea id="a" rows="3" maxlength="120" placeholder="Votre indice"></textarea>
+      <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
+    document.getElementById('ok').onclick = () => s.emit('answer', document.getElementById('a').value,
+      r => { if (r === 'invalid') document.getElementById('msg').textContent = 'Mot interdit utilisé, ou texte vide. Reformulez !'; });
+  } else if (p.kind === 'draw') {
+    clearInterval(window._dt);
+    const pv = st.me.priv;
+    if (pv) {
+      app.innerHTML = `${top}<div class="card stack"><p class="prompt">Dessinez : <b>${esc(pv.word)}</b></p>
+        <canvas id="cv" class="board" width="600" height="450"></canvas><button id="clr" class="alt">Effacer</button></div>`;
+      const cv = document.getElementById('cv'), c = cv.getContext('2d');
+      c.lineWidth = 5; c.lineCap = 'round'; c.strokeStyle = '#1d1a3b';
+      let last = null, buf = [];
+      const pos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
+      const line = (a, b) => { c.beginPath(); c.moveTo(a[0] * cv.width, a[1] * cv.height); c.lineTo(b[0] * cv.width, b[1] * cv.height); c.stroke(); };
+      cv.onpointerdown = e => { cv.setPointerCapture(e.pointerId); last = pos(e); line(last, last); buf.push([...last, ...last]); };
+      cv.onpointermove = e => { if (!last) return; const q = pos(e); line(last, q); buf.push([...last, ...q]); last = q; };
+      cv.onpointerup = cv.onpointercancel = () => { last = null; };
+      document.getElementById('clr').onclick = () => { c.clearRect(0, 0, cv.width, cv.height); buf = []; s.emit('draw', { clear: true }); };
+      window._dt = setInterval(() => { if (buf.length) { s.emit('draw', { segs: buf }); buf = []; } }, 60);
+      return;
+    }
+    if (done) { app.innerHTML = `${top}${wait('Bien joué ✓<br>Attendez les autres.')}`; return; }
+    app.innerHTML = `${top}<div class="card stack"><p class="prompt">Regardez l'écran et devinez le dessin !</p>
+      <input id="a" placeholder="Votre réponse" autocomplete="off" autocapitalize="off">
+      <button id="ok">Envoyer</button><p class="msg" id="msg"></p></div>`;
+    const el = document.getElementById('a');
+    const send = () => { window.partyAudio.click(); s.emit('answer', el.value, r => {
+      if (r === 'invalid') { window.partyAudio.error(); document.getElementById('msg').textContent = 'Ce n\'est pas ça, réessayez !'; el.value = ''; el.focus(); }
+    }); };
     document.getElementById('ok').onclick = send;
     el.onkeydown = e => { if (e.key === 'Enter') send(); };
   } else if (p.kind === 'vote') {

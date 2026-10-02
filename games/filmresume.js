@@ -1,7 +1,7 @@
 const mk = require('./_textquiz');
 const Q = (r, y, a, ...alias) => ({ p: 'Quel film se cache derrière ce résumé ?', clues: [r, `Indice : sorti en ${y}`], a, alias });
 module.exports = mk({
-  id: 'filmresume', name: 'Film résumé très mal', rounds: 5, clueSeconds: 25,
+  id: 'filmresume', category: 'Cinéma & séries', name: 'Film résumé très mal', rounds: 5, clueSeconds: 25, categories: ['Cinéma & séries', 'Comédie', 'Aventure'],
   desc: 'Retrouvez le film à partir d\'un résumé volontairement catastrophique.',
   questions: [
     Q('Un homme dessine une femme puis un gros glaçon gagne contre un bateau.', 1997, 'Titanic'),

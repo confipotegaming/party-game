@@ -30,7 +30,7 @@ function guess(room, api) {
 }
 
 module.exports = {
-  id: 'quiadit', name: 'Qui a dit ça ?',
+  id: 'quiadit', category: 'Vie quotidienne', name: 'Qui a dit ça ?', categories: ['Vie quotidienne', 'Humour', 'Famille'],
   desc: 'Des réponses anonymes s\'affichent : devinez qui les a écrites.',
 
   start(room, api) { room.g = { qs: shuffle(QUESTIONS).slice(0, ROUNDS), i: 0, queue: [], k: 0 }; write(room, api); },
