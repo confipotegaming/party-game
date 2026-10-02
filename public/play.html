@@ -25,16 +25,44 @@ s.on('closed', () => { localStorage.removeItem('pg'); joined = null; form('La pa
 
 function form(err = '') {
   key = '';
-  app.innerHTML = `<h1 class="big" style="font-size:2.6rem">Rejoindre</h1>
-    <div class="card stack"><input id="c" placeholder="Code (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
-    <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
-    <p class="avatar-label">Choisissez votre avatar</p><div id="avatars" class="avatar-grid"></div>
-    <button id="j">Rejoindre</button><p id="e" style="color:#c0123f">${esc(err)}</p></div>`;
-  const grid=document.getElementById('avatars');
-  const list=(window.AVATARS||[]); if(!chosenAvatar && list[0]) chosenAvatar=list[0].id;
-  grid.innerHTML=list.map(a=>`<button type="button" class="avatar-pick ${chosenAvatar===a.id?'selected':''}" data-avatar="${a.id}" title="${esc(a.name)}">${avatarMarkup(a.id,74)}<span>${esc(a.name)}</span></button>`).join('');
-  grid.onclick=e=>{const b=e.target.closest('[data-avatar]');if(!b)return;chosenAvatar=b.dataset.avatar;grid.querySelectorAll('.avatar-pick').forEach(x=>x.classList.toggle('selected',x===b));localStorage.setItem('pg-avatar',chosenAvatar);window.partyAudio.click();};
-  document.getElementById('j').onclick=()=>{ window.partyAudio.enable(); join(document.getElementById('c').value,document.getElementById('n').value,null,chosenAvatar); };
+  app.innerHTML = `<h1 class="big join-title">Rejoindre une partie</h1>
+    <div id="join-step" class="card stack join-card">
+      <div class="step-pill"><b>1</b><span>Infos de la partie</span></div>
+      <input id="c" placeholder="Code de partie (4 lettres)" maxlength="4" autocapitalize="characters" autocomplete="off">
+      <input id="n" placeholder="Votre pseudo" maxlength="14" autocomplete="off">
+      <button id="next-avatar">Choisir mon avatar →</button>
+      <p id="e" class="msg">${esc(err)}</p>
+    </div>`;
+  document.getElementById('next-avatar').onclick=()=>{
+    const code=document.getElementById('c').value.trim().toUpperCase();
+    const name=document.getElementById('n').value.trim();
+    if(code.length!==4 || !name){ document.getElementById('e').textContent='Entrez le code et votre pseudo avant de choisir votre avatar.'; return; }
+    avatarStep(code,name);
+  };
+}
+function avatarStep(code,name){
+  const list=(window.avatarData&&window.avatarData()) || window.AVATARS || [];
+  if(!list.length){ document.getElementById('e').textContent='Les avatars arrivent…'; return; }
+  let index=Math.max(0,list.findIndex(a=>a.id===chosenAvatar)); if(index<0) index=0;
+  const draw=()=>{
+    const a=list[index]; chosenAvatar=a.id;
+    app.innerHTML=`<h1 class="big join-title">Choisis ton avatar</h1>
+      <div class="card avatar-stage-card">
+        <div class="step-pill"><b>2</b><span>Fais défiler les personnages</span></div>
+        <div class="avatar-carousel">
+          <button class="avatar-arrow" id="prev" aria-label="Avatar précédent">‹</button>
+          <div class="avatar-showcase"><div class="avatar-halo">${avatarMarkup(a.id,190,'happy')}</div><h2>${esc(a.name)}</h2><p>${esc(a.animal||'Compagnon')}</p></div>
+          <button class="avatar-arrow" id="next" aria-label="Avatar suivant">›</button>
+        </div>
+        <div class="avatar-dots">${list.map((_,i)=>`<i class="${i===index?'on':''}"></i>`).join('')}</div>
+        <div class="avatar-actions"><button class="alt" id="back-avatar">← Retour</button><button id="confirm-avatar">C'est moi ! ✨</button></div>
+      </div>`;
+    document.getElementById('prev').onclick=()=>{index=(index-1+list.length)%list.length;window.partyAudio.click();draw();};
+    document.getElementById('next').onclick=()=>{index=(index+1)%list.length;window.partyAudio.click();draw();};
+    document.getElementById('back-avatar').onclick=()=>form();
+    document.getElementById('confirm-avatar').onclick=()=>{chosenAvatar=a.id;localStorage.setItem('pg-avatar',chosenAvatar);window.partyAudio.enable();join(code,name,null,chosenAvatar);};
+  };
+  draw();
 }
 
 s.on('state', x => {
@@ -47,6 +75,8 @@ s.on('state', x => {
   if (k !== key) { key = k; render(p, done); }
 });
 
+setInterval(() => { if (st && st.phase && (st.phase.kind==='lobby' || st.phase.kind==='scores') && st.me) render(st.phase, st.phase.answered.includes(st.me.id)); }, 6500);
+
 setInterval(() => {
   const t = document.getElementById('t');
   if (t && st && st.phase.endsAt) t.textContent = Math.max(0, Math.ceil((st.phase.endsAt - Date.now() - off) / 1000));
@@ -55,7 +85,8 @@ setInterval(() => {
 const me = () => st.players.find(x => x.id === st.me.id) || { name: '', score: 0 };
 const wait = msg => `<div class="card stack"><p class="prompt">${msg}</p></div>`;
 const timer = p => p.endsAt ? '<span class="timer" id="t"></span>' : '';
-const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-a.score); const moods=['happy','grimace','sleepy']; return `<section class="home-ranking"><div class="section-title"><span>🏆 Classement</span><small>ça chambre déjà 😈</small></div><div class="rank-board">${r.map((x,i)=>`<div class="rank-row rank-${i+1}"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,moods[i%3])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${x.score} pts</span></div><div class="rank-bubble">${i===0?'😎':i===1?'😤':'😂'}</div></div>`).join('')}</div></section>`; };
+const socialScene = (r, final=false) => { const lines=['Le premier parade et fait sa star !','Deuxième place : petit duel de regards !','Ça se chamaille pour la prochaine place !','Quelqu’un fait une grimace au champion !','Tout le monde prépare sa revanche !','Le groupe célèbre déjà !']; const text=lines[Math.floor(Math.random()*lines.length)]; const cls=['winner','p2','p3','p4','p5']; return `<div class="rank-scene"><div class="scene-prop">${text}</div><div class="scene-floor"></div>${r.slice(0,5).map((x,i)=>`<div class="scene-player ${cls[i]}"><div>${avatarMarkup(x.avatar,76,['smug','grimace','sleepy','happy','smug'][i%5])}</div><span class="scene-name">${esc(x.name)}</span></div>`).join('')}</div>`; };
+const lobbyRanking = () => { const r=[...(st?.players||[])].sort((a,b)=>b.score-a.score); return `<section class="home-ranking"><div class="section-title"><span>🏆 Classement</span><small>la partie commence déjà à chambrer</small></div>${r.length?socialScene(r):'<div class="empty-ranking">Les premiers joueurs vont apparaître ici 👀</div>'}<div class="rank-board">${r.map((x,i)=>`<div class="rank-row rank-${i+1}"><div class="rank-place">${i+1}</div><div class="rank-avatar">${avatarMarkup(x.avatar,58,['smug','grimace','sleepy','happy'][i%4])}</div><div class="rank-name"><b>${esc(x.name)}</b><span>${x.score} pts</span></div></div>`).join('')}</div></section>`; };
 
 function render(p, done) {
   const m = me();
